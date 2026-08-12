@@ -1,16 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Summary from "./components/Summary";
 import DealTable from "./components/DealTable";
 import DealForm from "./components/DealForm";
 import initialDeals from "./data/initialDeals";
+import { loadDeals, saveDeals } from "./utils/dealsStorage";
 import "./App.css";
 
 function App() {
-  const [deals, setDeals] = useState(initialDeals);
+  // Funkcja w useState() uruchamia się tylko raz, przy pierwszym renderze -
+  // dzięki temu odczyt z localStorage nie powtarza się przy każdej zmianie stanu.
+  const [deals, setDeals] = useState(() => loadDeals(initialDeals));
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
   const editingDeal = deals.find((deal) => deal.id === editingId) || null;
+
+  // Zapisuje deale do localStorage za każdym razem, gdy lista się zmieni.
+  useEffect(() => {
+    saveDeals(deals);
+  }, [deals]);
 
   function handleAddClick() {
     setEditingId(null);
