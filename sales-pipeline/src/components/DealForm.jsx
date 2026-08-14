@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { STAGES } from "../data/stages";
+import { LEAD_SOURCES } from "../data/leadSources";
 
 const emptyDeal = {
   client: "",
@@ -7,13 +8,16 @@ const emptyDeal = {
   stage: "Pozyskano lead",
   probability: "",
   closeDate: "",
+  source: "",
 };
 
 // editingDeal - jeśli podany, formularz działa w trybie edycji i wypełnia się
 // jego danymi. Jeśli null - formularz jest pusty (dodawanie nowego deala).
 function DealForm({ editingDeal, presetStage, onSave, onCancel }) {
   const [formData, setFormData] = useState(
-    editingDeal || { ...emptyDeal, stage: presetStage || emptyDeal.stage }
+    editingDeal
+      ? { ...editingDeal, source: editingDeal.source || "" }
+      : { ...emptyDeal, stage: presetStage || emptyDeal.stage }
   );
 
   function handleChange(event) {
@@ -27,6 +31,7 @@ function DealForm({ editingDeal, presetStage, onSave, onCancel }) {
       ...formData,
       value: Number(formData.value),
       probability: Number(formData.probability),
+      source: formData.source || null,
     });
   }
 
@@ -90,6 +95,18 @@ function DealForm({ editingDeal, presetStage, onSave, onCancel }) {
           onChange={handleChange}
           required
         />
+      </label>
+
+      <label>
+        Źródło leada (opcjonalnie)
+        <select name="source" value={formData.source} onChange={handleChange}>
+          <option value="">— nie wybrano —</option>
+          {LEAD_SOURCES.map((source) => (
+            <option key={source} value={source}>
+              {source}
+            </option>
+          ))}
+        </select>
       </label>
 
       <div className="form-actions">

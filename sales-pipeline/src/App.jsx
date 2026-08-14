@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import Summary from "./components/Summary";
+import MonthlyTargetCard from "./components/MonthlyTargetCard";
+import TodayPanel from "./components/TodayPanel";
+import SearchSortBar from "./components/SearchSortBar";
 import DealTable from "./components/DealTable";
 import BoardView from "./components/BoardView";
+import StatsView from "./components/StatsView";
 import DealForm from "./components/DealForm";
 import DealDetail from "./components/DealDetail";
+import LostReasonModal from "./components/LostReasonModal";
 import initialDeals from "./data/initialDeals";
+import { SORT_OPTIONS } from "./data/sortOptions";
 import { loadDeals, saveDeals } from "./utils/dealsStorage";
+import { loadTarget, saveTarget } from "./utils/targetStorage";
+import { getMonthlyRealization } from "./utils/salesStats";
+import { sortDeals } from "./utils/sortDeals";
 import { createId } from "./utils/createId";
 import "./App.css";
 
@@ -13,19 +22,32 @@ function App() {
   // Funkcja w useState() uruchamia się tylko raz, przy pierwszym renderze -
   // dzięki temu odczyt z localStorage nie powtarza się przy każdej zmianie stanu.
   const [deals, setDeals] = useState(() => loadDeals(initialDeals));
+  const [monthlyTarget, setMonthlyTarget] = useState(() => loadTarget());
   const [viewMode, setViewMode] = useState("board");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState(SORT_OPTIONS[0].value);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [addStagePreset, setAddStagePreset] = useState(null);
   const [selectedDealId, setSelectedDealId] = useState(null);
+  const [pendingLostDeal, setPendingLostDeal] = useState(null);
 
   const editingDeal = deals.find((deal) => deal.id === editingId) || null;
   const selectedDeal = deals.find((deal) => deal.id === selectedDealId) || null;
 
-  // Zapisuje deale do localStorage za każdym razem, gdy lista się zmieni.
+  const visibleDeals = sortDeals(
+    deals.filter((deal) => deal.client.toLowerCase().includes(search.trim().toLowerCase())),
+    sortBy
+  );
+
+  // Zapisuje deale/cel do localStorage za każdym razem, gdy się zmienią.
   useEffect(() => {
     saveDeals(deals);
   }, [deals]);
+
+  useEffect(() => {
+    saveTarget(monthlyTarget);
+  }, [monthlyTarget]);
 
   // Wspólna funkcja do modyfikowania jednego deala - reszta funkcji
   // (notatki, kontakty, działania, etap) korzysta z niej zamiast powtarzać ten sam kod.
@@ -79,6 +101,32 @@ function App() {
     updateDeal(dealId, (deal) => ({ ...deal, stage }));
   }
 
+  // Przesunięcie na "Closed Lost" (przez pasek etapów albo przeciągnięcie na
+  // tablicy) nie zmienia etapu od razu - najpierw pyta o powód, w modalu.
+  function requestStageChange(dealId, stage) {
+    const deal = deals.find((d) => d.id === dealId);
+    if (stage === "Closed Lost" && deal && deal.stage !== "Closed Lost") {
+      setPendingLostDeal({ id: dealId, client: deal.client, fromStage: deal.stage });
+      return;
+    }
+    handleChangeStage(dealId, stage);
+  }
+
+  function confirmLostReason(reason) {
+    if (!pendingLostDeal) return;
+    updateDeal(pendingLostDeal.id, (deal) => ({
+      ...deal,
+      stage: "Closed Lost",
+      lostReason: reason,
+      lostFromStage: pendingLostDeal.fromStage,
+    }));
+    setPendingLostDeal(null);
+  }
+
+  function cancelLostReason() {
+    setPendingLostDeal(null);
+  }
+
   function handleAddNote(dealId, text) {
     const note = { id: createId(), text, createdAt: new Date().toISOString() };
     updateDeal(dealId, (deal) => ({ ...deal, notes: [...deal.notes, note] }));
@@ -128,6 +176,14 @@ function App() {
     }));
   }
 
+  const lostReasonModal = pendingLostDeal && (
+    <LostReasonModal
+      dealClient={pendingLostDeal.client}
+      onConfirm={confirmLostReason}
+      onCancel={cancelLostReason}
+    />
+  );
+
   if (selectedDeal) {
     return (
       <div className="app">
@@ -145,7 +201,7 @@ function App() {
           onBack={() => setSelectedDealId(null)}
           onEdit={() => handleEditClick(selectedDeal.id)}
           onDelete={() => handleDelete(selectedDeal.id)}
-          onChangeStage={(stage) => handleChangeStage(selectedDeal.id, stage)}
+          onChangeStage={(stage) => requestStageChange(selectedDeal.id, stage)}
           onAddNote={(text) => handleAddNote(selectedDeal.id, text)}
           onDeleteNote={(noteId) => handleDeleteNote(selectedDeal.id, noteId)}
           onAddContact={(contact) => handleAddContact(selectedDeal.id, contact)}
@@ -154,6 +210,7 @@ function App() {
           onToggleActivity={(activityId) => handleToggleActivity(selectedDeal.id, activityId)}
           onDeleteActivity={(activityId) => handleDeleteActivity(selectedDeal.id, activityId)}
         />
+        {lostReasonModal}
       </div>
     );
   }
@@ -162,7 +219,15 @@ function App() {
     <div className="app">
       <h1>Pipeline sprzedażowy</h1>
 
-      <Summary deals={deals} />
+      <Summary deals={deals}>
+        <MonthlyTargetCard
+          target={monthlyTarget}
+          realization={getMonthlyRealization(deals)}
+          onChangeTarget={setMonthlyTarget}
+        />
+      </Summary>
+
+      <TodayPanel deals={deals} onSelectDeal={setSelectedDealId} onToggleActivity={handleToggleActivity} />
 
       <div className="main-toolbar">
         <div className="view-switch">
@@ -180,6 +245,13 @@ function App() {
           >
             Lista
           </button>
+          <button
+            type="button"
+            className={viewMode === "stats" ? "active" : ""}
+            onClick={() => setViewMode("stats")}
+          >
+            Statystyki
+          </button>
         </div>
 
         {!isFormOpen && (
@@ -188,6 +260,10 @@ function App() {
           </button>
         )}
       </div>
+
+      {viewMode !== "stats" && (
+        <SearchSortBar search={search} onSearchChange={setSearch} sortBy={sortBy} onSortChange={setSortBy} />
+      )}
 
       {isFormOpen && (
         <DealForm
@@ -198,21 +274,27 @@ function App() {
         />
       )}
 
-      {viewMode === "board" ? (
+      {viewMode === "board" && (
         <BoardView
-          deals={deals}
+          deals={visibleDeals}
           onSelect={setSelectedDealId}
-          onMoveStage={handleChangeStage}
+          onMoveStage={requestStageChange}
           onAddToStage={handleAddClick}
         />
-      ) : (
+      )}
+
+      {viewMode === "table" && (
         <DealTable
-          deals={deals}
+          deals={visibleDeals}
           onSelect={setSelectedDealId}
           onEdit={handleEditClick}
           onDelete={handleDelete}
         />
       )}
+
+      {viewMode === "stats" && <StatsView deals={deals} />}
+
+      {lostReasonModal}
     </div>
   );
 }

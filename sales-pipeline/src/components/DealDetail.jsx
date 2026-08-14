@@ -30,7 +30,11 @@ function DealDetail({
           <h2>{deal.client}</h2>
           <p className="detail-subtitle">
             {formatCurrency(deal.value)} · {deal.probability}% szans · zamknięcie {deal.closeDate}
+            {deal.source && <> · źródło: {deal.source}</>}
           </p>
+          {deal.stage === "Closed Lost" && deal.lostReason && (
+            <p className="detail-lost-reason">Powód przegranej: {deal.lostReason}</p>
+          )}
         </div>
         <div className="detail-header-actions">
           <button type="button" className="btn-secondary" onClick={onEdit}>

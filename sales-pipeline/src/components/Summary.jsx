@@ -3,7 +3,7 @@ import { formatCurrency } from "../utils/formatCurrency";
 
 // "Aktywne" deale to takie, które nie są jeszcze zamknięte
 // (ani wygrane, ani przegrane).
-function Summary({ deals }) {
+function Summary({ deals, children }) {
   const activeDeals = deals.filter(
     (deal) => !CLOSED_STAGES.includes(deal.stage)
   );
@@ -25,6 +25,7 @@ function Summary({ deals }) {
         <span className="summary-label">Wartość ważona prawdopodobieństwem</span>
         <span className="summary-value">{formatCurrency(weightedValue)}</span>
       </div>
+      {children}
     </div>
   );
 }

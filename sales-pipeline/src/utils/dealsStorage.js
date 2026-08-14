@@ -19,6 +19,9 @@ function withDefaults(deal) {
     notes: [],
     contacts: [],
     activities: [],
+    source: null,
+    lostReason: null,
+    lostFromStage: null,
     ...deal,
     // Przeciąganie kart (drag & drop) przekazuje id zawsze jako tekst,
     // więc wymuszamy tu String() - inaczej stare, liczbowe id (np. z
