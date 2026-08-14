@@ -11,8 +11,10 @@ const emptyDeal = {
 
 // editingDeal - jeśli podany, formularz działa w trybie edycji i wypełnia się
 // jego danymi. Jeśli null - formularz jest pusty (dodawanie nowego deala).
-function DealForm({ editingDeal, onSave, onCancel }) {
-  const [formData, setFormData] = useState(editingDeal || emptyDeal);
+function DealForm({ editingDeal, presetStage, onSave, onCancel }) {
+  const [formData, setFormData] = useState(
+    editingDeal || { ...emptyDeal, stage: presetStage || emptyDeal.stage }
+  );
 
   function handleChange(event) {
     const { name, value } = event.target;

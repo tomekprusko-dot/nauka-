@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Summary from "./components/Summary";
 import DealTable from "./components/DealTable";
+import BoardView from "./components/BoardView";
 import DealForm from "./components/DealForm";
 import DealDetail from "./components/DealDetail";
 import initialDeals from "./data/initialDeals";
@@ -12,8 +13,10 @@ function App() {
   // Funkcja w useState() uruchamia się tylko raz, przy pierwszym renderze -
   // dzięki temu odczyt z localStorage nie powtarza się przy każdej zmianie stanu.
   const [deals, setDeals] = useState(() => loadDeals(initialDeals));
+  const [viewMode, setViewMode] = useState("board");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [addStagePreset, setAddStagePreset] = useState(null);
   const [selectedDealId, setSelectedDealId] = useState(null);
 
   const editingDeal = deals.find((deal) => deal.id === editingId) || null;
@@ -30,8 +33,9 @@ function App() {
     setDeals((prev) => prev.map((deal) => (deal.id === id ? updater(deal) : deal)));
   }
 
-  function handleAddClick() {
+  function handleAddClick(stage) {
     setEditingId(null);
+    setAddStagePreset(stage || null);
     setIsFormOpen(true);
   }
 
@@ -62,11 +66,13 @@ function App() {
     }
     setIsFormOpen(false);
     setEditingId(null);
+    setAddStagePreset(null);
   }
 
   function handleCancel() {
     setIsFormOpen(false);
     setEditingId(null);
+    setAddStagePreset(null);
   }
 
   function handleChangeStage(dealId, stage) {
@@ -158,24 +164,55 @@ function App() {
 
       <Summary deals={deals} />
 
-      {isFormOpen ? (
+      <div className="main-toolbar">
+        <div className="view-switch">
+          <button
+            type="button"
+            className={viewMode === "board" ? "active" : ""}
+            onClick={() => setViewMode("board")}
+          >
+            Tablica
+          </button>
+          <button
+            type="button"
+            className={viewMode === "table" ? "active" : ""}
+            onClick={() => setViewMode("table")}
+          >
+            Lista
+          </button>
+        </div>
+
+        {!isFormOpen && (
+          <button className="add-deal-button" onClick={() => handleAddClick()}>
+            + Dodaj deal
+          </button>
+        )}
+      </div>
+
+      {isFormOpen && (
         <DealForm
           editingDeal={editingDeal}
+          presetStage={addStagePreset}
           onSave={handleSave}
           onCancel={handleCancel}
         />
-      ) : (
-        <button className="add-deal-button" onClick={handleAddClick}>
-          + Dodaj deal
-        </button>
       )}
 
-      <DealTable
-        deals={deals}
-        onSelect={setSelectedDealId}
-        onEdit={handleEditClick}
-        onDelete={handleDelete}
-      />
+      {viewMode === "board" ? (
+        <BoardView
+          deals={deals}
+          onSelect={setSelectedDealId}
+          onMoveStage={handleChangeStage}
+          onAddToStage={handleAddClick}
+        />
+      ) : (
+        <DealTable
+          deals={deals}
+          onSelect={setSelectedDealId}
+          onEdit={handleEditClick}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   );
 }

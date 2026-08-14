@@ -20,6 +20,10 @@ function withDefaults(deal) {
     contacts: [],
     activities: [],
     ...deal,
+    // Przeciąganie kart (drag & drop) przekazuje id zawsze jako tekst,
+    // więc wymuszamy tu String() - inaczej stare, liczbowe id (np. z
+    // przykładowych danych) nigdy nie dopasuje się przy porównaniu ===.
+    id: String(deal.id),
     stage: migrateStage(deal.stage),
   };
 }
@@ -27,11 +31,10 @@ function withDefaults(deal) {
 export function loadDeals(fallback) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return fallback;
-    const deals = JSON.parse(raw);
+    const deals = raw ? JSON.parse(raw) : fallback;
     return deals.map(withDefaults);
   } catch {
-    return fallback;
+    return fallback.map(withDefaults);
   }
 }
 
