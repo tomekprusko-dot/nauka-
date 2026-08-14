@@ -1,3 +1,4 @@
+import { STAGE_SLUGS } from "../data/stages";
 import { formatCurrency } from "../utils/formatCurrency";
 
 function DealTable({ deals, onEdit, onDelete }) {
@@ -23,7 +24,7 @@ function DealTable({ deals, onEdit, onDelete }) {
             <td>{deal.client}</td>
             <td>{formatCurrency(deal.value)}</td>
             <td>
-              <span className={`stage-badge stage-${deal.stage.replace(/\s+/g, "-")}`}>
+              <span className={`stage-badge stage-${STAGE_SLUGS[deal.stage]}`}>
                 {deal.stage}
               </span>
             </td>

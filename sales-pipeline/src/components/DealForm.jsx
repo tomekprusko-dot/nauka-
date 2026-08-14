@@ -4,7 +4,7 @@ import { STAGES } from "../data/stages";
 const emptyDeal = {
   client: "",
   value: "",
-  stage: "Prospecting",
+  stage: "Pozyskano lead",
   probability: "",
   closeDate: "",
 };
