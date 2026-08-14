@@ -12,12 +12,24 @@ function migrateStage(stage) {
   return STAGE_MIGRATION[stage] || stage;
 }
 
+// Deale zapisane przed dodaniem notatek/kontaktów/działań nie mają tych pól -
+// dopisujemy puste listy, żeby reszta appki mogła zakładać, że zawsze istnieją.
+function withDefaults(deal) {
+  return {
+    notes: [],
+    contacts: [],
+    activities: [],
+    ...deal,
+    stage: migrateStage(deal.stage),
+  };
+}
+
 export function loadDeals(fallback) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
     const deals = JSON.parse(raw);
-    return deals.map((deal) => ({ ...deal, stage: migrateStage(deal.stage) }));
+    return deals.map(withDefaults);
   } catch {
     return fallback;
   }

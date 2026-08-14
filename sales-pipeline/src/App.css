@@ -178,3 +178,287 @@ h1 {
   background: #fee2e2;
   color: #991b1b;
 }
+
+/* Klikalna nazwa klienta w tabeli */
+.client-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: #2563eb;
+  cursor: pointer;
+  text-align: left;
+}
+
+.client-link:hover {
+  text-decoration: underline;
+}
+
+/* Widok szczegółów deala */
+.back-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 1rem;
+  color: #5a6472;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  color: #16171d;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.detail-header h2 {
+  margin: 0 0 0.3rem;
+}
+
+.detail-subtitle {
+  margin: 0;
+  color: #5a6472;
+  font-size: 0.9rem;
+}
+
+.detail-header-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+/* Pasek etapów (stepper) */
+.stage-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.stage-step {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #f4f6f8;
+  color: #5a6472;
+}
+
+.stage-step:hover:not(:disabled) {
+  border-color: #c7cdd6;
+}
+
+.stage-step.past {
+  opacity: 0.7;
+}
+
+.stage-step.active {
+  cursor: default;
+  font-weight: 600;
+}
+
+.stage-step.stage-lead.active { background: #dbeafe; color: #1e40af; }
+.stage-step.stage-oferta-wyslana.active { background: #fef3c7; color: #92400e; }
+.stage-step.stage-oferta-zaakceptowana.active { background: #fde68a; color: #78350f; }
+.stage-step.stage-closed-won.active { background: #dcfce7; color: #166534; }
+.stage-step.stage-closed-lost.active { background: #fee2e2; color: #991b1b; }
+
+/* Siatka sekcji: notatki / kontakty / działania */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.detail-section {
+  background: #f4f6f8;
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+}
+
+.detail-section h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+}
+
+.inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.inline-form input,
+.inline-form select,
+.inline-form textarea {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.inline-form .btn-secondary {
+  align-self: flex-start;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.inline-form .btn-secondary:hover {
+  background: #d7dade;
+}
+
+/* Notatki */
+.notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.note-item {
+  background: white;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+.note-text {
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.note-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #5a6472;
+}
+
+.note-meta button {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+}
+
+/* Kontakty */
+.contacts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.contact-item {
+  background: white;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.contact-email {
+  font-size: 0.8rem;
+  color: #2563eb;
+}
+
+.contact-item button {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+/* Działania */
+.activities-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.activity-item {
+  background: white;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activity-item.done .activity-description,
+.activity-item.done .activity-type {
+  text-decoration: line-through;
+  color: #9aa4af;
+}
+
+.activity-item.overdue .activity-date {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.activity-checkbox {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-type {
+  font-weight: 600;
+  color: #5a6472;
+  white-space: nowrap;
+}
+
+.activity-description {
+  min-width: 0;
+}
+
+.activity-date {
+  font-size: 0.8rem;
+  color: #5a6472;
+  white-space: nowrap;
+}
+
+.activity-item button {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 0.75rem;
+}

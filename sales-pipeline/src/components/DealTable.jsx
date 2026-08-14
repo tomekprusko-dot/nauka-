@@ -1,7 +1,7 @@
 import { STAGE_SLUGS } from "../data/stages";
 import { formatCurrency } from "../utils/formatCurrency";
 
-function DealTable({ deals, onEdit, onDelete }) {
+function DealTable({ deals, onSelect, onEdit, onDelete }) {
   if (deals.length === 0) {
     return <p className="empty-state">Brak deali. Dodaj pierwszy powyżej.</p>;
   }
@@ -21,7 +21,11 @@ function DealTable({ deals, onEdit, onDelete }) {
       <tbody>
         {deals.map((deal) => (
           <tr key={deal.id}>
-            <td>{deal.client}</td>
+            <td>
+              <button type="button" className="client-link" onClick={() => onSelect(deal.id)}>
+                {deal.client}
+              </button>
+            </td>
             <td>{formatCurrency(deal.value)}</td>
             <td>
               <span className={`stage-badge stage-${STAGE_SLUGS[deal.stage]}`}>
