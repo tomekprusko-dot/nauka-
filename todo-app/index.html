@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <title>Zadania</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2575fc">
+
+  <!-- iOS PWA support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zadania">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>Zadania</h1>
+        <p class="today-label" id="todayLabel"></p>
+      </div>
+    </header>
+
+    <nav class="daystrip" id="dayStrip"></nav>
+
+    <main class="content" id="content"></main>
+
+    <button class="fab" id="addBtn" aria-label="Dodaj zadanie">+</button>
+  </div>
+
+  <div class="sheet-overlay" id="sheetOverlay">
+    <div class="sheet" id="sheet">
+      <div class="sheet-handle"></div>
+      <h2 id="sheetTitle">Nowe zadanie</h2>
+      <form id="taskForm">
+        <label>
+          Co trzeba zrobić?
+          <input type="text" id="taskTitle" placeholder="np. Zadzwonić do..." required maxlength="200">
+        </label>
+        <label>
+          Notatka (opcjonalnie)
+          <textarea id="taskNote" placeholder="Dodatkowe szczegóły" maxlength="500" rows="2"></textarea>
+        </label>
+        <label>
+          Data
+          <input type="date" id="taskDate">
+        </label>
+        <div class="sheet-actions">
+          <button type="button" class="btn-secondary" id="cancelBtn">Anuluj</button>
+          <button type="submit" class="btn-primary" id="saveBtn">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
