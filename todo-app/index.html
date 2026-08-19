@@ -31,6 +31,12 @@
 
     <nav class="daystrip" id="dayStrip"></nav>
 
+    <div class="tag-filter-strip" id="tagFilterStrip">
+      <button type="button" class="tag-filter-chip active" data-tag="all">Wszystkie</button>
+      <button type="button" class="tag-filter-chip" data-tag="praca">💼 Praca</button>
+      <button type="button" class="tag-filter-chip" data-tag="prywatne">🏠 Prywatne</button>
+    </div>
+
     <main class="content" id="content"></main>
 
     <button class="fab" id="addBtn" aria-label="Dodaj zadanie">+</button>
@@ -62,6 +68,14 @@
             Godzina (opcjonalnie)
             <input type="time" id="taskTime">
           </label>
+        </div>
+        <div class="tag-row">
+          <span class="tag-row-label">Tag</span>
+          <div class="tag-options" id="tagOptions">
+            <button type="button" class="tag-chip active" data-tag="">Bez tagu</button>
+            <button type="button" class="tag-chip" data-tag="praca">💼 Praca</button>
+            <button type="button" class="tag-chip" data-tag="prywatne">🏠 Prywatne</button>
+          </div>
         </div>
         <div class="sheet-actions">
           <button type="button" class="btn-secondary" id="cancelBtn">Anuluj</button>

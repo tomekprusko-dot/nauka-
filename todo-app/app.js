@@ -31,7 +31,11 @@
     exportBtn: document.getElementById('exportBtn'),
     importBtn: document.getElementById('importBtn'),
     importFile: document.getElementById('importFile'),
+    tagFilterStrip: document.getElementById('tagFilterStrip'),
+    tagOptions: document.getElementById('tagOptions'),
   };
+
+  const TAG_LABELS = { praca: '💼 Praca', prywatne: '🏠 Prywatne' };
 
   function todayStr() {
     return toISODate(new Date());
@@ -79,6 +83,13 @@
   let tasks = loadTasks();
   let filter = 'all'; // 'all' | 'none' | 'YYYY-MM-DD'
   let editingId = null;
+  let tagFilter = 'all'; // 'all' | 'praca' | 'prywatne'
+  let selectedTag = null; // null | 'praca' | 'prywatne' (in the add/edit sheet)
+
+  function visibleTasks() {
+    if (tagFilter === 'all') return tasks;
+    return tasks.filter(t => t.tag === tagFilter);
+  }
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -102,18 +113,19 @@
   }
 
   function hasOpenTasks(dateStr) {
-    return tasks.some(t => t.date === dateStr && !t.done);
+    return visibleTasks().some(t => t.date === dateStr && !t.done);
   }
 
   function renderDayStrip() {
     const today = todayStr();
     const days = buildDayList();
     el.dayStrip.innerHTML = '';
+    const vTasks = visibleTasks();
 
-    const allChip = makeChip('all', 'Wszystko', '', filter === 'all', tasks.some(t => !t.done));
+    const allChip = makeChip('all', 'Wszystko', '', filter === 'all', vTasks.some(t => !t.done));
     el.dayStrip.appendChild(allChip);
 
-    const noneChip = makeChip('none', 'Ogólne', '', filter === 'none', tasks.some(t => !t.date && !t.done));
+    const noneChip = makeChip('none', 'Ogólne', '', filter === 'none', vTasks.some(t => !t.date && !t.done));
     el.dayStrip.appendChild(noneChip);
 
     days.forEach(dateStr => {
@@ -156,22 +168,23 @@
     el.content.innerHTML = '';
     const today = todayStr();
     const nowTime = nowHHMM();
+    const vTasks = visibleTasks();
 
     if (filter === 'none') {
-      renderSection(null, tasks.filter(t => !t.date), false, 'Brak zadań ogólnych. Dodaj pierwsze przyciskiem +');
+      renderSection(null, vTasks.filter(t => !t.date), false, 'Brak zadań ogólnych. Dodaj pierwsze przyciskiem +');
       return;
     }
 
     if (filter !== 'all') {
-      renderSection(null, tasks.filter(t => t.date === filter), false, 'Brak zadań na ten dzień.');
+      renderSection(null, vTasks.filter(t => t.date === filter), false, 'Brak zadań na ten dzień.');
       return;
     }
 
     // filter === 'all': grouped view
-    const overdue = tasks.filter(t => isOverdue(t, today, nowTime));
+    const overdue = vTasks.filter(t => isOverdue(t, today, nowTime));
     const overdueIds = new Set(overdue.map(t => t.id));
-    const withDate = tasks.filter(t => t.date && t.date >= today && !overdueIds.has(t.id));
-    const noDate = tasks.filter(t => !t.date);
+    const withDate = vTasks.filter(t => t.date && t.date >= today && !overdueIds.has(t.id));
+    const noDate = vTasks.filter(t => !t.date);
 
     const byDate = {};
     withDate.forEach(t => {
@@ -253,10 +266,21 @@
       body.appendChild(note);
     }
 
-    if (t.time) {
+    if (t.time || t.tag) {
       const meta = document.createElement('div');
       meta.className = 'task-meta';
-      meta.textContent = `🕐 ${t.time}`;
+      if (t.time) {
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'task-time';
+        timeSpan.textContent = `🕐 ${t.time}`;
+        meta.appendChild(timeSpan);
+      }
+      if (t.tag) {
+        const tagSpan = document.createElement('span');
+        tagSpan.className = `task-tag tag-${t.tag}`;
+        tagSpan.textContent = TAG_LABELS[t.tag] || t.tag;
+        meta.appendChild(tagSpan);
+      }
       body.appendChild(meta);
     }
 
@@ -283,6 +307,13 @@
     el.dateTimeRow.classList.toggle('hidden', noDate);
   }
 
+  function setTag(tag) {
+    selectedTag = tag || null;
+    el.tagOptions.querySelectorAll('.tag-chip').forEach(btn => {
+      btn.classList.toggle('active', (btn.dataset.tag || null) === selectedTag);
+    });
+  }
+
   function openSheet() {
     editingId = null;
     el.sheetTitle.textContent = 'Nowe zadanie';
@@ -294,6 +325,7 @@
     el.taskTime.value = '';
     el.taskNoDate.checked = filter === 'none';
     applyNoDateToggle();
+    setTag(tagFilter !== 'all' ? tagFilter : null);
     el.sheetOverlay.classList.add('open');
     setTimeout(() => el.taskTitle.focus(), 200);
   }
@@ -311,6 +343,7 @@
     el.taskTime.value = t.time || '';
     el.taskNoDate.checked = !t.date;
     applyNoDateToggle();
+    setTag(t.tag || null);
     el.sheetOverlay.classList.add('open');
   }
 
@@ -321,6 +354,11 @@
   el.addBtn.addEventListener('click', openSheet);
   el.cancelBtn.addEventListener('click', closeSheet);
   el.taskNoDate.addEventListener('change', applyNoDateToggle);
+  el.tagOptions.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tag-chip');
+    if (!btn) return;
+    setTag(btn.dataset.tag || null);
+  });
   el.sheetOverlay.addEventListener('click', (e) => {
     if (e.target === el.sheetOverlay) closeSheet();
   });
@@ -349,6 +387,7 @@
         existing.note = note;
         existing.date = date;
         existing.time = time;
+        existing.tag = selectedTag;
       }
     } else {
       tasks.push({
@@ -357,6 +396,7 @@
         note,
         date,
         time,
+        tag: selectedTag,
         done: false,
         createdAt: Date.now(),
       });
@@ -427,6 +467,18 @@
       }
     };
     reader.readAsText(file);
+  });
+
+  // ---------- Tag filter ----------
+
+  el.tagFilterStrip.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tag-filter-chip');
+    if (!btn) return;
+    tagFilter = btn.dataset.tag;
+    el.tagFilterStrip.querySelectorAll('.tag-filter-chip').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+    render();
   });
 
   // ---------- Header ----------

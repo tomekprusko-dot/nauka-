@@ -9,6 +9,8 @@
   --accent-b: #2575fc;
   --danger: #ff4d5e;
   --overdue: #ff4d5e;
+  --tag-praca: #2563eb;
+  --tag-prywatne: #16a34a;
   --radius: 16px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -99,6 +101,30 @@ html, body {
 .day-chip.active .dot { background: var(--accent-b); }
 .day-chip:not(.active) .dot { background: #fff; }
 
+.tag-filter-strip {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid #e6e6ee;
+  flex-shrink: 0;
+}
+.tag-filter-chip {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 10px;
+  border: 1.5px solid #e2e2ea;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+.tag-filter-chip.active[data-tag="all"] { background: var(--text); border-color: var(--text); color: #fff; }
+.tag-filter-chip.active[data-tag="praca"] { background: var(--tag-praca); border-color: var(--tag-praca); color: #fff; }
+.tag-filter-chip.active[data-tag="prywatne"] { background: var(--tag-prywatne); border-color: var(--tag-prywatne); color: #fff; }
+
 .content {
   flex: 1;
   padding: 16px 16px calc(100px + var(--safe-bottom));
@@ -153,8 +179,19 @@ html, body {
 .task-title { font-size: 0.98rem; font-weight: 600; word-break: break-word; }
 .task-card.done .task-title { text-decoration: line-through; color: var(--muted); }
 .task-note { font-size: 0.85rem; color: var(--muted); margin-top: 2px; word-break: break-word; }
-.task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 6px; display: flex; gap: 8px; align-items: center; }
-.task-card.overdue .task-meta { color: var(--overdue); font-weight: 600; }
+.task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.task-card.overdue .task-meta .task-time { color: var(--overdue); font-weight: 600; }
+
+.task-tag {
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #eceef4;
+  color: var(--muted);
+}
+.task-tag.tag-praca { background: rgba(37, 99, 235, 0.12); color: var(--tag-praca); }
+.task-tag.tag-prywatne { background: rgba(22, 163, 74, 0.12); color: var(--tag-prywatne); }
 
 .task-delete {
   flex: 0 0 auto;
@@ -245,6 +282,23 @@ html, body {
 .sheet-row label { flex: 1; min-width: 0; }
 .sheet-row input { width: 100%; }
 .sheet-row.hidden { display: none; }
+
+.tag-row { display: flex; flex-direction: column; gap: 8px; }
+.tag-row-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+.tag-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag-chip {
+  padding: 9px 15px;
+  border-radius: 20px;
+  border: 1.5px solid #e2e2ea;
+  background: #f8f8fb;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tag-chip.active[data-tag=""] { background: #eceef4; border-color: #c7c9d6; }
+.tag-chip.active[data-tag="praca"] { background: rgba(37, 99, 235, 0.12); border-color: var(--tag-praca); color: var(--tag-praca); }
+.tag-chip.active[data-tag="prywatne"] { background: rgba(22, 163, 74, 0.12); border-color: var(--tag-prywatne); color: var(--tag-prywatne); }
 
 .checkbox-row {
   flex-direction: row !important;
