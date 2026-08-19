@@ -283,6 +283,22 @@ html, body {
 .sheet-row input { width: 100%; }
 .sheet-row.hidden { display: none; }
 
+.repeat-row { display: flex; flex-direction: column; gap: 10px; }
+.repeat-interval { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text); }
+.repeat-interval.hidden { display: none; }
+.repeat-interval input[type="number"] {
+  width: 64px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e2ea;
+  background: #f8f8fb;
+  color: var(--text);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.task-repeat-badge { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+
 .tag-row { display: flex; flex-direction: column; gap: 8px; }
 .tag-row-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
 .tag-options { display: flex; gap: 8px; flex-wrap: wrap; }

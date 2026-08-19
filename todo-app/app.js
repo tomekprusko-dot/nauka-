@@ -33,6 +33,10 @@
     importFile: document.getElementById('importFile'),
     tagFilterStrip: document.getElementById('tagFilterStrip'),
     tagOptions: document.getElementById('tagOptions'),
+    repeatRow: document.getElementById('repeatRow'),
+    taskRepeat: document.getElementById('taskRepeat'),
+    repeatIntervalRow: document.getElementById('repeatIntervalRow'),
+    repeatDays: document.getElementById('repeatDays'),
   };
 
   const TAG_LABELS = { praca: '💼 Praca', prywatne: '🏠 Prywatne' };
@@ -246,7 +250,21 @@
     check.className = 'task-check';
     check.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     check.addEventListener('click', () => {
+      const wasDone = t.done;
       t.done = !t.done;
+      if (!wasDone && t.done && t.repeatEveryDays && t.date) {
+        tasks.push({
+          id: uid(),
+          title: t.title,
+          note: t.note,
+          date: addDays(t.date, t.repeatEveryDays),
+          time: t.time,
+          tag: t.tag,
+          repeatEveryDays: t.repeatEveryDays,
+          done: false,
+          createdAt: Date.now(),
+        });
+      }
       saveTasks(tasks);
       render();
     });
@@ -266,7 +284,7 @@
       body.appendChild(note);
     }
 
-    if (t.time || t.tag) {
+    if (t.time || t.tag || t.repeatEveryDays) {
       const meta = document.createElement('div');
       meta.className = 'task-meta';
       if (t.time) {
@@ -280,6 +298,12 @@
         tagSpan.className = `task-tag tag-${t.tag}`;
         tagSpan.textContent = TAG_LABELS[t.tag] || t.tag;
         meta.appendChild(tagSpan);
+      }
+      if (t.repeatEveryDays) {
+        const repeatSpan = document.createElement('span');
+        repeatSpan.className = 'task-repeat-badge';
+        repeatSpan.textContent = `🔁 co ${t.repeatEveryDays} dni`;
+        meta.appendChild(repeatSpan);
       }
       body.appendChild(meta);
     }
@@ -305,6 +329,15 @@
   function applyNoDateToggle() {
     const noDate = el.taskNoDate.checked;
     el.dateTimeRow.classList.toggle('hidden', noDate);
+    el.repeatRow.classList.toggle('hidden', noDate);
+    if (noDate) {
+      el.taskRepeat.checked = false;
+      applyRepeatToggle();
+    }
+  }
+
+  function applyRepeatToggle() {
+    el.repeatIntervalRow.classList.toggle('hidden', !el.taskRepeat.checked);
   }
 
   function setTag(tag) {
@@ -324,6 +357,9 @@
     el.taskDate.value = (filter !== 'all' && filter !== 'none') ? filter : todayStr();
     el.taskTime.value = '';
     el.taskNoDate.checked = filter === 'none';
+    el.taskRepeat.checked = false;
+    el.repeatDays.value = 2;
+    applyRepeatToggle();
     applyNoDateToggle();
     setTag(tagFilter !== 'all' ? tagFilter : null);
     el.sheetOverlay.classList.add('open');
@@ -342,6 +378,9 @@
     el.taskDate.value = t.date || todayStr();
     el.taskTime.value = t.time || '';
     el.taskNoDate.checked = !t.date;
+    el.taskRepeat.checked = !!t.repeatEveryDays;
+    el.repeatDays.value = t.repeatEveryDays || 2;
+    applyRepeatToggle();
     applyNoDateToggle();
     setTag(t.tag || null);
     el.sheetOverlay.classList.add('open');
@@ -354,6 +393,7 @@
   el.addBtn.addEventListener('click', openSheet);
   el.cancelBtn.addEventListener('click', closeSheet);
   el.taskNoDate.addEventListener('change', applyNoDateToggle);
+  el.taskRepeat.addEventListener('change', applyRepeatToggle);
   el.tagOptions.addEventListener('click', (e) => {
     const btn = e.target.closest('.tag-chip');
     if (!btn) return;
@@ -379,6 +419,11 @@
     const date = noDate ? null : (el.taskDate.value || null);
     const time = (!noDate && el.taskDate.value) ? (el.taskTime.value || null) : null;
     const note = el.taskNote.value.trim();
+    let repeatEveryDays = null;
+    if (!noDate && date && el.taskRepeat.checked) {
+      const n = parseInt(el.repeatDays.value, 10);
+      repeatEveryDays = Number.isFinite(n) ? Math.min(90, Math.max(1, n)) : 2;
+    }
 
     if (editingId) {
       const existing = tasks.find(x => x.id === editingId);
@@ -388,6 +433,7 @@
         existing.date = date;
         existing.time = time;
         existing.tag = selectedTag;
+        existing.repeatEveryDays = repeatEveryDays;
       }
     } else {
       tasks.push({
@@ -397,6 +443,7 @@
         date,
         time,
         tag: selectedTag,
+        repeatEveryDays,
         done: false,
         createdAt: Date.now(),
       });
