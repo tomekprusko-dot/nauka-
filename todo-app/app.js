@@ -78,7 +78,7 @@
   function buildDayList() {
     const today = todayStr();
     const days = [];
-    for (let i = 0; i < 10; i++) days.push(addDays(today, i));
+    for (let i = 0; i < 14; i++) days.push(addDays(today, i));
     return days;
   }
 
