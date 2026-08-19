@@ -20,9 +20,12 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <div>
-        <h1>Zadania</h1>
-        <p class="today-label" id="todayLabel"></p>
+      <div class="topbar-row">
+        <div>
+          <h1>Zadania</h1>
+          <p class="today-label" id="todayLabel"></p>
+        </div>
+        <button class="icon-btn" id="settingsBtn" aria-label="Ustawienia">⚙</button>
       </div>
     </header>
 
@@ -64,7 +67,24 @@
           <button type="button" class="btn-secondary" id="cancelBtn">Anuluj</button>
           <button type="submit" class="btn-primary" id="saveBtn">Zapisz</button>
         </div>
+        <button type="button" class="delete-link hidden" id="deleteInSheetBtn">Usuń zadanie</button>
       </form>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" id="settingsOverlay">
+    <div class="sheet" id="settingsSheet">
+      <div class="sheet-handle"></div>
+      <h2>Ustawienia</h2>
+      <p class="settings-info">Zadań łącznie: <b id="taskCount">0</b></p>
+      <div class="settings-list">
+        <button type="button" class="btn-secondary settings-btn" id="exportBtn">⬇️&nbsp; Eksportuj kopię zapasową</button>
+        <button type="button" class="btn-secondary settings-btn" id="importBtn">⬆️&nbsp; Importuj kopię zapasową</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+      <div class="sheet-actions">
+        <button type="button" class="btn-primary" id="settingsCloseBtn">Zamknij</button>
+      </div>
     </div>
   </div>
 

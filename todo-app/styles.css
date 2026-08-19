@@ -40,6 +40,23 @@ html, body {
 .topbar h1 { margin: 0; font-size: 1.7rem; font-weight: 700; }
 .today-label { margin: 4px 0 0; opacity: 0.85; font-size: 0.9rem; }
 
+.topbar-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+
+.icon-btn {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .daystrip {
   display: flex;
   gap: 8px;
@@ -132,7 +149,7 @@ html, body {
 .task-card.done .task-check { background: var(--accent-b); border-color: var(--accent-b); }
 .task-card.done .task-check svg { opacity: 1; }
 
-.task-body { flex: 1; min-width: 0; }
+.task-body { flex: 1; min-width: 0; cursor: pointer; }
 .task-title { font-size: 0.98rem; font-weight: 600; word-break: break-word; }
 .task-card.done .task-title { text-decoration: line-through; color: var(--muted); }
 .task-note { font-size: 0.85rem; color: var(--muted); margin-top: 2px; word-break: break-word; }
@@ -256,3 +273,21 @@ html, body {
 }
 .btn-primary { background: linear-gradient(135deg, var(--accent-a), var(--accent-b)); color: #fff; }
 .btn-secondary { background: #f0f0f5; color: var(--text); }
+
+.delete-link {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--overdue);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 14px 0 4px;
+  cursor: pointer;
+  text-align: center;
+}
+.delete-link.hidden { display: none; }
+
+.settings-info { font-size: 0.85rem; color: var(--muted); margin: -4px 0 14px; }
+.settings-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+.settings-btn { width: 100%; text-align: left; }

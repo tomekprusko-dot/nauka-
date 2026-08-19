@@ -21,6 +21,16 @@
     taskNoDate: document.getElementById('taskNoDate'),
     dateTimeRow: document.getElementById('dateTimeRow'),
     cancelBtn: document.getElementById('cancelBtn'),
+    sheetTitle: document.getElementById('sheetTitle'),
+    saveBtn: document.getElementById('saveBtn'),
+    deleteInSheetBtn: document.getElementById('deleteInSheetBtn'),
+    settingsBtn: document.getElementById('settingsBtn'),
+    settingsOverlay: document.getElementById('settingsOverlay'),
+    settingsCloseBtn: document.getElementById('settingsCloseBtn'),
+    taskCount: document.getElementById('taskCount'),
+    exportBtn: document.getElementById('exportBtn'),
+    importBtn: document.getElementById('importBtn'),
+    importFile: document.getElementById('importFile'),
   };
 
   function todayStr() {
@@ -68,6 +78,7 @@
 
   let tasks = loadTasks();
   let filter = 'all'; // 'all' | 'none' | 'YYYY-MM-DD'
+  let editingId = null;
 
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -229,6 +240,7 @@
 
     const body = document.createElement('div');
     body.className = 'task-body';
+    body.addEventListener('click', () => openEditSheet(t.id));
     const title = document.createElement('div');
     title.className = 'task-title';
     title.textContent = t.title;
@@ -264,7 +276,7 @@
     return card;
   }
 
-  // ---------- Add task sheet ----------
+  // ---------- Add / edit task sheet ----------
 
   function applyNoDateToggle() {
     const noDate = el.taskNoDate.checked;
@@ -272,6 +284,10 @@
   }
 
   function openSheet() {
+    editingId = null;
+    el.sheetTitle.textContent = 'Nowe zadanie';
+    el.saveBtn.textContent = 'Zapisz';
+    el.deleteInSheetBtn.classList.add('hidden');
     el.taskTitle.value = '';
     el.taskNote.value = '';
     el.taskDate.value = (filter !== 'all' && filter !== 'none') ? filter : todayStr();
@@ -280,6 +296,22 @@
     applyNoDateToggle();
     el.sheetOverlay.classList.add('open');
     setTimeout(() => el.taskTitle.focus(), 200);
+  }
+
+  function openEditSheet(id) {
+    const t = tasks.find(x => x.id === id);
+    if (!t) return;
+    editingId = id;
+    el.sheetTitle.textContent = 'Edytuj zadanie';
+    el.saveBtn.textContent = 'Zapisz zmiany';
+    el.deleteInSheetBtn.classList.remove('hidden');
+    el.taskTitle.value = t.title;
+    el.taskNote.value = t.note || '';
+    el.taskDate.value = t.date || todayStr();
+    el.taskTime.value = t.time || '';
+    el.taskNoDate.checked = !t.date;
+    applyNoDateToggle();
+    el.sheetOverlay.classList.add('open');
   }
 
   function closeSheet() {
@@ -293,23 +325,108 @@
     if (e.target === el.sheetOverlay) closeSheet();
   });
 
+  el.deleteInSheetBtn.addEventListener('click', () => {
+    if (!editingId) return;
+    tasks = tasks.filter(x => x.id !== editingId);
+    saveTasks(tasks);
+    closeSheet();
+    render();
+  });
+
   el.taskForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const title = el.taskTitle.value.trim();
     if (!title) return;
     const noDate = el.taskNoDate.checked;
-    tasks.push({
-      id: uid(),
-      title,
-      note: el.taskNote.value.trim(),
-      date: noDate ? null : (el.taskDate.value || null),
-      time: (!noDate && el.taskDate.value) ? (el.taskTime.value || null) : null,
-      done: false,
-      createdAt: Date.now(),
-    });
+    const date = noDate ? null : (el.taskDate.value || null);
+    const time = (!noDate && el.taskDate.value) ? (el.taskTime.value || null) : null;
+    const note = el.taskNote.value.trim();
+
+    if (editingId) {
+      const existing = tasks.find(x => x.id === editingId);
+      if (existing) {
+        existing.title = title;
+        existing.note = note;
+        existing.date = date;
+        existing.time = time;
+      }
+    } else {
+      tasks.push({
+        id: uid(),
+        title,
+        note,
+        date,
+        time,
+        done: false,
+        createdAt: Date.now(),
+      });
+    }
     saveTasks(tasks);
     closeSheet();
     render();
+  });
+
+  // ---------- Settings: export / import ----------
+
+  function openSettings() {
+    el.taskCount.textContent = tasks.length;
+    el.settingsOverlay.classList.add('open');
+  }
+
+  function closeSettings() {
+    el.settingsOverlay.classList.remove('open');
+  }
+
+  el.settingsBtn.addEventListener('click', openSettings);
+  el.settingsCloseBtn.addEventListener('click', closeSettings);
+  el.settingsOverlay.addEventListener('click', (e) => {
+    if (e.target === el.settingsOverlay) closeSettings();
+  });
+
+  el.exportBtn.addEventListener('click', () => {
+    const payload = JSON.stringify({ exportedAt: new Date().toISOString(), tasks }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `zadania-kopia-${todayStr()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  el.importBtn.addEventListener('click', () => el.importFile.click());
+
+  el.importFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        const importedTasks = Array.isArray(parsed) ? parsed : parsed.tasks;
+        if (!Array.isArray(importedTasks)) throw new Error('invalid backup format');
+        const existingIds = new Set(tasks.map(t => t.id));
+        let added = 0;
+        importedTasks.forEach(t => {
+          if (t && t.id && t.title && !existingIds.has(t.id)) {
+            tasks.push(t);
+            existingIds.add(t.id);
+            added++;
+          }
+        });
+        saveTasks(tasks);
+        render();
+        el.taskCount.textContent = tasks.length;
+        alert(`Zaimportowano ${added} zadań.`);
+      } catch {
+        alert('Nie udało się wczytać pliku kopii zapasowej.');
+      } finally {
+        el.importFile.value = '';
+      }
+    };
+    reader.readAsText(file);
   });
 
   // ---------- Header ----------
