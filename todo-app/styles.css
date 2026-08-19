@@ -224,6 +224,10 @@ html, body {
 }
 .sheet input:focus, .sheet textarea:focus { outline: 2px solid var(--accent-b); }
 
+.sheet-row { display: flex; gap: 10px; }
+.sheet-row label { flex: 1; min-width: 0; }
+.sheet-row input { width: 100%; }
+
 .sheet-actions { display: flex; gap: 10px; margin-top: 6px; }
 .btn-primary, .btn-secondary {
   flex: 1;

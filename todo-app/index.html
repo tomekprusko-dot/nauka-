@@ -46,10 +46,16 @@
           Notatka (opcjonalnie)
           <textarea id="taskNote" placeholder="Dodatkowe szczegóły" maxlength="500" rows="2"></textarea>
         </label>
-        <label>
-          Data
-          <input type="date" id="taskDate">
-        </label>
+        <div class="sheet-row">
+          <label>
+            Data
+            <input type="date" id="taskDate">
+          </label>
+          <label>
+            Godzina (opcjonalnie)
+            <input type="time" id="taskTime">
+          </label>
+        </div>
         <div class="sheet-actions">
           <button type="button" class="btn-secondary" id="cancelBtn">Anuluj</button>
           <button type="submit" class="btn-primary" id="saveBtn">Zapisz</button>

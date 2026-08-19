@@ -17,6 +17,7 @@
     taskTitle: document.getElementById('taskTitle'),
     taskNote: document.getElementById('taskNote'),
     taskDate: document.getElementById('taskDate'),
+    taskTime: document.getElementById('taskTime'),
     cancelBtn: document.getElementById('cancelBtn'),
   };
 
@@ -36,6 +37,18 @@
     const dt = new Date(y, m - 1, d);
     dt.setDate(dt.getDate() + n);
     return toISODate(dt);
+  }
+
+  function nowHHMM() {
+    const now = new Date();
+    return String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  }
+
+  function isOverdue(t, today, nowTime) {
+    if (t.done || !t.date) return false;
+    if (t.date < today) return true;
+    if (t.date === today && t.time && t.time < nowTime) return true;
+    return false;
   }
 
   function loadTasks() {
@@ -120,6 +133,8 @@
   function sortTasks(list) {
     return [...list].sort((a, b) => {
       if (a.done !== b.done) return a.done ? 1 : -1;
+      if (!!a.time !== !!b.time) return a.time ? -1 : 1;
+      if (a.time && b.time && a.time !== b.time) return a.time < b.time ? -1 : 1;
       return a.createdAt - b.createdAt;
     });
   }
@@ -127,6 +142,7 @@
   function renderContent() {
     el.content.innerHTML = '';
     const today = todayStr();
+    const nowTime = nowHHMM();
 
     if (filter === 'none') {
       renderSection(null, tasks.filter(t => !t.date));
@@ -139,8 +155,9 @@
     }
 
     // filter === 'all': grouped view
-    const overdue = tasks.filter(t => t.date && t.date < today && !t.done);
-    const withDate = tasks.filter(t => t.date && t.date >= today);
+    const overdue = tasks.filter(t => isOverdue(t, today, nowTime));
+    const overdueIds = new Set(overdue.map(t => t.id));
+    const withDate = tasks.filter(t => t.date && t.date >= today && !overdueIds.has(t.id));
     const noDate = tasks.filter(t => !t.date);
 
     const byDate = {};
@@ -194,9 +211,10 @@
 
   function renderTaskCard(t) {
     const today = todayStr();
+    const nowTime = nowHHMM();
     const card = document.createElement('div');
     card.className = 'task-card' + (t.done ? ' done' : '') +
-      (t.date && t.date < today && !t.done ? ' overdue' : '');
+      (isOverdue(t, today, nowTime) ? ' overdue' : '');
 
     const check = document.createElement('button');
     check.className = 'task-check';
@@ -221,6 +239,13 @@
       body.appendChild(note);
     }
 
+    if (t.time) {
+      const meta = document.createElement('div');
+      meta.className = 'task-meta';
+      meta.textContent = `🕐 ${t.time}`;
+      body.appendChild(meta);
+    }
+
     const del = document.createElement('button');
     del.className = 'task-delete';
     del.setAttribute('aria-label', 'Usuń zadanie');
@@ -243,6 +268,7 @@
     el.taskTitle.value = '';
     el.taskNote.value = '';
     el.taskDate.value = (filter !== 'all' && filter !== 'none') ? filter : todayStr();
+    el.taskTime.value = '';
     el.sheetOverlay.classList.add('open');
     setTimeout(() => el.taskTitle.focus(), 200);
   }
@@ -266,6 +292,7 @@
       title,
       note: el.taskNote.value.trim(),
       date: el.taskDate.value || null,
+      time: el.taskDate.value ? (el.taskTime.value || null) : null,
       done: false,
       createdAt: Date.now(),
     });
