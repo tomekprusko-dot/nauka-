@@ -46,7 +46,11 @@
           Notatka (opcjonalnie)
           <textarea id="taskNote" placeholder="Dodatkowe szczegóły" maxlength="500" rows="2"></textarea>
         </label>
-        <div class="sheet-row">
+        <label class="checkbox-row">
+          <input type="checkbox" id="taskNoDate">
+          <span>Zadanie ogólne (bez konkretnej daty)</span>
+        </label>
+        <div class="sheet-row" id="dateTimeRow">
           <label>
             Data
             <input type="date" id="taskDate">

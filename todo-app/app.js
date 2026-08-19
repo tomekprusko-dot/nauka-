@@ -18,6 +18,8 @@
     taskNote: document.getElementById('taskNote'),
     taskDate: document.getElementById('taskDate'),
     taskTime: document.getElementById('taskTime'),
+    taskNoDate: document.getElementById('taskNoDate'),
+    dateTimeRow: document.getElementById('dateTimeRow'),
     cancelBtn: document.getElementById('cancelBtn'),
   };
 
@@ -100,14 +102,14 @@
     const allChip = makeChip('all', 'Wszystko', '', filter === 'all', tasks.some(t => !t.done));
     el.dayStrip.appendChild(allChip);
 
+    const noneChip = makeChip('none', 'Ogólne', '', filter === 'none', tasks.some(t => !t.date && !t.done));
+    el.dayStrip.appendChild(noneChip);
+
     days.forEach(dateStr => {
       const { dow, num } = dayChipLabel(dateStr, today);
       const chip = makeChip(dateStr, dow, num, filter === dateStr, hasOpenTasks(dateStr));
       el.dayStrip.appendChild(chip);
     });
-
-    const noneChip = makeChip('none', 'Bez', 'daty', filter === 'none', tasks.some(t => !t.date && !t.done));
-    el.dayStrip.appendChild(noneChip);
   }
 
   function makeChip(value, dow, num, active, showDot) {
@@ -145,12 +147,12 @@
     const nowTime = nowHHMM();
 
     if (filter === 'none') {
-      renderSection(null, tasks.filter(t => !t.date));
+      renderSection(null, tasks.filter(t => !t.date), false, 'Brak zadań ogólnych. Dodaj pierwsze przyciskiem +');
       return;
     }
 
     if (filter !== 'all') {
-      renderSection(null, tasks.filter(t => t.date === filter));
+      renderSection(null, tasks.filter(t => t.date === filter), false, 'Brak zadań na ten dzień.');
       return;
     }
 
@@ -183,7 +185,7 @@
 
     if (noDate.length) {
       renderedAny = true;
-      renderSection('Bez daty', noDate);
+      renderSection('Ogólne', noDate);
     }
 
     if (!renderedAny) {
@@ -191,7 +193,7 @@
     }
   }
 
-  function renderSection(title, items, overdueSection = false) {
+  function renderSection(title, items, overdueSection = false, emptyText = 'Brak zadań na ten dzień.') {
     if (title) {
       const h = document.createElement('div');
       h.className = 'section-title' + (overdueSection ? ' overdue-title' : '');
@@ -202,7 +204,7 @@
     list.className = 'task-list';
     const sorted = sortTasks(items);
     if (!sorted.length && title === null) {
-      el.content.innerHTML = '<div class="empty-state">Brak zadań na ten dzień.</div>';
+      el.content.innerHTML = `<div class="empty-state">${emptyText}</div>`;
       return;
     }
     sorted.forEach(t => list.appendChild(renderTaskCard(t)));
@@ -264,11 +266,18 @@
 
   // ---------- Add task sheet ----------
 
+  function applyNoDateToggle() {
+    const noDate = el.taskNoDate.checked;
+    el.dateTimeRow.classList.toggle('hidden', noDate);
+  }
+
   function openSheet() {
     el.taskTitle.value = '';
     el.taskNote.value = '';
     el.taskDate.value = (filter !== 'all' && filter !== 'none') ? filter : todayStr();
     el.taskTime.value = '';
+    el.taskNoDate.checked = filter === 'none';
+    applyNoDateToggle();
     el.sheetOverlay.classList.add('open');
     setTimeout(() => el.taskTitle.focus(), 200);
   }
@@ -279,6 +288,7 @@
 
   el.addBtn.addEventListener('click', openSheet);
   el.cancelBtn.addEventListener('click', closeSheet);
+  el.taskNoDate.addEventListener('change', applyNoDateToggle);
   el.sheetOverlay.addEventListener('click', (e) => {
     if (e.target === el.sheetOverlay) closeSheet();
   });
@@ -287,12 +297,13 @@
     e.preventDefault();
     const title = el.taskTitle.value.trim();
     if (!title) return;
+    const noDate = el.taskNoDate.checked;
     tasks.push({
       id: uid(),
       title,
       note: el.taskNote.value.trim(),
-      date: el.taskDate.value || null,
-      time: el.taskDate.value ? (el.taskTime.value || null) : null,
+      date: noDate ? null : (el.taskDate.value || null),
+      time: (!noDate && el.taskDate.value) ? (el.taskTime.value || null) : null,
       done: false,
       createdAt: Date.now(),
     });
