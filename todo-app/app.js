@@ -5,6 +5,7 @@
   const DOW = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
   const MONTHS = ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca',
     'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'];
+  const MONTHS_SHORT = ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'];
   const DOW_LONG = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
 
   const el = {
@@ -129,6 +130,11 @@
     const allChip = makeChip('all', 'Wszystko', '', filter === 'all', vTasks.some(t => !t.done));
     el.dayStrip.appendChild(allChip);
 
+    const nowTime = nowHHMM();
+    const overdueChip = makeChip('overdue', 'Zaległe', '', filter === 'overdue', vTasks.some(t => isOverdue(t, today, nowTime)));
+    overdueChip.classList.add('chip-overdue');
+    el.dayStrip.appendChild(overdueChip);
+
     const noneChip = makeChip('none', 'Ogólne', '', filter === 'none', vTasks.some(t => !t.date && !t.done));
     el.dayStrip.appendChild(noneChip);
 
@@ -159,6 +165,11 @@
     return `${DOW_LONG[dt.getDay()]}, ${d} ${MONTHS[m - 1]}`;
   }
 
+  function shortDateLabel(dateStr) {
+    const [, m, d] = dateStr.split('-').map(Number);
+    return `${d} ${MONTHS_SHORT[m - 1]}`;
+  }
+
   function sortTasks(list) {
     return [...list].sort((a, b) => {
       if (a.done !== b.done) return a.done ? 1 : -1;
@@ -176,6 +187,11 @@
 
     if (filter === 'none') {
       renderSection(null, vTasks.filter(t => !t.date), false, 'Brak zadań ogólnych. Dodaj pierwsze przyciskiem +');
+      return;
+    }
+
+    if (filter === 'overdue') {
+      renderSection(null, vTasks.filter(t => isOverdue(t, today, nowTime)), false, 'Brak zaległych zadań. Świetna robota!');
       return;
     }
 
@@ -242,9 +258,9 @@
   function renderTaskCard(t) {
     const today = todayStr();
     const nowTime = nowHHMM();
+    const overdue = isOverdue(t, today, nowTime);
     const card = document.createElement('div');
-    card.className = 'task-card' + (t.done ? ' done' : '') +
-      (isOverdue(t, today, nowTime) ? ' overdue' : '');
+    card.className = 'task-card' + (t.done ? ' done' : '') + (overdue ? ' overdue' : '');
 
     const check = document.createElement('button');
     check.className = 'task-check';
@@ -284,9 +300,15 @@
       body.appendChild(note);
     }
 
-    if (t.time || t.tag || t.repeatEveryDays) {
+    if (t.time || t.tag || t.repeatEveryDays || overdue) {
       const meta = document.createElement('div');
       meta.className = 'task-meta';
+      if (overdue && t.date) {
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'task-overdue-date';
+        dateSpan.textContent = shortDateLabel(t.date);
+        meta.appendChild(dateSpan);
+      }
       if (t.time) {
         const timeSpan = document.createElement('span');
         timeSpan.className = 'task-time';

@@ -100,6 +100,8 @@ html, body {
 }
 .day-chip.active .dot { background: var(--accent-b); }
 .day-chip:not(.active) .dot { background: #fff; }
+.day-chip.chip-overdue.active { background: var(--overdue); color: #fff; }
+.day-chip.chip-overdue.active .dot { background: var(--overdue); }
 
 .tag-filter-strip {
   display: flex;
@@ -181,6 +183,15 @@ html, body {
 .task-note { font-size: 0.85rem; color: var(--muted); margin-top: 2px; word-break: break-word; }
 .task-meta { font-size: 0.75rem; color: var(--muted); margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .task-card.overdue .task-meta .task-time { color: var(--overdue); font-weight: 600; }
+
+.task-overdue-date {
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(255, 77, 94, 0.12);
+  color: var(--overdue);
+}
 
 .task-tag {
   padding: 2px 9px;
