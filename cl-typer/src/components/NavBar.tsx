@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import Trophy from "@/components/Trophy";
 
 const links = [
   { href: "/terminarz", label: "Terminarz" },
@@ -23,11 +24,13 @@ export default function NavBar() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-white/10 bg-[#0b1330]/95 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-[#f4c542]/25 bg-[#0b1330]/95 backdrop-blur">
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/terminarz" className="flex items-center gap-2 font-semibold text-white">
-          <span className="text-lg">⚽</span>
-          <span className="hidden sm:inline">Typer LM 2026/27</span>
+          <Trophy className="h-6 w-6" />
+          <span className="font-display hidden text-lg tracking-wide sm:inline">
+            Typer LM 2026/27
+          </span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           {links.map((link) => (

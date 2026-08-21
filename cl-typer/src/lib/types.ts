@@ -3,6 +3,8 @@ export interface Team {
   name: string;
   shortName: string;
   country: string;
+  /** Approximate kit colors, used for the little badge next to the team name. */
+  colors: { bg: string; fg: string };
 }
 
 export interface Fixture {

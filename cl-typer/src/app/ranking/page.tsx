@@ -5,6 +5,8 @@ import RequireAuth from "@/components/RequireAuth";
 import * as store from "@/lib/store";
 import { StandingsRow } from "@/lib/types";
 
+const MEDALS = ["🥇", "🥈", "🥉"];
+
 function RankingContent() {
   const [rows, setRows] = useState<StandingsRow[]>([]);
 
@@ -15,10 +17,10 @@ function RankingContent() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold">Ranking typowania</h1>
+        <h1 className="font-display gold-text text-3xl">Ranking typowania</h1>
         <p className="mt-1 text-sm text-zinc-400">
-          3 pkt za trafiony dokładny wynik, 1 pkt za trafiony typ zwycięzcy/remisu, 0 pkt za
-          chybiony typ.
+          🥇 3 pkt za trafiony dokładny wynik &nbsp;·&nbsp; 1 pkt za trafiony typ
+          zwycięzcy/remisu &nbsp;·&nbsp; 0 pkt za chybiony typ.
         </p>
       </div>
 
@@ -35,16 +37,33 @@ function RankingContent() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, i) => (
-              <tr key={row.user.id} className="border-t border-white/10">
-                <td className="px-4 py-3 text-zinc-400">{i + 1}</td>
-                <td className="px-4 py-3 font-medium">{row.user.name}</td>
-                <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
-                <td className="px-4 py-3 text-right text-zinc-400">{row.exactHits}</td>
-                <td className="px-4 py-3 text-right text-zinc-400">{row.outcomeHits}</td>
-                <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
-              </tr>
-            ))}
+            {rows.map((row, i) => {
+              const medal = row.points > 0 ? MEDALS[i] : undefined;
+              return (
+                <tr
+                  key={row.user.id}
+                  className={`border-t border-white/10 ${
+                    medal === "🥇" ? "bg-[#f4c542]/10" : ""
+                  }`}
+                >
+                  <td className="px-4 py-3 text-zinc-400">
+                    {medal ? <span className="text-base">{medal}</span> : i + 1}
+                  </td>
+                  <td className="px-4 py-3 font-medium">
+                    {row.user.name}
+                    {medal === "🥇" && (
+                      <span className="ml-2 text-xs font-normal text-[#f4c542]">
+                        Lider typowania
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
+                  <td className="px-4 py-3 text-right text-zinc-400">{row.exactHits}</td>
+                  <td className="px-4 py-3 text-right text-zinc-400">{row.outcomeHits}</td>
+                  <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

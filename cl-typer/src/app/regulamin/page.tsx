@@ -1,9 +1,25 @@
 import RequireAuth from "@/components/RequireAuth";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  number,
+  icon,
+  title,
+  children,
+}: {
+  number: number;
+  icon: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-4">
-      <h2 className="font-semibold text-white">{title}</h2>
+      <h2 className="flex items-center gap-2 font-semibold text-white">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#ffe27a] to-[#c9922a] text-xs font-bold text-[#1b1200]">
+          {number}
+        </span>
+        <span aria-hidden>{icon}</span>
+        {title}
+      </h2>
       <div className="space-y-2 text-sm leading-relaxed text-zinc-300">{children}</div>
     </section>
   );
@@ -13,20 +29,20 @@ function RegulaminContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold">Regulamin typowania</h1>
+        <h1 className="font-display gold-text text-3xl">Regulamin typowania</h1>
         <p className="mt-1 text-sm text-zinc-400">
           Zasady typowania wyników meczy fazy ligowej Ligi Mistrzów UEFA 2026/27.
         </p>
       </div>
 
-      <Section title="1. Kto może grać">
+      <Section number={1} icon="🎟️" title="Kto może grać">
         <p>
           W typowaniu bierze udział wyłącznie osoby zaproszone przez organizatora
           (dostęp na podstawie imienia/e-maila i indywidualnego kodu dostępu).
         </p>
       </Section>
 
-      <Section title="2. Jak typować">
+      <Section number={2} icon="✍️" title="Jak typować">
         <p>
           Dla każdego meczu podajesz przewidywany dokładny wynik (liczbę bramek
           gospodarzy i gości). Typ zapisujesz przyciskiem „Zapisz” na stronie
@@ -35,17 +51,17 @@ function RegulaminContent() {
         </p>
       </Section>
 
-      <Section title="3. Blokada typów po starcie meczu">
+      <Section number={3} icon="🔒" title="Blokada typów po starcie meczu">
         <p>
           Typ jest możliwy tylko <strong>przed</strong> zaplanowaną godziną
-          rozpoczęcia spotkania. Z chwilą startu meczu pole typu jest blokowane —
-          nie da się już go dodać ani zmienić, niezależnie od tego, czy mecz
-          faktycznie już trwa. Brak zapisanego typu przed startem meczu = 0 punktów
-          za ten mecz.
+          rozpoczęcia spotkania. Z chwilą startu meczu (gwizdek sędziego!) pole typu
+          jest blokowane — nie da się już go dodać ani zmienić, niezależnie od tego,
+          czy mecz faktycznie już trwa. Brak zapisanego typu przed startem meczu = 0
+          punktów za ten mecz.
         </p>
       </Section>
 
-      <Section title="4. Punktacja">
+      <Section number={4} icon="🏆" title="Punktacja">
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <strong>3 punkty</strong> — trafiony dokładny wynik (np. typowałeś 2:1 i
@@ -64,7 +80,7 @@ function RegulaminContent() {
         </ul>
       </Section>
 
-      <Section title="5. Ranking">
+      <Section number={5} icon="📊" title="Ranking">
         <p>
           Ranking to suma punktów ze wszystkich rozegranych meczów fazy ligowej. Przy
           równej liczbie punktów wyżej w tabeli plasuje się osoba z większą liczbą
@@ -72,7 +88,7 @@ function RegulaminContent() {
         </p>
       </Section>
 
-      <Section title="6. Wyniki meczów">
+      <Section number={6} icon="📋" title="Wyniki meczów">
         <p>
           Oficjalne wyniki wpisuje administrator po zakończeniu meczu — na ich
           podstawie automatycznie przeliczany jest ranking. W razie oczywistej

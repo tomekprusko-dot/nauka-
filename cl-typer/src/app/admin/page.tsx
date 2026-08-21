@@ -4,7 +4,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import RequireAuth from "@/components/RequireAuth";
 import * as store from "@/lib/store";
 import { getTeam } from "@/data/teams";
-import { FixtureResult, InvitedUser } from "@/lib/types";
+import { FixtureResult, InvitedUser, Team } from "@/lib/types";
+import TeamBadge from "@/components/TeamBadge";
 
 function UsersSection() {
   const [users, setUsers] = useState<InvitedUser[]>([]);
@@ -123,7 +124,10 @@ function ResultsSection() {
           return (
             <ResultRow
               key={fixture.id}
-              label={`${home?.name ?? fixture.homeTeamId} vs ${away?.name ?? fixture.awayTeamId}`}
+              home={home}
+              away={away}
+              homeFallback={fixture.homeTeamId}
+              awayFallback={fixture.awayTeamId}
               result={result}
               onSave={(h, a) => handleSave(fixture.id, h, a)}
             />
@@ -135,39 +139,51 @@ function ResultsSection() {
 }
 
 function ResultRow({
-  label,
+  home,
+  away,
+  homeFallback,
+  awayFallback,
   result,
   onSave,
 }: {
-  label: string;
+  home: Team | undefined;
+  away: Team | undefined;
+  homeFallback: string;
+  awayFallback: string;
   result: FixtureResult | undefined;
   onSave: (home: string, away: string) => void;
 }) {
-  const [home, setHome] = useState(result?.homeGoals?.toString() ?? "");
-  const [away, setAway] = useState(result?.awayGoals?.toString() ?? "");
+  const [homeGoals, setHomeGoals] = useState(result?.homeGoals?.toString() ?? "");
+  const [awayGoals, setAwayGoals] = useState(result?.awayGoals?.toString() ?? "");
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm">{label}</p>
+      <p className="flex items-center gap-2 text-sm">
+        <TeamBadge team={home} size="sm" />
+        {home?.name ?? homeFallback}
+        <span className="text-zinc-500">–</span>
+        {away?.name ?? awayFallback}
+        <TeamBadge team={away} size="sm" />
+      </p>
       <div className="flex items-center gap-2">
         <input
-          value={home}
-          onChange={(e) => setHome(e.target.value)}
+          value={homeGoals}
+          onChange={(e) => setHomeGoals(e.target.value)}
           type="number"
           min={0}
-          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#3d5afe]"
+          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#f4c542]"
         />
         <span className="text-zinc-500">:</span>
         <input
-          value={away}
-          onChange={(e) => setAway(e.target.value)}
+          value={awayGoals}
+          onChange={(e) => setAwayGoals(e.target.value)}
           type="number"
           min={0}
-          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#3d5afe]"
+          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#f4c542]"
         />
         <button
-          onClick={() => onSave(home, away)}
-          className="rounded-lg bg-[#3d5afe] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#2f47d1]"
+          onClick={() => onSave(homeGoals, awayGoals)}
+          className="rounded-lg bg-gradient-to-b from-[#ffe27a] to-[#c9922a] px-3 py-1.5 text-xs font-bold text-[#1b1200] transition-transform hover:scale-105 active:scale-95"
         >
           Zapisz
         </button>
@@ -180,7 +196,7 @@ function AdminContent() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-xl font-bold">Panel administratora</h1>
+        <h1 className="font-display gold-text text-3xl">Panel administratora</h1>
         <p className="mt-1 text-sm text-zinc-400">
           Zarządzaj dostępem osób oraz wpisuj wyniki meczów.
         </p>
