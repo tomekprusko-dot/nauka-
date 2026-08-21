@@ -22,8 +22,8 @@ function RankingContent() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-white/10">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-xl border border-white/10">
+        <table className="w-full min-w-[520px] text-sm">
           <thead className="bg-white/5 text-left text-xs uppercase tracking-wide text-zinc-400">
             <tr>
               <th className="px-4 py-3">#</th>
@@ -48,6 +48,7 @@ function RankingContent() {
           </tbody>
         </table>
       </div>
+      <p className="text-xs text-zinc-500 sm:hidden">Przesuń tabelę w bok, żeby zobaczyć kolumnę Punkty.</p>
 
       {rows.length === 0 && (
         <p className="text-sm text-zinc-500">Brak jeszcze żadnych typów.</p>

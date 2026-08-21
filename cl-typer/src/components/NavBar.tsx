@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 const links = [
   { href: "/terminarz", label: "Terminarz" },
   { href: "/ranking", label: "Ranking" },
+  { href: "/regulamin", label: "Regulamin" },
 ];
 
 export default function NavBar() {
