@@ -8,11 +8,17 @@ import { getTeam } from "@/data/teams";
 import { Fixture, Prediction } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
 
-function formatKickoff(iso: string) {
-  return new Date(iso).toLocaleString("pl-PL", {
-    weekday: "short",
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pl-PL", {
+    weekday: "long",
     day: "2-digit",
-    month: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("pl-PL", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -72,10 +78,13 @@ function FixtureRow({
       </div>
 
       <div className="flex flex-col gap-1.5 sm:items-end">
-        <p className="flex items-center gap-1 text-xs text-zinc-400">
+        <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1 text-xs">
+          <span aria-hidden>📅</span>
+          <span className="capitalize text-zinc-200">{formatDate(fixture.kickoff)}</span>
+          <span className="text-zinc-500">•</span>
           <span aria-hidden>🕐</span>
-          {formatKickoff(fixture.kickoff)}
-        </p>
+          <span className="font-semibold text-[#f4c542]">{formatTime(fixture.kickoff)}</span>
+        </div>
         <div className="flex items-center gap-2">
           <input
             type="number"

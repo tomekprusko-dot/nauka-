@@ -53,7 +53,7 @@ function RankingContent() {
                     {row.user.name}
                     {medal === "🥇" && (
                       <span className="ml-2 text-xs font-normal text-[#f4c542]">
-                        Lider typowania
+                        Największy Ekspert
                       </span>
                     )}
                   </td>
