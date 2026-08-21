@@ -1,0 +1,65 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import RequireAuth from "@/components/RequireAuth";
+import * as store from "@/lib/store";
+import { StandingsRow } from "@/lib/types";
+
+function RankingContent() {
+  const [rows, setRows] = useState<StandingsRow[]>([]);
+
+  useEffect(() => {
+    setRows(store.computeStandings());
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-xl font-bold">Ranking typowania</h1>
+        <p className="mt-1 text-sm text-zinc-400">
+          3 pkt za trafiony dokładny wynik, 1 pkt za trafiony typ zwycięzcy/remisu, 0 pkt za
+          chybiony typ.
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-white/10">
+        <table className="w-full text-sm">
+          <thead className="bg-white/5 text-left text-xs uppercase tracking-wide text-zinc-400">
+            <tr>
+              <th className="px-4 py-3">#</th>
+              <th className="px-4 py-3">Gracz</th>
+              <th className="px-4 py-3 text-right">Typy</th>
+              <th className="px-4 py-3 text-right">Trafione wyniki</th>
+              <th className="px-4 py-3 text-right">Trafione typy</th>
+              <th className="px-4 py-3 text-right">Punkty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={row.user.id} className="border-t border-white/10">
+                <td className="px-4 py-3 text-zinc-400">{i + 1}</td>
+                <td className="px-4 py-3 font-medium">{row.user.name}</td>
+                <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
+                <td className="px-4 py-3 text-right text-zinc-400">{row.exactHits}</td>
+                <td className="px-4 py-3 text-right text-zinc-400">{row.outcomeHits}</td>
+                <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {rows.length === 0 && (
+        <p className="text-sm text-zinc-500">Brak jeszcze żadnych typów.</p>
+      )}
+    </div>
+  );
+}
+
+export default function RankingPage() {
+  return (
+    <RequireAuth>
+      <RankingContent />
+    </RequireAuth>
+  );
+}
