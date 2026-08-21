@@ -3,6 +3,7 @@ import { FixtureResult, Prediction } from "@/lib/types";
 export const POINTS_EXACT = 3;
 export const POINTS_OUTCOME = 1;
 export const POINTS_MISS = 0;
+export const POINTS_SPECIAL = 10;
 
 function outcome(homeGoals: number, awayGoals: number): "H" | "D" | "A" {
   if (homeGoals > awayGoals) return "H";

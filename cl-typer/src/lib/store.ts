@@ -2,8 +2,15 @@
 
 import { seedUsers } from "@/data/users";
 import { fixtures } from "@/data/fixtures";
-import { FixtureResult, InvitedUser, Prediction, StandingsRow } from "@/lib/types";
-import { scorePrediction } from "@/lib/scoring";
+import {
+  FixtureResult,
+  InvitedUser,
+  Prediction,
+  SpecialPrediction,
+  SpecialResult,
+  StandingsRow,
+} from "@/lib/types";
+import { scorePrediction, POINTS_SPECIAL } from "@/lib/scoring";
 
 /**
  * Tymczasowa "baza danych" oparta o localStorage przeglądarki.
@@ -18,6 +25,8 @@ const KEYS = {
   session: "cl-typer:session",
   results: "cl-typer:results",
   predictions: "cl-typer:predictions",
+  specialPredictions: "cl-typer:specialPredictions",
+  specialResult: "cl-typer:specialResult",
 } as const;
 
 function readJSON<T>(key: string, fallback: T): T {
@@ -92,6 +101,14 @@ export function getFixtures() {
   return fixtures;
 }
 
+/** Kickoff of the very first fixture — special picks lock at this moment. */
+export function getTournamentStart(): string {
+  return fixtures.reduce(
+    (earliest, f) => (f.kickoff < earliest ? f.kickoff : earliest),
+    fixtures[0].kickoff,
+  );
+}
+
 export function getResults(): Record<string, FixtureResult> {
   return readJSON<Record<string, FixtureResult>>(KEYS.results, {});
 }
@@ -130,10 +147,54 @@ export function savePrediction(
   writeJSON(KEYS.predictions, [...withoutThis, next]);
 }
 
+export function getAllSpecialPredictions(): Record<string, SpecialPrediction> {
+  return readJSON<Record<string, SpecialPrediction>>(KEYS.specialPredictions, {});
+}
+
+export function getUserSpecialPrediction(userId: string): SpecialPrediction | null {
+  return getAllSpecialPredictions()[userId] ?? null;
+}
+
+export function saveSpecialPrediction(
+  userId: string,
+  championTeamId: string | null,
+  topScorer: string | null,
+) {
+  const all = getAllSpecialPredictions();
+  all[userId] = { userId, championTeamId, topScorer, savedAt: new Date().toISOString() };
+  writeJSON(KEYS.specialPredictions, all);
+}
+
+export function getSpecialResult(): SpecialResult {
+  return readJSON<SpecialResult>(KEYS.specialResult, { championTeamId: null, topScorer: null });
+}
+
+export function setSpecialResult(championTeamId: string | null, topScorer: string | null) {
+  writeJSON(KEYS.specialResult, { championTeamId, topScorer });
+}
+
+function scoreSpecial(prediction: SpecialPrediction | null, result: SpecialResult): number {
+  if (!prediction) return 0;
+  let points = 0;
+  if (result.championTeamId && prediction.championTeamId === result.championTeamId) {
+    points += POINTS_SPECIAL;
+  }
+  if (
+    result.topScorer &&
+    prediction.topScorer &&
+    prediction.topScorer.trim().toLowerCase() === result.topScorer.trim().toLowerCase()
+  ) {
+    points += POINTS_SPECIAL;
+  }
+  return points;
+}
+
 export function computeStandings(): StandingsRow[] {
   const users = ensureUsersSeeded();
   const results = getResults();
   const allPredictions = getAllPredictions();
+  const allSpecialPredictions = getAllSpecialPredictions();
+  const specialResult = getSpecialResult();
 
   return users
     .map((user) => {
@@ -151,12 +212,16 @@ export function computeStandings(): StandingsRow[] {
         else if (score === 1) outcomeHits += 1;
       }
 
+      const specialPoints = scoreSpecial(allSpecialPredictions[user.id] ?? null, specialResult);
+      points += specialPoints;
+
       return {
         user,
         points,
         exactHits,
         outcomeHits,
         predictionsMade: userPredictions.length,
+        specialPoints,
       };
     })
     .sort((a, b) => b.points - a.points || b.exactHits - a.exactHits);

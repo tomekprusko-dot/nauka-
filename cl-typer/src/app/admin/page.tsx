@@ -3,8 +3,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import RequireAuth from "@/components/RequireAuth";
 import * as store from "@/lib/store";
-import { getTeam } from "@/data/teams";
-import { FixtureResult, InvitedUser, Team } from "@/lib/types";
+import { getTeam, teams } from "@/data/teams";
+import { FixtureResult, InvitedUser, SpecialResult, Team } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
 
 function UsersSection() {
@@ -90,6 +90,81 @@ function UsersSection() {
           Dodaj
         </button>
       </form>
+    </section>
+  );
+}
+
+function SpecialResultSection() {
+  const [result, setResult] = useState<SpecialResult>({ championTeamId: null, topScorer: null });
+  const [championTeamId, setChampionTeamId] = useState("");
+  const [topScorer, setTopScorer] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const current = store.getSpecialResult();
+    setResult(current);
+    setChampionTeamId(current.championTeamId ?? "");
+    setTopScorer(current.topScorer ?? "");
+  }, []);
+
+  function handleSave(e: FormEvent) {
+    e.preventDefault();
+    store.setSpecialResult(championTeamId || null, topScorer.trim() || null);
+    setResult(store.getSpecialResult());
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1200);
+  }
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
+        Wyniki specjalne (koniec sezonu)
+      </h2>
+      <p className="text-xs text-zinc-500">
+        Wpisz, gdy będą znane — automatycznie doliczy po 10 pkt każdej osobie z trafionym typem.
+      </p>
+      <form
+        onSubmit={handleSave}
+        className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-3 sm:flex-row sm:items-end"
+      >
+        <div className="flex-1 space-y-1">
+          <label className="text-xs text-zinc-400">🏆 Zwycięzca Ligi Mistrzów</label>
+          <select
+            value={championTeamId}
+            onChange={(e) => setChampionTeamId(e.target.value)}
+            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#f4c542]"
+          >
+            <option value="">— nie ustawiono —</option>
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex-1 space-y-1">
+          <label className="text-xs text-zinc-400">👑 Król strzelców</label>
+          <input
+            value={topScorer}
+            onChange={(e) => setTopScorer(e.target.value)}
+            placeholder="np. Kylian Mbappé"
+            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#f4c542]"
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-lg bg-gradient-to-b from-[#ffe27a] to-[#c9922a] px-4 py-1.5 text-sm font-bold text-[#1b1200] transition-transform hover:scale-105 active:scale-95"
+        >
+          {saved ? "Zapisano ✓" : "Zapisz"}
+        </button>
+      </form>
+      {(result.championTeamId || result.topScorer) && (
+        <p className="text-xs text-zinc-500">
+          Aktualnie ustawione: {result.championTeamId ? getTeam(result.championTeamId)?.name : "—"}
+          {" · "}
+          {result.topScorer ?? "—"}
+        </p>
+      )}
     </section>
   );
 }
@@ -203,6 +278,7 @@ function AdminContent() {
       </div>
       <UsersSection />
       <ResultsSection />
+      <SpecialResultSection />
     </div>
   );
 }

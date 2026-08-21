@@ -80,15 +80,37 @@ function RegulaminContent() {
         </ul>
       </Section>
 
-      <Section number={5} icon="📊" title="Ranking">
+      <Section number={5} icon="👑" title="Typy specjalne">
         <p>
-          Ranking to suma punktów ze wszystkich rozegranych meczów fazy ligowej. Przy
-          równej liczbie punktów wyżej w tabeli plasuje się osoba z większą liczbą
-          trafionych dokładnych wyników (3-punktowych typów).
+          Przed rozpoczęciem rozgrywek (do pierwszego meczu fazy ligowej) każdy typuje
+          dodatkowo, jednorazowo na cały sezon:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            <strong>Zwycięzcę całej Ligi Mistrzów</strong> — trafiony typ to{" "}
+            <strong>+10 punktów</strong>.
+          </li>
+          <li>
+            <strong>Króla strzelców rozgrywek</strong> — trafiony typ to{" "}
+            <strong>+10 punktów</strong>.
+          </li>
+        </ul>
+        <p>
+          Oba typy ustawiasz na stronie „Typy specjalne”. Po starcie sezonu są
+          zablokowane, a punkty doliczane są dopiero po zakończeniu rozgrywek, gdy
+          administrator wpisze ostateczne rozstrzygnięcie.
         </p>
       </Section>
 
-      <Section number={6} icon="📋" title="Wyniki meczów">
+      <Section number={6} icon="📊" title="Ranking">
+        <p>
+          Ranking to suma punktów ze wszystkich rozegranych meczów fazy ligowej oraz
+          typów specjalnych. Przy równej liczbie punktów wyżej w tabeli plasuje się
+          osoba z większą liczbą trafionych dokładnych wyników (3-punktowych typów).
+        </p>
+      </Section>
+
+      <Section number={7} icon="📋" title="Wyniki meczów">
         <p>
           Oficjalne wyniki wpisuje administrator po zakończeniu meczu — na ich
           podstawie automatycznie przeliczany jest ranking. W razie oczywistej

@@ -20,12 +20,13 @@ function RankingContent() {
         <h1 className="font-display gold-text text-3xl">Ranking typowania</h1>
         <p className="mt-1 text-sm text-zinc-400">
           🥇 3 pkt za trafiony dokładny wynik &nbsp;·&nbsp; 1 pkt za trafiony typ
-          zwycięzcy/remisu &nbsp;·&nbsp; 0 pkt za chybiony typ.
+          zwycięzcy/remisu &nbsp;·&nbsp; 0 pkt za chybiony typ &nbsp;·&nbsp; 👑 +10 pkt za
+          trafionego mistrza ligi i +10 pkt za króla strzelców.
         </p>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-white/10">
-        <table className="w-full min-w-[520px] text-sm">
+        <table className="w-full min-w-[600px] text-sm">
           <thead className="bg-white/5 text-left text-xs uppercase tracking-wide text-zinc-400">
             <tr>
               <th className="px-4 py-3">#</th>
@@ -33,6 +34,7 @@ function RankingContent() {
               <th className="px-4 py-3 text-right">Typy</th>
               <th className="px-4 py-3 text-right">Trafione wyniki</th>
               <th className="px-4 py-3 text-right">Trafione typy</th>
+              <th className="px-4 py-3 text-right">Specjalne</th>
               <th className="px-4 py-3 text-right">Punkty</th>
             </tr>
           </thead>
@@ -60,6 +62,9 @@ function RankingContent() {
                   <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
                   <td className="px-4 py-3 text-right text-zinc-400">{row.exactHits}</td>
                   <td className="px-4 py-3 text-right text-zinc-400">{row.outcomeHits}</td>
+                  <td className="px-4 py-3 text-right text-zinc-400">
+                    {row.specialPoints > 0 ? `👑 ${row.specialPoints}` : "—"}
+                  </td>
                   <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
                 </tr>
               );

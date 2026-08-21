@@ -45,4 +45,19 @@ export interface StandingsRow {
   exactHits: number;
   outcomeHits: number;
   predictionsMade: number;
+  specialPoints: number;
+}
+
+/** A user's one-off, pre-season picks: who wins it all and who's top scorer. */
+export interface SpecialPrediction {
+  userId: string;
+  championTeamId: string | null;
+  topScorer: string | null;
+  savedAt: string;
+}
+
+/** The real outcome, set by the admin once known — used to score special picks. */
+export interface SpecialResult {
+  championTeamId: string | null;
+  topScorer: string | null;
 }

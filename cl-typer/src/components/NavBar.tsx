@@ -7,6 +7,7 @@ import Trophy from "@/components/Trophy";
 
 const links = [
   { href: "/terminarz", label: "Terminarz" },
+  { href: "/typy-specjalne", label: "Specjalne" },
   { href: "/ranking", label: "Ranking" },
   { href: "/regulamin", label: "Regulamin" },
 ];
@@ -25,14 +26,14 @@ export default function NavBar() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-[#f4c542]/25 bg-[#0b1330]/95 backdrop-blur">
-      <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
+      <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
         <Link href="/terminarz" className="flex items-center gap-2 font-semibold text-white">
           <Trophy className="h-6 w-6" />
           <span className="font-display hidden text-lg tracking-wide sm:inline">
             Typer LM 2026/27
           </span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex flex-wrap items-center gap-1 text-sm">
           {links.map((link) => (
             <Link
               key={link.href}
