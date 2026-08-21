@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { usePathname } from "next/navigation";
 import Trophy from "@/components/Trophy";
+import { logoutAction } from "@/app/login/actions";
+import type { InvitedUser } from "@/lib/types";
 
 const links = [
   { href: "/terminarz", label: "Terminarz" },
@@ -12,17 +13,10 @@ const links = [
   { href: "/regulamin", label: "Regulamin" },
 ];
 
-export default function NavBar() {
-  const { user, logout } = useAuth();
+export default function NavBar({ user }: { user: InvitedUser | null }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   if (!user) return null;
-
-  function handleLogout() {
-    logout();
-    router.push("/login");
-  }
 
   return (
     <header className="sticky top-0 z-10 border-b border-[#f4c542]/25 bg-[#0b1330]/95 backdrop-blur">
@@ -62,12 +56,14 @@ export default function NavBar() {
         </nav>
         <div className="flex items-center gap-3 text-sm text-zinc-300">
           <span className="hidden sm:inline">{user.name}</span>
-          <button
-            onClick={handleLogout}
-            className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/10"
-          >
-            Wyloguj
-          </button>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/10"
+            >
+              Wyloguj
+            </button>
+          </form>
         </div>
       </div>
     </header>

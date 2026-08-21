@@ -1,4 +1,4 @@
-import RequireAuth from "@/components/RequireAuth";
+import { requireUser } from "@/lib/auth";
 
 function Section({
   number,
@@ -25,7 +25,9 @@ function Section({
   );
 }
 
-function RegulaminContent() {
+export default async function RegulaminPage() {
+  await requireUser();
+
   return (
     <div className="space-y-6">
       <div>
@@ -118,13 +120,5 @@ function RegulaminContent() {
         </p>
       </Section>
     </div>
-  );
-}
-
-export default function RegulaminPage() {
-  return (
-    <RequireAuth>
-      <RegulaminContent />
-    </RequireAuth>
   );
 }

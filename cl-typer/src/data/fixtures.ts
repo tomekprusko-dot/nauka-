@@ -25,3 +25,8 @@ export const fixtures: Fixture[] = [
   { id: "md2-7", matchday: 2, homeTeamId: "psv", awayTeamId: "dortmund", kickoff: "2026-10-01T18:45:00Z" },
   { id: "md2-8", matchday: 2, homeTeamId: "liverpool", awayTeamId: "atletico", kickoff: "2026-09-30T18:45:00Z" },
 ];
+
+/** Kickoff of the very first fixture — special picks lock at this moment. */
+export function getTournamentStart(): string {
+  return fixtures.reduce((earliest, f) => (f.kickoff < earliest ? f.kickoff : earliest), fixtures[0].kickoff);
+}

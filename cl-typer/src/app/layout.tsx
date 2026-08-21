@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Bebas_Neue } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import { getCurrentUser } from "@/lib/auth";
 import NavBar from "@/components/NavBar";
 
 const geistSans = Geist({
@@ -44,19 +44,19 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const user = await getCurrentUser();
+
   return (
     <html
       lang="pl"
       className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} h-full antialiased`}
     >
       <body className="stadium-bg min-h-full flex flex-col text-zinc-100">
-        <AuthProvider>
-          <NavBar />
-          <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
-            {children}
-          </main>
-        </AuthProvider>
+        <NavBar user={user} />
+        <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
+          {children}
+        </main>
       </body>
     </html>
   );

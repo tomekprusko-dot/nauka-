@@ -1,18 +1,11 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import RequireAuth from "@/components/RequireAuth";
-import * as store from "@/lib/store";
-import { StandingsRow } from "@/lib/types";
+import { requireUser } from "@/lib/auth";
+import { computeStandings } from "@/lib/db";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
-function RankingContent() {
-  const [rows, setRows] = useState<StandingsRow[]>([]);
-
-  useEffect(() => {
-    setRows(store.computeStandings());
-  }, []);
+export default async function RankingPage() {
+  await requireUser();
+  const rows = await computeStandings();
 
   return (
     <div className="space-y-4">
@@ -78,13 +71,5 @@ function RankingContent() {
         <p className="text-sm text-zinc-500">Brak jeszcze żadnych typów.</p>
       )}
     </div>
-  );
-}
-
-export default function RankingPage() {
-  return (
-    <RequireAuth>
-      <RankingContent />
-    </RequireAuth>
   );
 }
