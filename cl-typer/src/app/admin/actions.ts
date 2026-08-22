@@ -5,12 +5,12 @@ import { requireAdmin } from "@/lib/auth";
 import { addUser, removeUser, setResult, setSpecialResult } from "@/lib/db";
 import { fixtures } from "@/data/fixtures";
 
-export async function addUserAction(name: string, email: string, accessCode: string) {
+export async function addUserAction(name: string, accessCode: string) {
   await requireAdmin();
-  if (!name.trim() || !email.trim() || !accessCode.trim()) {
-    throw new Error("Uzupełnij imię, e-mail i kod dostępu.");
+  if (!name.trim() || !accessCode.trim()) {
+    throw new Error("Uzupełnij imię i kod dostępu.");
   }
-  await addUser({ name: name.trim(), email: email.trim(), accessCode: accessCode.trim(), role: "user" });
+  await addUser({ name: name.trim(), email: null, accessCode: accessCode.trim(), role: "user" });
   revalidatePath("/admin");
 }
 

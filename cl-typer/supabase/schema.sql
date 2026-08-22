@@ -4,11 +4,13 @@
 
 create extension if not exists pgcrypto;
 
--- Zaproszone osoby (dostęp na podstawie imienia/e-maila + kodu).
+-- Zaproszone osoby (dostęp na podstawie imienia + kodu; e-mail opcjonalny,
+-- nieużywany do logowania — zostawiony na wypadek, gdyby kiedyś przydał się
+-- do np. automatycznych powiadomień).
 create table if not exists users (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  email text not null unique,
+  email text unique,
   access_code text not null,
   role text not null default 'user' check (role in ('admin', 'user')),
   created_at timestamptz not null default now()

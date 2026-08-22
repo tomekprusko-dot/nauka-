@@ -26,7 +26,7 @@ export type UserRole = "admin" | "user";
 export interface InvitedUser {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   accessCode: string;
   role: UserRole;
 }

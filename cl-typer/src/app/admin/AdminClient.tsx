@@ -9,24 +9,22 @@ import { addUserAction, removeUserAction, setResultAction, setSpecialResultActio
 function UsersSection({ initialUsers }: { initialUsers: InvitedUser[] }) {
   const [users, setUsers] = useState(initialUsers);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [accessCode, setAccessCode] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
-    if (!name || !email || !accessCode) return;
+    if (!name || !accessCode) return;
     setError(null);
     setPending(true);
     try {
-      await addUserAction(name, email, accessCode);
+      await addUserAction(name, accessCode);
       setUsers((prev) => [
         ...prev,
-        { id: `pending-${Date.now()}`, name, email, accessCode, role: "user" },
+        { id: `pending-${Date.now()}`, name, email: null, accessCode, role: "user" },
       ]);
       setName("");
-      setEmail("");
       setAccessCode("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Nie udało się dodać osoby.");
@@ -60,9 +58,7 @@ function UsersSection({ initialUsers }: { initialUsers: InvitedUser[] }) {
               <p className="font-medium">
                 {u.name} {u.role === "admin" && <span className="text-xs text-amber-400">(admin)</span>}
               </p>
-              <p className="text-xs text-zinc-400">
-                {u.email} · kod: {u.accessCode}
-              </p>
+              <p className="text-xs text-zinc-400">kod: {u.accessCode}</p>
             </div>
             {u.role !== "admin" && (
               <button
@@ -82,12 +78,6 @@ function UsersSection({ initialUsers }: { initialUsers: InvitedUser[] }) {
           onChange={(e) => setName(e.target.value)}
           placeholder="Imię"
           className="min-w-[120px] flex-1 rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#3d5afe]"
-        />
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-mail"
-          className="min-w-[160px] flex-1 rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#3d5afe]"
         />
         <input
           value={accessCode}

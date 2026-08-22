@@ -31,7 +31,7 @@ export default function LoginForm() {
       >
         <div className="space-y-1">
           <label className="text-sm text-zinc-300" htmlFor="nameOrEmail">
-            Imię albo e-mail
+            Imię
           </label>
           <input
             id="nameOrEmail"

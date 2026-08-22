@@ -22,7 +22,7 @@ import {
 interface UserRow {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   access_code: string;
   role: UserRole;
 }
@@ -52,7 +52,9 @@ export async function findUserByCredentials(
   const users = await getUsers();
   return (
     users.find(
-      (u) => (u.name.toLowerCase() === needle || u.email.toLowerCase() === needle) && u.accessCode.toLowerCase() === code,
+      (u) =>
+        (u.name.toLowerCase() === needle || u.email?.toLowerCase() === needle) &&
+        u.accessCode.toLowerCase() === code,
     ) ?? null
   );
 }
