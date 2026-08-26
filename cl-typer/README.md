@@ -6,18 +6,25 @@ i można ją dodać do ekranu głównego jak natywną aplikację.
 
 ## Status projektu
 
-To jest **etap 1: sam frontend**. Logowanie, terminarz, typy i ranking
-działają, ale dane (osoby, typy, wyniki) są trzymane w `localStorage`
-przeglądarki (`src/lib/store.ts`) — to tymczasowa "baza" zastępująca prawdziwy
-backend, więc na razie działa lokalnie w jednej przeglądarce, a nie współdzielone
-między urządzeniami. **Etap 2** to podpięcie prawdziwego backendu (Supabase:
-autoryzacja + baza Postgres współdzielona między wszystkimi uczestnikami).
+**Etap 2: prawdziwy backend.** Logowanie, terminarz, typy, typy specjalne
+(mistrz ligi + król strzelców) i ranking działają na współdzielonej bazie
+danych (Supabase Postgres) — dane są wspólne dla wszystkich urządzeń, nie
+lokalne w przeglądarce. Sesja logowania to podpisane, bezpieczne ciasteczko;
+wszystkie zapisy przechodzą przez Server Actions z autoryzacją po stronie
+serwera (`src/app/*/actions.ts`, `src/lib/auth.ts`, `src/lib/db.ts`).
+
+Logowanie odbywa się przez imię + kod dostępu (bez adresu e-mail — pole
+`email` w bazie jest opcjonalne i nieużywane w UI).
 
 Terminarz w `src/data/fixtures.ts` i lista drużyn w `src/data/teams.ts` to
 **dane przykładowe** — prawdziwe pary meczów fazy ligowej LM 2026/27 poznamy
-po losowaniu 27 sierpnia 2026. Po losowaniu wystarczy podmienić te dwa pliki.
+po losowaniu 27 sierpnia 2026. Po losowaniu wystarczy podmienić te dwa pliki
+i wypchnąć zmianę — Vercel zbuduje nową wersję automatycznie.
 
 ## Uruchomienie lokalnie
+
+Skopiuj `.env.local.example` do `.env.local` i uzupełnij danymi swojego
+projektu Supabase (zobacz `supabase/schema.sql` po schemat bazy).
 
 ```bash
 npm install
@@ -26,7 +33,7 @@ npm run dev
 
 Otwórz [http://localhost:3000](http://localhost:3000).
 
-### Konta demo
+### Konta demo (z seeda w `supabase/schema.sql`)
 
 | Osoba | Kod dostępu | Rola |
 | --- | --- | --- |
@@ -34,11 +41,26 @@ Otwórz [http://localhost:3000](http://localhost:3000).
 | Kuba | KUBA123 | użytkownik |
 | Ola | OLA123 | użytkownik |
 
-Admin (`/admin`) może dodawać/usuwać zaproszone osoby oraz wpisywać wyniki
-meczów, na podstawie których liczony jest ranking (3 pkt za dokładny wynik,
-1 pkt za trafiony typ zwycięzcy/remisu).
+Admin (`/admin`) dodaje/usuwa zaproszone osoby (samo imię + kod dostępu,
+działa od razu na dowolnym urządzeniu) oraz wpisuje wyniki meczów i wyniki
+specjalne na koniec sezonu, na podstawie których liczony jest ranking
+(3 pkt za dokładny wynik, 1 pkt za trafiony typ zwycięzcy/remisu, +10 pkt za
+trafionego mistrza ligi, +10 pkt za trafionego króla strzelców).
+
+## Wdrożenie
+
+Aplikacja jest wdrożona na [Vercel](https://vercel.com). Root Directory
+projektu w ustawieniach Vercel musi być ustawiony na `cl-typer` (bo repo
+zawiera też inne, niepowiązane projekty). Wymagane zmienne środowiskowe
+(Project Settings → Environment Variables):
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SESSION_SECRET`
 
 ## Stack
 
-- [Next.js](https://nextjs.org) (App Router, TypeScript, Tailwind CSS)
-- Docelowo: [Supabase](https://supabase.com) (autoryzacja + baza danych)
+- [Next.js](https://nextjs.org) (App Router, TypeScript, Tailwind CSS,
+  Server Actions)
+- [Supabase](https://supabase.com) (Postgres, przez `service_role` klucz —
+  bez Supabase Auth, logowanie własne oparte o imię + kod dostępu)
