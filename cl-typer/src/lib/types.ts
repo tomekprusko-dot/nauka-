@@ -69,3 +69,16 @@ export interface SpecialResult {
   championTeamId: string | null;
   topScorer: string | null;
 }
+
+/** One team's row in the real Ekstraklasa league table (not the typers' ranking). */
+export interface LeagueTableRow {
+  teamId: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
+  points: number;
+}

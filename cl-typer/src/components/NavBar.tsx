@@ -8,6 +8,7 @@ import type { InvitedUser } from "@/lib/types";
 
 const links = [
   { href: "/terminarz", label: "Terminarz" },
+  { href: "/tabela-ligi", label: "Tabela ligi" },
   { href: "/typy-specjalne", label: "Specjalne" },
   { href: "/ranking", label: "Tabela typerów" },
   { href: "/regulamin", label: "Regulamin" },

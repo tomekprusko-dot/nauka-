@@ -1,10 +1,12 @@
 import "server-only";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { fixtures } from "@/data/fixtures";
+import { teams } from "@/data/teams";
 import { scorePrediction, POINTS_SPECIAL } from "@/lib/scoring";
 import {
   FixtureResult,
   InvitedUser,
+  LeagueTableRow,
   MatchOutcome,
   Prediction,
   SpecialPrediction,
@@ -313,4 +315,49 @@ export async function computeStandings(): Promise<StandingsRow[]> {
     rank: i + 1,
     previousRank: latestResolvedMatchday === null ? null : (previousRankByUserId.get(row.user.id) ?? null),
   }));
+}
+
+/** The real Ekstraklasa league table (team standings), computed from played fixtures. */
+export async function computeLeagueTable(): Promise<LeagueTableRow[]> {
+  const results = await getResults();
+
+  const table = new Map<string, LeagueTableRow>(
+    teams.map((team) => [
+      team.id,
+      { teamId: team.id, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0 },
+    ]),
+  );
+
+  for (const fixture of fixtures) {
+    const result = results[fixture.id];
+    const home = table.get(fixture.homeTeamId);
+    const away = table.get(fixture.awayTeamId);
+    if (!result || !home || !away) continue;
+
+    home.played += 1;
+    away.played += 1;
+    home.goalsFor += result.homeGoals;
+    home.goalsAgainst += result.awayGoals;
+    away.goalsFor += result.awayGoals;
+    away.goalsAgainst += result.homeGoals;
+
+    if (result.homeGoals > result.awayGoals) {
+      home.won += 1;
+      home.points += 3;
+      away.lost += 1;
+    } else if (result.homeGoals < result.awayGoals) {
+      away.won += 1;
+      away.points += 3;
+      home.lost += 1;
+    } else {
+      home.drawn += 1;
+      away.drawn += 1;
+      home.points += 1;
+      away.points += 1;
+    }
+  }
+
+  return [...table.values()]
+    .map((row) => ({ ...row, goalDiff: row.goalsFor - row.goalsAgainst }))
+    .sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
 }
