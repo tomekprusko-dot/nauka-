@@ -177,8 +177,13 @@ export default function TerminarzClient({
 
   useEffect(() => {
     const now = Date.now();
-    const upcoming = fixtures.find((f) => new Date(f.kickoff).getTime() > now);
-    setCurrentMatchday(upcoming ? upcoming.matchday : fixtures[fixtures.length - 1]?.matchday ?? null);
+    // Fixtures aren't guaranteed to be in chronological order (postponed
+    // matches keep their original matchday but move to a later date), so
+    // find the earliest future kickoff rather than the first array match.
+    const upcoming = fixtures
+      .filter((f) => new Date(f.kickoff).getTime() > now)
+      .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())[0];
+    setCurrentMatchday(upcoming ? upcoming.matchday : (fixtures[fixtures.length - 1]?.matchday ?? null));
   }, [fixtures]);
 
   function handleSaved(fixtureId: string, home: number, away: number) {
@@ -207,9 +212,8 @@ export default function TerminarzClient({
           zablokowany.
         </p>
         <p className="mt-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
-          18 drużyn to prawdziwa stawka sezonu 2026/27 — dokładne pary meczów i godziny
-          w kolejnych kolejkach są na razie przykładowe, do podmiany na pełny oficjalny
-          terminarz PZPN/Ekstraklasa.org.
+          Kolejki 1-5 to prawdziwe wyniki sezonu 2026/27. Kolejka 6 i kolejne są na razie
+          przykładowe, do podmiany na pełny oficjalny terminarz PZPN/Ekstraklasa.org.
         </p>
       </div>
 

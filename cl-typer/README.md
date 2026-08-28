@@ -17,12 +17,12 @@ Logowanie odbywa się przez imię + kod dostępu (bez adresu e-mail — pole
 `email` w bazie jest opcjonalne i nieużywane w UI).
 
 Lista drużyn w `src/data/teams.ts` to prawdziwa stawka 18 klubów sezonu
-2026/27. Terminarz w `src/data/fixtures.ts` (34 kolejki, 306 meczów) jest
-wygenerowany algorytmem systemu kołowego na bazie tej stawki — 1. kolejka w
-dużej mierze pokrywa się z oficjalnym terminarzem, kolejne kolejki i
-dokładne godziny są przykładowe. Podmień na pełny oficjalny terminarz
-PZPN/Ekstraklasa.org i wypchnij zmianę — Vercel zbuduje nową wersję
-automatycznie.
+2026/27. Terminarz w `src/data/fixtures.ts` (34 kolejki, 306 meczów) ma
+prawdziwe pary i wyniki dla kolejek 1-5 (sezon ruszył 24 lipca 2026,
+dane zebrane z publicznych wyników); kolejka 6 i kolejne są nadal
+wygenerowane algorytmem systemu kołowego jako przykładowe. Podmień je na
+pełny oficjalny terminarz PZPN/Ekstraklasa.org i wypchnij zmianę — Vercel
+zbuduje nową wersję automatycznie.
 
 ## Uruchomienie lokalnie
 
