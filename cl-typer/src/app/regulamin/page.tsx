@@ -110,9 +110,15 @@ export default async function RegulaminPage() {
 
       <Section number={7} icon="📋" title="Wyniki meczów">
         <p>
-          Oficjalne wyniki wpisuje administrator po zakończeniu meczu — na ich
-          podstawie automatycznie przeliczany jest ranking. W razie oczywistej
-          pomyłki w wyniku zgłoś to organizatorowi.
+          Wyniki pojawiają się w aplikacji automatycznie, zwykle w ciągu
+          15-30 minut od zakończenia meczu — system sam sprawdza w internecie,
+          czy mecz się skończył i jaki jest wynik, i na tej podstawie od razu
+          przelicza ranking oraz Tabelę ligi. To nie jest natychmiastowe
+          (zależy, jak szybko wynik pojawi się w serwisach sportowych), a dla
+          kolejek bardziej odległych w czasie wyniki mogą dochodzić wolniej,
+          przy cotygodniowym przeglądzie terminarza. W razie oczywistej
+          pomyłki w wyniku zgłoś to organizatorowi — administrator może
+          poprawić wynik ręcznie w panelu.
         </p>
       </Section>
     </div>
