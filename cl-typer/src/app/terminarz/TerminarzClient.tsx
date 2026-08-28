@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getTeam } from "@/data/teams";
-import { Fixture, Prediction } from "@/lib/types";
+import { Fixture, FixtureResult, Prediction } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
+import { scorePrediction } from "@/lib/scoring";
 import { savePredictionAction } from "./actions";
 
 function formatDate(iso: string) {
@@ -22,13 +23,30 @@ function formatTime(iso: string) {
   });
 }
 
+function PointsBadge({ prediction, result }: { prediction: Prediction; result: FixtureResult }) {
+  const score = scorePrediction(prediction, result);
+  const style =
+    score === 3
+      ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"
+      : score === 1
+        ? "border-sky-400/40 bg-sky-400/10 text-sky-300"
+        : "border-white/15 bg-white/5 text-zinc-400";
+  return (
+    <span className={`ml-2 rounded-full border px-2 py-0.5 text-xs font-bold ${style}`}>
+      {score > 0 ? `+${score} pkt` : "0 pkt"}
+    </span>
+  );
+}
+
 function FixtureRow({
   fixture,
   prediction,
+  result,
   onSaved,
 }: {
   fixture: Fixture;
   prediction: Prediction | undefined;
+  result: FixtureResult | undefined;
   onSaved: (fixtureId: string, home: number, away: number) => void;
 }) {
   const home = getTeam(fixture.homeTeamId);
@@ -122,6 +140,11 @@ function FixtureRow({
             >
               {saved ? "Zapisano ✓" : saving ? "Zapisywanie..." : "Zapisz"}
             </button>
+          ) : result ? (
+            <span className="ml-2 flex items-center rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300">
+              Wynik: <strong className="ml-1">{result.homeGoals}:{result.awayGoals}</strong>
+              {prediction && <PointsBadge prediction={prediction} result={result} />}
+            </span>
           ) : (
             <span className="ml-2 rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-400">
               🔒 Zablokowane
@@ -137,11 +160,26 @@ function FixtureRow({
 export default function TerminarzClient({
   fixtures,
   initialPredictions,
+  results,
+  myPoints,
+  myRank,
+  hotStreak,
 }: {
   fixtures: Fixture[];
   initialPredictions: Record<string, Prediction>;
+  results: Record<string, FixtureResult>;
+  myPoints: number;
+  myRank: number | null;
+  hotStreak: number;
 }) {
   const [predictions, setPredictions] = useState(initialPredictions);
+  const [currentMatchday, setCurrentMatchday] = useState<number | null>(null);
+
+  useEffect(() => {
+    const now = Date.now();
+    const upcoming = fixtures.find((f) => new Date(f.kickoff).getTime() > now);
+    setCurrentMatchday(upcoming ? upcoming.matchday : fixtures[fixtures.length - 1]?.matchday ?? null);
+  }, [fixtures]);
 
   function handleSaved(fixtureId: string, home: number, away: number) {
     setPredictions((prev) => ({
@@ -175,11 +213,41 @@ export default function TerminarzClient({
         </p>
       </div>
 
+      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-[#dc2626]/30 bg-[#dc2626]/10 px-4 py-3">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-zinc-400">🏟️ Twoja kolejka</p>
+          <p className="font-display text-2xl text-white">
+            {currentMatchday !== null ? `Kolejka ${currentMatchday}` : "…"}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-zinc-400">Twoje punkty</p>
+          <p className="font-display text-2xl text-white">{myPoints} pkt</p>
+        </div>
+        {myRank !== null && (
+          <div>
+            <p className="text-xs uppercase tracking-wide text-zinc-400">Tabela typerów</p>
+            <p className="font-display text-2xl text-white">#{myRank}</p>
+          </div>
+        )}
+        {hotStreak >= 3 && (
+          <div>
+            <p className="text-xs uppercase tracking-wide text-zinc-400">Seria</p>
+            <p className="font-display text-2xl text-white">🔥 {hotStreak}</p>
+          </div>
+        )}
+      </div>
+
       {byMatchday.map(([matchday, list]) => (
         <div key={matchday} className="space-y-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
-            <span aria-hidden>🏆</span>
+            <span aria-hidden>⚽</span>
             Kolejka {matchday}
+            {matchday === currentMatchday && (
+              <span className="rounded-full bg-[#dc2626]/20 px-2 py-0.5 text-[10px] font-bold text-[#dc2626]">
+                Twoja kolejka
+              </span>
+            )}
           </h2>
           <div className="space-y-2">
             {list.map((fixture) => (
@@ -187,6 +255,7 @@ export default function TerminarzClient({
                 key={fixture.id}
                 fixture={fixture}
                 prediction={predictions[fixture.id]}
+                result={results[fixture.id]}
                 onSaved={handleSaved}
               />
             ))}

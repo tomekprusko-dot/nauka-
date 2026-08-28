@@ -9,7 +9,7 @@ import type { InvitedUser } from "@/lib/types";
 const links = [
   { href: "/terminarz", label: "Terminarz" },
   { href: "/typy-specjalne", label: "Specjalne" },
-  { href: "/ranking", label: "Ranking" },
+  { href: "/ranking", label: "Tabela typerów" },
   { href: "/regulamin", label: "Regulamin" },
 ];
 

@@ -46,6 +46,13 @@ export interface StandingsRow {
   outcomeHits: number;
   predictionsMade: number;
   specialPoints: number;
+  rank: number;
+  /** Rank before the most recently resolved matchday, for an "Awans/Spadek o X pozycji" badge. Null until at least one matchday has results. */
+  previousRank: number | null;
+  /** Last up to 5 scored picks (0 | 1 | 3 points each), oldest to newest. */
+  form: number[];
+  /** Consecutive most-recent scoring (non-zero) picks, only set once it reaches 3+. */
+  hotStreak: number;
 }
 
 /** A user's one-off, pre-season picks: who wins it all and who's top scorer. */

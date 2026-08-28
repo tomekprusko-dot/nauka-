@@ -1,6 +1,7 @@
 import "server-only";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { scorePrediction, POINTS_SPECIAL } from "@/lib/scoring";
+import { fixtures } from "@/data/fixtures";
+import { scorePrediction, POINTS_EXACT, POINTS_OUTCOME, POINTS_SPECIAL } from "@/lib/scoring";
 import {
   FixtureResult,
   InvitedUser,
@@ -241,33 +242,82 @@ export async function computeStandings(): Promise<StandingsRow[]> {
     getSpecialResult(),
   ]);
 
-  return users
-    .map((user) => {
-      const userPredictions = allPredictions.filter((p) => p.userId === user.id);
-      let points = 0;
-      let exactHits = 0;
-      let outcomeHits = 0;
+  const fixtureById = new Map(fixtures.map((f) => [f.id, f]));
 
-      for (const prediction of userPredictions) {
-        const result = results[prediction.fixtureId];
-        if (!result) continue;
-        const score = scorePrediction(prediction, result);
-        points += score;
-        if (score === 3) exactHits += 1;
-        else if (score === 1) outcomeHits += 1;
-      }
+  // The most recently played matchday with at least one recorded result —
+  // used to compute each user's rank *before* that round, for an
+  // "Awans/Spadek o X pozycji" badge.
+  let latestResolvedMatchday: number | null = null;
+  for (const fixtureId of Object.keys(results)) {
+    const fixture = fixtureById.get(fixtureId);
+    if (fixture && (latestResolvedMatchday === null || fixture.matchday > latestResolvedMatchday)) {
+      latestResolvedMatchday = fixture.matchday;
+    }
+  }
 
-      const specialPoints = scoreSpecial(allSpecialPredictions[user.id] ?? null, specialResult);
-      points += specialPoints;
+  const base = users.map((user) => {
+    const userPredictions = allPredictions.filter((p) => p.userId === user.id);
+    const picks: { matchday: number; kickoff: string; score: number }[] = [];
+    let exactHits = 0;
+    let outcomeHits = 0;
+    let points = 0;
+    let previousPoints = 0;
 
-      return {
-        user,
-        points,
-        exactHits,
-        outcomeHits,
-        predictionsMade: userPredictions.length,
-        specialPoints,
-      };
-    })
-    .sort((a, b) => b.points - a.points || b.exactHits - a.exactHits);
+    for (const prediction of userPredictions) {
+      const result = results[prediction.fixtureId];
+      const fixture = fixtureById.get(prediction.fixtureId);
+      if (!result || !fixture) continue;
+
+      const score = scorePrediction(prediction, result);
+      points += score;
+      if (fixture.matchday !== latestResolvedMatchday) previousPoints += score;
+      if (score === POINTS_EXACT) exactHits += 1;
+      else if (score === POINTS_OUTCOME) outcomeHits += 1;
+      picks.push({ matchday: fixture.matchday, kickoff: fixture.kickoff, score });
+    }
+
+    picks.sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
+    const form = picks.slice(-5).map((p) => p.score);
+
+    let hotStreak = 0;
+    for (let i = picks.length - 1; i >= 0; i--) {
+      if (picks[i].score === 0) break;
+      hotStreak += 1;
+    }
+    if (hotStreak < 3) hotStreak = 0;
+
+    const specialPoints = scoreSpecial(allSpecialPredictions[user.id] ?? null, specialResult);
+    points += specialPoints;
+    previousPoints += specialPoints;
+
+    return {
+      user,
+      points,
+      previousPoints,
+      exactHits,
+      outcomeHits,
+      predictionsMade: userPredictions.length,
+      specialPoints,
+      form,
+      hotStreak,
+    };
+  });
+
+  const ranked = [...base].sort((a, b) => b.points - a.points || b.exactHits - a.exactHits);
+  const previousRanked = [...base].sort((a, b) => b.previousPoints - a.previousPoints);
+  const previousRankByUserId = new Map<string, number>();
+  previousRanked.forEach((row, i) => previousRankByUserId.set(row.user.id, i + 1));
+
+  return ranked.map((row, i) => ({
+    user: row.user,
+    points: row.points,
+    exactHits: row.exactHits,
+    outcomeHits: row.outcomeHits,
+    predictionsMade: row.predictionsMade,
+    specialPoints: row.specialPoints,
+    form: row.form,
+    hotStreak: row.hotStreak,
+    rank: i + 1,
+    previousRank: latestResolvedMatchday === null ? null : (previousRankByUserId.get(row.user.id) ?? null),
+  }));
 }
