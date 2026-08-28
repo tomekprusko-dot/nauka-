@@ -58,12 +58,14 @@ function OutcomePicker({
   homeName,
   awayName,
   value,
+  isSaved,
   disabled,
   onChange,
 }: {
   homeName: string;
   awayName: string;
   value: MatchOutcome | null;
+  isSaved: boolean;
   disabled: boolean;
   onChange: (outcome: MatchOutcome) => void;
 }) {
@@ -74,22 +76,26 @@ function OutcomePicker({
   ];
   return (
     <div className="flex items-center gap-1.5">
-      {options.map(({ outcome, title }) => (
-        <button
-          key={outcome}
-          type="button"
-          title={title}
-          disabled={disabled}
-          onClick={() => onChange(outcome)}
-          className={`h-9 w-9 rounded-lg border text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-            value === outcome
-              ? "border-[#dc2626] bg-[#dc2626]/20 text-white"
-              : "border-white/15 bg-black/30 text-zinc-300 hover:border-white/30"
-          }`}
-        >
-          {OUTCOME_LABEL[outcome]}
-        </button>
-      ))}
+      {options.map(({ outcome, title }) => {
+        const selected = value === outcome;
+        const style = !selected
+          ? "border-white/15 bg-black/30 text-zinc-300 hover:border-white/30"
+          : isSaved
+            ? "border-emerald-400 bg-emerald-400/20 text-white"
+            : "border-[#dc2626] bg-[#dc2626]/20 text-white";
+        return (
+          <button
+            key={outcome}
+            type="button"
+            title={title}
+            disabled={disabled}
+            onClick={() => onChange(outcome)}
+            className={`h-9 w-9 rounded-lg border text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${style}`}
+          >
+            {OUTCOME_LABEL[outcome]}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -109,7 +115,6 @@ function FixtureRow({
   const away = getTeam(fixture.awayTeamId);
 
   const [outcome, setOutcome] = useState<MatchOutcome | null>(prediction?.outcome ?? null);
-  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
@@ -122,6 +127,12 @@ function FixtureRow({
     setLocked(new Date(fixture.kickoff).getTime() <= Date.now());
   }, [fixture.kickoff]);
 
+  // Green "Zapisano" only while the selected pick matches what's actually
+  // saved — picking something else immediately reverts to needing a
+  // fresh confirm, so it's always obvious whether the current choice is
+  // actually locked in yet.
+  const isSaved = outcome !== null && outcome === (prediction?.outcome ?? null);
+
   async function handleSave() {
     if (!outcome) return;
     setError(null);
@@ -129,8 +140,6 @@ function FixtureRow({
     try {
       await savePredictionAction(fixture.id, outcome);
       onSaved(fixture.id, outcome);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1200);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Nie udało się zapisać typu.");
     } finally {
@@ -173,15 +182,20 @@ function FixtureRow({
                 homeName={home?.shortName ?? fixture.homeTeamId}
                 awayName={away?.shortName ?? fixture.awayTeamId}
                 value={outcome}
+                isSaved={isSaved}
                 disabled={saving}
                 onChange={setOutcome}
               />
               <button
                 onClick={handleSave}
-                disabled={saving || !outcome}
-                className="ml-1 rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={saving || !outcome || isSaved}
+                className={`ml-1 rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed ${
+                  isSaved
+                    ? "bg-emerald-500 disabled:opacity-100"
+                    : "bg-gradient-to-b from-[#f87171] to-[#991b1b] disabled:opacity-60"
+                }`}
               >
-                {saved ? "Zapisano ✓" : saving ? "Zapisywanie..." : "Zapisz"}
+                {isSaved ? "Zapisano ✓" : saving ? "Zapisywanie..." : "Zapisz"}
               </button>
             </>
           ) : result ? (
