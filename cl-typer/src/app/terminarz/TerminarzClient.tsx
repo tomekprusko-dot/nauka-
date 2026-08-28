@@ -23,6 +23,22 @@ function formatTime(iso: string) {
   });
 }
 
+function formatMatchdayRange(list: Fixture[]): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const dates = list.map((f) => new Date(f.kickoff));
+  const min = new Date(Math.min(...dates.map((d) => d.getTime())));
+  const max = new Date(Math.max(...dates.map((d) => d.getTime())));
+  const minDay = pad(min.getDate());
+  const maxDay = pad(max.getDate());
+  const minMonth = pad(min.getMonth() + 1);
+  const maxMonth = pad(max.getMonth() + 1);
+  const year = max.getFullYear();
+
+  if (minDay === maxDay && minMonth === maxMonth) return `${minDay}.${minMonth}.${year}`;
+  if (minMonth === maxMonth) return `${minDay}-${maxDay}.${minMonth}.${year}`;
+  return `${minDay}.${minMonth}-${maxDay}.${maxMonth}.${year}`;
+}
+
 function PointsBadge({ prediction, result }: { prediction: Prediction; result: FixtureResult }) {
   const score = scorePrediction(prediction, result);
   const style =
@@ -231,6 +247,8 @@ export default function TerminarzClient({
     return [...map.entries()].sort((a, b) => a[0] - b[0]);
   }, [fixtures]);
 
+  const currentMatchdayFixtures = byMatchday.find(([md]) => md === currentMatchday)?.[1];
+
   return (
     <div className="space-y-8">
       <div>
@@ -249,10 +267,13 @@ export default function TerminarzClient({
 
       <div className="flex flex-wrap items-center gap-4 rounded-xl border border-[#dc2626]/30 bg-[#dc2626]/10 px-4 py-3">
         <div>
-          <p className="text-xs uppercase tracking-wide text-zinc-400">🏟️ Twoja kolejka</p>
+          <p className="text-xs uppercase tracking-wide text-zinc-400">🏟️ Aktualna kolejka</p>
           <p className="font-display text-2xl text-white">
             {currentMatchday !== null ? `Kolejka ${currentMatchday}` : "…"}
           </p>
+          {currentMatchdayFixtures && (
+            <p className="text-xs text-zinc-400">{formatMatchdayRange(currentMatchdayFixtures)}</p>
+          )}
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-zinc-400">Twoje punkty</p>
@@ -277,9 +298,10 @@ export default function TerminarzClient({
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
             <span aria-hidden>⚽</span>
             Kolejka {matchday}
+            <span className="font-normal normal-case text-zinc-500">{formatMatchdayRange(list)}</span>
             {matchday === currentMatchday && (
               <span className="rounded-full bg-[#dc2626]/20 px-2 py-0.5 text-[10px] font-bold text-[#dc2626]">
-                Twoja kolejka
+                Aktualna kolejka
               </span>
             )}
           </h2>
