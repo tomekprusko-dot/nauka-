@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getTeam } from "@/data/teams";
 import { Fixture, FixtureResult, MatchOutcome, Prediction } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
@@ -251,6 +251,7 @@ export default function TerminarzClient({
 }) {
   const [predictions, setPredictions] = useState(initialPredictions);
   const [currentMatchday, setCurrentMatchday] = useState<number | null>(null);
+  const hasScrolledToCurrent = useRef(false);
 
   useEffect(() => {
     const now = Date.now();
@@ -264,6 +265,15 @@ export default function TerminarzClient({
       .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())[0];
     setCurrentMatchday(upcoming ? upcoming.matchday : (fixtures[fixtures.length - 1]?.matchday ?? null));
   }, [fixtures]);
+
+  // Jump straight to the current, typeable matchday on load instead of
+  // making everyone scroll past six closed rounds first — only once, so
+  // it doesn't fight the user's own scrolling afterwards.
+  useEffect(() => {
+    if (currentMatchday === null || hasScrolledToCurrent.current) return;
+    hasScrolledToCurrent.current = true;
+    document.getElementById(`kolejka-${currentMatchday}`)?.scrollIntoView({ block: "start" });
+  }, [currentMatchday]);
 
   function handleSaved(fixtureId: string, outcome: MatchOutcome) {
     setPredictions((prev) => ({
@@ -337,7 +347,13 @@ export default function TerminarzClient({
       </div>
 
       {byMatchday.map(([matchday, list]) => (
-        <div key={matchday} className="space-y-3">
+        <div
+          key={matchday}
+          id={`kolejka-${matchday}`}
+          className={`scroll-mt-24 space-y-3 ${
+            matchday < TYPING_OPENS_FROM_MATCHDAY ? "opacity-50 grayscale-[0.6]" : ""
+          }`}
+        >
           <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
             <span aria-hidden>⚽</span>
             Kolejka {matchday}
