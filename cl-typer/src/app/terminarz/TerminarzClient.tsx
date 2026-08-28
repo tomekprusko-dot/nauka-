@@ -370,7 +370,7 @@ export default function TerminarzClient({
             Kolejka {matchday}
             <span className="font-normal normal-case text-zinc-500">{formatMatchdayRange(list)}</span>
             {matchday === currentMatchday && (
-              <span className="rounded-full bg-[#dc2626]/20 px-2 py-0.5 text-[10px] font-bold text-[#dc2626]">
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
                 Aktualna kolejka
               </span>
             )}
