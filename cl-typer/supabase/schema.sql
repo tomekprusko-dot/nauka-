@@ -71,12 +71,10 @@ create table if not exists special_result (
 );
 insert into special_result (id) values (1) on conflict (id) do nothing;
 
--- Startowe konta (dopasowane do dotychczasowych kont demo).
--- Zmień kody dostępu / e-maile na docelowe przed zaproszeniem prawdziwych osób.
+-- Konto administratora. Pozostałych graczy dodaje się przez panel /admin
+-- (samo imię + kod dostępu) albo bezpośrednio w tabeli `users`.
 insert into users (name, email, access_code, role) values
-  ('Tomek', 'tomekprusko@gmail.com', 'ADMIN2026', 'admin'),
-  ('Kuba', 'kuba@example.com', 'KUBA123', 'user'),
-  ('Ola', 'ola@example.com', 'OLA123', 'user')
+  ('Tomek', 'tomekprusko@gmail.com', 'ADMIN2026', 'admin')
 on conflict (email) do nothing;
 
 -- RLS włączone, bez żadnych policy — to celowe: jedyny klucz, który może

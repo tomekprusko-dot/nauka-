@@ -37,7 +37,7 @@ export default function LoginForm() {
             id="nameOrEmail"
             name="nameOrEmail"
             className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-[#dc2626]"
-            placeholder="np. Kuba"
+            placeholder="Twoje imię"
             autoComplete="username"
             required
           />
@@ -66,13 +66,6 @@ export default function LoginForm() {
           {pending ? "Logowanie..." : "Wejdź na boisko ⚽"}
         </button>
       </form>
-
-      <div className="max-w-sm rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-zinc-400">
-        <p className="mb-1 font-medium text-zinc-300">Konta demo (na czas testów):</p>
-        <p>Kuba / kod: KUBA123</p>
-        <p>Ola / kod: OLA123</p>
-        <p>Tomek (admin) / kod: ADMIN2026</p>
-      </div>
     </div>
   );
 }

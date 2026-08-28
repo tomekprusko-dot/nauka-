@@ -37,13 +37,8 @@ npm run dev
 
 Otwórz [http://localhost:3000](http://localhost:3000).
 
-### Konta demo (z seeda w `supabase/schema.sql`)
-
-| Osoba | Kod dostępu | Rola |
-| --- | --- | --- |
-| Tomek | ADMIN2026 | admin |
-| Kuba | KUBA123 | użytkownik |
-| Ola | OLA123 | użytkownik |
+`supabase/schema.sql` zakłada jedno konto administratora (Tomek). Pozostałych
+graczy dodaje się przez panel `/admin` (samo imię + kod dostępu).
 
 Typerzy wybierają tylko zwycięzcę albo remis (1/X/2), bez dokładnego wyniku
 bramkowego. Admin (`/admin`) dodaje/usuwa zaproszone osoby (samo imię + kod
