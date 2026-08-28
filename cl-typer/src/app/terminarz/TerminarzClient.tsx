@@ -5,7 +5,7 @@ import { getTeam } from "@/data/teams";
 import { Fixture, FixtureResult, MatchOutcome, Prediction } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
 import { scorePrediction } from "@/lib/scoring";
-import { savePredictionAction } from "./actions";
+import { savePredictionAction, deletePredictionAction } from "./actions";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pl-PL", {
@@ -105,11 +105,13 @@ function FixtureRow({
   prediction,
   result,
   onSaved,
+  onReset,
 }: {
   fixture: Fixture;
   prediction: Prediction | undefined;
   result: FixtureResult | undefined;
   onSaved: (fixtureId: string, outcome: MatchOutcome) => void;
+  onReset: (fixtureId: string) => void;
 }) {
   const home = getTeam(fixture.homeTeamId);
   const away = getTeam(fixture.awayTeamId);
@@ -142,6 +144,20 @@ function FixtureRow({
       onSaved(fixture.id, outcome);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Nie udało się zapisać typu.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleReset() {
+    setError(null);
+    setSaving(true);
+    try {
+      await deletePredictionAction(fixture.id);
+      setOutcome(null);
+      onReset(fixture.id);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Nie udało się skasować typu.");
     } finally {
       setSaving(false);
     }
@@ -187,15 +203,16 @@ function FixtureRow({
                 onChange={setOutcome}
               />
               <button
-                onClick={handleSave}
-                disabled={saving || !outcome || isSaved}
+                onClick={isSaved ? handleReset : handleSave}
+                disabled={saving || (!outcome && !isSaved)}
+                title={isSaved ? "Kliknij, żeby skasować typ" : undefined}
                 className={`ml-1 rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed ${
                   isSaved
-                    ? "bg-emerald-500 disabled:opacity-100"
+                    ? "bg-emerald-500 disabled:opacity-60"
                     : "bg-gradient-to-b from-[#f87171] to-[#991b1b] disabled:opacity-60"
                 }`}
               >
-                {isSaved ? "Zapisano ✓" : saving ? "Zapisywanie..." : "Zapisz"}
+                {saving ? (isSaved ? "Kasowanie..." : "Zapisywanie...") : isSaved ? "Zapisano ✓" : "Zapisz"}
               </button>
             </>
           ) : result ? (
@@ -249,6 +266,14 @@ export default function TerminarzClient({
       ...prev,
       [fixtureId]: { userId: "", fixtureId, outcome, savedAt: new Date().toISOString() },
     }));
+  }
+
+  function handleReset(fixtureId: string) {
+    setPredictions((prev) => {
+      const next = { ...prev };
+      delete next[fixtureId];
+      return next;
+    });
   }
 
   const byMatchday = useMemo(() => {
@@ -327,6 +352,7 @@ export default function TerminarzClient({
                 prediction={predictions[fixture.id]}
                 result={results[fixture.id]}
                 onSaved={handleSaved}
+                onReset={handleReset}
               />
             ))}
           </div>

@@ -152,6 +152,15 @@ export async function savePrediction(
   if (error) throw error;
 }
 
+export async function deletePrediction(userId: string, fixtureId: string): Promise<void> {
+  const { error } = await supabaseServer()
+    .from("predictions")
+    .delete()
+    .eq("user_id", userId)
+    .eq("fixture_id", fixtureId);
+  if (error) throw error;
+}
+
 interface SpecialPredictionRow {
   user_id: string;
   champion_team_id: string | null;
