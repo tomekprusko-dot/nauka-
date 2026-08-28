@@ -344,6 +344,17 @@ export default function TerminarzClient({
             <p className="font-display text-2xl text-white">🔥 {hotStreak}</p>
           </div>
         )}
+        {currentMatchday !== null && (
+          <button
+            type="button"
+            onClick={() =>
+              document.getElementById(`kolejka-${currentMatchday}`)?.scrollIntoView({ block: "start" })
+            }
+            className="ml-auto rounded-lg bg-emerald-500 px-3 py-2 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95"
+          >
+            ⬇️ Przejdź do aktualnej kolejki
+          </button>
+        )}
       </div>
 
       {byMatchday.map(([matchday, list]) => (
