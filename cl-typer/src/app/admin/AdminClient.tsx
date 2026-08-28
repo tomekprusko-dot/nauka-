@@ -145,7 +145,7 @@ function ResultRow({
           onChange={(e) => setHomeGoals(e.target.value)}
           type="number"
           min={0}
-          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#f4c542]"
+          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#dc2626]"
         />
         <span className="text-zinc-500">:</span>
         <input
@@ -153,12 +153,12 @@ function ResultRow({
           onChange={(e) => setAwayGoals(e.target.value)}
           type="number"
           min={0}
-          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#f4c542]"
+          className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm outline-none focus:border-[#dc2626]"
         />
         <button
           onClick={handleSave}
           disabled={pending}
-          className="rounded-lg bg-gradient-to-b from-[#ffe27a] to-[#c9922a] px-3 py-1.5 text-xs font-bold text-[#1b1200] transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+          className="rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
         >
           {pending ? "Zapisywanie..." : "Zapisz"}
         </button>
@@ -244,11 +244,11 @@ function SpecialResultSection({ initialResult }: { initialResult: SpecialResult 
         className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-3 sm:flex-row sm:items-end"
       >
         <div className="flex-1 space-y-1">
-          <label className="text-xs text-zinc-400">🏆 Zwycięzca Ligi Mistrzów</label>
+          <label className="text-xs text-zinc-400">🏆 Mistrz Polski</label>
           <select
             value={championTeamId}
             onChange={(e) => setChampionTeamId(e.target.value)}
-            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#f4c542]"
+            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#dc2626]"
           >
             <option value="">— nie ustawiono —</option>
             {teams.map((t) => (
@@ -264,13 +264,13 @@ function SpecialResultSection({ initialResult }: { initialResult: SpecialResult 
             value={topScorer}
             onChange={(e) => setTopScorer(e.target.value)}
             placeholder="np. Kylian Mbappé"
-            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#f4c542]"
+            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#dc2626]"
           />
         </div>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-gradient-to-b from-[#ffe27a] to-[#c9922a] px-4 py-1.5 text-sm font-bold text-[#1b1200] transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+          className="rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-4 py-1.5 text-sm font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
         >
           {pending ? "Zapisywanie..." : justSaved ? "Zapisano ✓" : "Zapisz"}
         </button>

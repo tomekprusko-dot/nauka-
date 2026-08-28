@@ -19,12 +19,12 @@ export default function NavBar({ user }: { user: InvitedUser | null }) {
   if (!user) return null;
 
   return (
-    <header className="sticky top-0 z-10 border-b border-[#f4c542]/25 bg-[#0b1330]/95 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-[#dc2626]/25 bg-[#0b1330]/95 backdrop-blur">
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
         <Link href="/terminarz" className="flex items-center gap-2 font-semibold text-white">
           <Trophy className="h-6 w-6" />
           <span className="font-display hidden text-lg tracking-wide sm:inline">
-            Typer LM 2026/27
+            Typer Ekstraklasy 2026/27
           </span>
         </Link>
         <nav className="flex flex-wrap items-center gap-1 text-sm">

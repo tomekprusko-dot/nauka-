@@ -71,7 +71,7 @@ function FixtureRow({
   return (
     <div
       className={`flex flex-col gap-3 rounded-xl border bg-white/5 p-4 transition-colors sm:flex-row sm:items-center sm:justify-between ${
-        hasPrediction ? "border-[#f4c542]/30" : "border-white/10"
+        hasPrediction ? "border-[#dc2626]/30" : "border-white/10"
       }`}
     >
       <div className="flex flex-1 items-center gap-2">
@@ -92,7 +92,7 @@ function FixtureRow({
           <span className="capitalize text-zinc-200">{formatDate(fixture.kickoff)}</span>
           <span className="text-zinc-500">•</span>
           <span aria-hidden>🕐</span>
-          <span className="font-semibold text-[#f4c542]">{formatTime(fixture.kickoff)}</span>
+          <span className="font-semibold text-[#dc2626]">{formatTime(fixture.kickoff)}</span>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -102,7 +102,7 @@ function FixtureRow({
             disabled={locked || saving}
             value={homeGoals}
             onChange={(e) => setHomeGoals(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-center text-sm outline-none focus:border-[#f4c542] disabled:opacity-40"
+            className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-center text-sm outline-none focus:border-[#dc2626] disabled:opacity-40"
           />
           <span className="text-zinc-500">:</span>
           <input
@@ -112,13 +112,13 @@ function FixtureRow({
             disabled={locked || saving}
             value={awayGoals}
             onChange={(e) => setAwayGoals(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-center text-sm outline-none focus:border-[#f4c542] disabled:opacity-40"
+            className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-center text-sm outline-none focus:border-[#dc2626] disabled:opacity-40"
           />
           {!locked ? (
             <button
               onClick={handleSave}
               disabled={saving}
-              className="ml-2 rounded-lg bg-gradient-to-b from-[#ffe27a] to-[#c9922a] px-3 py-1.5 text-xs font-bold text-[#1b1200] transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+              className="ml-2 rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
             >
               {saved ? "Zapisano ✓" : saving ? "Zapisywanie..." : "Zapisz"}
             </button>
@@ -169,8 +169,9 @@ export default function TerminarzClient({
           zablokowany.
         </p>
         <p className="mt-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
-          Terminarz poniżej to dane przykładowe — prawdziwe pary meczów fazy ligowej LM
-          2026/27 poznamy po losowaniu 27 sierpnia 2026.
+          18 drużyn to prawdziwa stawka sezonu 2026/27 — dokładne pary meczów i godziny
+          w kolejnych kolejkach są na razie przykładowe, do podmiany na pełny oficjalny
+          terminarz PZPN/Ekstraklasa.org.
         </p>
       </div>
 

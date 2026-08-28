@@ -2,7 +2,7 @@ export interface Team {
   id: string;
   name: string;
   shortName: string;
-  country: string;
+  city: string;
   /** Approximate kit colors, used for the little badge next to the team name. */
   colors: { bg: string; fg: string };
 }

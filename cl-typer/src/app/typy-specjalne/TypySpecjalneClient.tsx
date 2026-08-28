@@ -69,7 +69,7 @@ export default function TypySpecjalneClient({
         </p>
         <p className="mt-2 flex items-center gap-1.5 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
           <span aria-hidden>🔒</span>
-          Typy można zmieniać do rozpoczęcia pierwszego meczu fazy ligowej —{" "}
+          Typy można zmieniać do rozpoczęcia pierwszego meczu sezonu —{" "}
           <span className="capitalize">{formatDeadline(tournamentStart)}</span>. Potem są
           zablokowane do końca sezonu.
         </p>
@@ -78,8 +78,8 @@ export default function TypySpecjalneClient({
       <div className="rounded-xl border border-white/10 bg-white/5 p-4">
         <h2 className="flex items-center gap-2 font-semibold text-white">
           <span aria-hidden>🏆</span>
-          Zwycięzca Ligi Mistrzów
-          <span className="ml-auto rounded-full bg-[#f4c542]/15 px-2 py-0.5 text-xs font-bold text-[#f4c542]">
+          Mistrz Polski
+          <span className="ml-auto rounded-full bg-[#dc2626]/15 px-2 py-0.5 text-xs font-bold text-[#dc2626]">
             +{POINTS_SPECIAL} pkt
           </span>
         </h2>
@@ -96,7 +96,7 @@ export default function TypySpecjalneClient({
                 onClick={() => setChampionTeamId(team.id)}
                 className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   selected
-                    ? "border-[#f4c542] bg-[#f4c542]/10"
+                    ? "border-[#dc2626] bg-[#dc2626]/10"
                     : "border-white/10 bg-black/20 hover:border-white/25"
                 }`}
               >
@@ -119,7 +119,7 @@ export default function TypySpecjalneClient({
         <h2 className="flex items-center gap-2 font-semibold text-white">
           <span aria-hidden>👑</span>
           Król strzelców rozgrywek
-          <span className="ml-auto rounded-full bg-[#f4c542]/15 px-2 py-0.5 text-xs font-bold text-[#f4c542]">
+          <span className="ml-auto rounded-full bg-[#dc2626]/15 px-2 py-0.5 text-xs font-bold text-[#dc2626]">
             +{POINTS_SPECIAL} pkt
           </span>
         </h2>
@@ -130,7 +130,7 @@ export default function TypySpecjalneClient({
           onChange={(e) => setTopScorer(e.target.value)}
           disabled={locked || saving}
           placeholder="np. Kylian Mbappé"
-          className="mt-3 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-[#f4c542] disabled:opacity-50"
+          className="mt-3 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-[#dc2626] disabled:opacity-50"
         />
 
         {topScorerResolved && saved && (
@@ -147,7 +147,7 @@ export default function TypySpecjalneClient({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full rounded-lg bg-gradient-to-b from-[#ffe27a] to-[#c9922a] px-4 py-2.5 text-sm font-bold text-[#1b1200] transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 sm:w-auto"
+          className="w-full rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-4 py-2.5 text-sm font-bold text-white transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 sm:w-auto"
         >
           {saving ? "Zapisywanie..." : justSaved ? "Zapisano ✓" : "Zapisz typy specjalne"}
         </button>

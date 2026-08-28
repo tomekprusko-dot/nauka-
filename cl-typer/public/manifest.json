@@ -1,7 +1,7 @@
 {
-  "name": "Typer Ligi Mistrzów 2026/27",
-  "short_name": "Typer LM",
-  "description": "Typuj wyniki meczy fazy ligowej Ligi Mistrzów UEFA 2026/27 ze znajomymi.",
+  "name": "Typer Ekstraklasy 2026/27",
+  "short_name": "Typer Ekstraklasy",
+  "description": "Typuj wyniki meczy PKO BP Ekstraklasy 2026/27 ze znajomymi.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#070c1f",

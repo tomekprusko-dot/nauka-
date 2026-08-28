@@ -14,7 +14,7 @@ export default function LoginForm() {
       <div className="flex flex-col items-center text-center">
         <Trophy className="trophy-glow h-24 w-24" />
         <h1 className="font-display gold-text mt-3 text-5xl leading-none">
-          Typer Ligi Mistrzów
+          Typer Ekstraklasy
         </h1>
         <p className="font-display mt-1 text-xl tracking-widest text-zinc-300">
           SEZON 2026 / 27
@@ -27,7 +27,7 @@ export default function LoginForm() {
 
       <form
         action={formAction}
-        className="w-full max-w-sm space-y-4 rounded-2xl border border-[#f4c542]/20 bg-white/5 p-6 shadow-[0_0_40px_-15px_rgba(244,197,66,0.35)]"
+        className="w-full max-w-sm space-y-4 rounded-2xl border border-[#dc2626]/20 bg-white/5 p-6 shadow-[0_0_40px_-15px_rgba(220,38,38,0.35)]"
       >
         <div className="space-y-1">
           <label className="text-sm text-zinc-300" htmlFor="nameOrEmail">
@@ -36,7 +36,7 @@ export default function LoginForm() {
           <input
             id="nameOrEmail"
             name="nameOrEmail"
-            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-[#f4c542]"
+            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-[#dc2626]"
             placeholder="np. Kuba"
             autoComplete="username"
             required
@@ -49,7 +49,7 @@ export default function LoginForm() {
           <input
             id="accessCode"
             name="accessCode"
-            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-[#f4c542]"
+            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-[#dc2626]"
             placeholder="kod otrzymany od organizatora"
             autoComplete="current-password"
             required
@@ -61,7 +61,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-lg bg-gradient-to-b from-[#ffe27a] to-[#c9922a] px-4 py-2 text-sm font-bold text-[#1b1200] transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+          className="w-full rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-4 py-2 text-sm font-bold text-white transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
         >
           {pending ? "Logowanie..." : "Wejdź na boisko ⚽"}
         </button>

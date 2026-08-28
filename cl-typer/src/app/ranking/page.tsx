@@ -38,7 +38,7 @@ export default async function RankingPage() {
                 <tr
                   key={row.user.id}
                   className={`border-t border-white/10 ${
-                    medal === "🥇" ? "bg-[#f4c542]/10" : ""
+                    medal === "🥇" ? "bg-[#dc2626]/10" : ""
                   }`}
                 >
                   <td className="px-4 py-3 text-zinc-400">
@@ -47,7 +47,7 @@ export default async function RankingPage() {
                   <td className="px-4 py-3 font-medium">
                     {row.user.name}
                     {medal === "🥇" && (
-                      <span className="ml-2 text-xs font-normal text-[#f4c542]">
+                      <span className="ml-2 text-xs font-normal text-[#dc2626]">
                         Największy Ekspert
                       </span>
                     )}

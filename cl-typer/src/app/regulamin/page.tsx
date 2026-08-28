@@ -14,7 +14,7 @@ function Section({
   return (
     <section className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-4">
       <h2 className="flex items-center gap-2 font-semibold text-white">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#ffe27a] to-[#c9922a] text-xs font-bold text-[#1b1200]">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#f87171] to-[#991b1b] text-xs font-bold text-white">
           {number}
         </span>
         <span aria-hidden>{icon}</span>
@@ -33,14 +33,14 @@ export default async function RegulaminPage() {
       <div>
         <h1 className="font-display gold-text text-3xl">Regulamin typowania</h1>
         <p className="mt-1 text-sm text-zinc-400">
-          Zasady typowania wyników meczy fazy ligowej Ligi Mistrzów UEFA 2026/27.
+          Zasady typowania wyników meczy sezonu PKO BP Ekstraklasa 2026/27.
         </p>
       </div>
 
       <Section number={1} icon="🎟️" title="Kto może grać">
         <p>
           W typowaniu bierze udział wyłącznie osoby zaproszone przez organizatora
-          (dostęp na podstawie imienia/e-maila i indywidualnego kodu dostępu).
+          (dostęp na podstawie imienia i indywidualnego kodu dostępu).
         </p>
       </Section>
 
@@ -84,12 +84,12 @@ export default async function RegulaminPage() {
 
       <Section number={5} icon="👑" title="Typy specjalne">
         <p>
-          Przed rozpoczęciem rozgrywek (do pierwszego meczu fazy ligowej) każdy typuje
+          Przed rozpoczęciem rozgrywek (do pierwszego meczu sezonu) każdy typuje
           dodatkowo, jednorazowo na cały sezon:
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <strong>Zwycięzcę całej Ligi Mistrzów</strong> — trafiony typ to{" "}
+            <strong>Mistrza Polski</strong> — trafiony typ to{" "}
             <strong>+10 punktów</strong>.
           </li>
           <li>
@@ -106,7 +106,7 @@ export default async function RegulaminPage() {
 
       <Section number={6} icon="📊" title="Ranking">
         <p>
-          Ranking to suma punktów ze wszystkich rozegranych meczów fazy ligowej oraz
+          Ranking to suma punktów ze wszystkich rozegranych meczów sezonu oraz
           typów specjalnych. Przy równej liczbie punktów wyżej w tabeli plasuje się
           osoba z większą liczbą trafionych dokładnych wyników (3-punktowych typów).
         </p>

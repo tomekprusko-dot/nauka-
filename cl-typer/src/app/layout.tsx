@@ -21,13 +21,13 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "Typer Ligi Mistrzów 2026/27",
-  description: "Typuj wyniki meczy fazy ligowej Ligi Mistrzów UEFA 2026/27 ze znajomymi.",
+  title: "Typer Ekstraklasy 2026/27",
+  description: "Typuj wyniki meczy PKO BP Ekstraklasy 2026/27 ze znajomymi.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Typer LM",
+    title: "Typer Ekstraklasy",
   },
   icons: {
     icon: [
