@@ -56,18 +56,16 @@ export interface StandingsRow {
   hotStreak: number;
 }
 
-/** A user's one-off, pre-season picks: who wins it all and who's top scorer. */
+/** A user's one-off, pre-season pick: who wins it all. */
 export interface SpecialPrediction {
   userId: string;
   championTeamId: string | null;
-  topScorer: string | null;
   savedAt: string;
 }
 
-/** The real outcome, set by the admin once known — used to score special picks. */
+/** The real outcome, set by the admin once known — used to score the special pick. */
 export interface SpecialResult {
   championTeamId: string | null;
-  topScorer: string | null;
 }
 
 /** One team's row in the real Ekstraklasa league table (not the typers' ranking). */

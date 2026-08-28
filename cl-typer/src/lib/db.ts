@@ -155,7 +155,6 @@ export async function savePrediction(
 interface SpecialPredictionRow {
   user_id: string;
   champion_team_id: string | null;
-  top_scorer: string | null;
   saved_at: string;
 }
 
@@ -163,7 +162,6 @@ function rowToSpecialPrediction(row: SpecialPredictionRow): SpecialPrediction {
   return {
     userId: row.user_id,
     championTeamId: row.champion_team_id,
-    topScorer: row.top_scorer,
     savedAt: row.saved_at,
   };
 }
@@ -186,15 +184,11 @@ export async function getUserSpecialPrediction(userId: string): Promise<SpecialP
   return data ? rowToSpecialPrediction(data as SpecialPredictionRow) : null;
 }
 
-export async function saveSpecialPrediction(
-  userId: string,
-  championTeamId: string | null,
-  topScorer: string | null,
-): Promise<void> {
+export async function saveSpecialPrediction(userId: string, championTeamId: string | null): Promise<void> {
   const { error } = await supabaseServer()
     .from("special_predictions")
     .upsert(
-      { user_id: userId, champion_team_id: championTeamId, top_scorer: topScorer, saved_at: new Date().toISOString() },
+      { user_id: userId, champion_team_id: championTeamId, saved_at: new Date().toISOString() },
       { onConflict: "user_id" },
     );
   if (error) throw error;
@@ -205,31 +199,20 @@ export async function getSpecialResult(): Promise<SpecialResult> {
   if (error) throw error;
   return {
     championTeamId: (data?.champion_team_id as string | null | undefined) ?? null,
-    topScorer: (data?.top_scorer as string | null | undefined) ?? null,
   };
 }
 
-export async function setSpecialResult(championTeamId: string | null, topScorer: string | null): Promise<void> {
-  const { error } = await supabaseServer()
-    .from("special_result")
-    .upsert({ id: 1, champion_team_id: championTeamId, top_scorer: topScorer });
+export async function setSpecialResult(championTeamId: string | null): Promise<void> {
+  const { error } = await supabaseServer().from("special_result").upsert({ id: 1, champion_team_id: championTeamId });
   if (error) throw error;
 }
 
 function scoreSpecial(prediction: SpecialPrediction | null, result: SpecialResult): number {
   if (!prediction) return 0;
-  let points = 0;
   if (result.championTeamId && prediction.championTeamId === result.championTeamId) {
-    points += POINTS_SPECIAL;
+    return POINTS_SPECIAL;
   }
-  if (
-    result.topScorer &&
-    prediction.topScorer &&
-    prediction.topScorer.trim().toLowerCase() === result.topScorer.trim().toLowerCase()
-  ) {
-    points += POINTS_SPECIAL;
-  }
-  return points;
+  return 0;
 }
 
 export async function computeStandings(): Promise<StandingsRow[]> {

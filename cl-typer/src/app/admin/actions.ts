@@ -33,9 +33,9 @@ export async function setResultAction(fixtureId: string, homeGoals: number, away
   revalidatePath("/ranking");
 }
 
-export async function setSpecialResultAction(championTeamId: string | null, topScorer: string | null) {
+export async function setSpecialResultAction(championTeamId: string | null) {
   await requireAdmin();
-  await setSpecialResult(championTeamId, topScorer);
+  await setSpecialResult(championTeamId);
   revalidatePath("/admin");
   revalidatePath("/ranking");
   revalidatePath("/typy-specjalne");

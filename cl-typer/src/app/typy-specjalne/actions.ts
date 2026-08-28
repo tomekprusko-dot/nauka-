@@ -5,14 +5,14 @@ import { requireUser } from "@/lib/auth";
 import { saveSpecialPrediction } from "@/lib/db";
 import { getTournamentStart } from "@/data/fixtures";
 
-export async function saveSpecialPredictionAction(championTeamId: string | null, topScorer: string | null) {
+export async function saveSpecialPredictionAction(championTeamId: string | null) {
   const user = await requireUser();
 
   if (new Date(getTournamentStart()).getTime() <= Date.now()) {
-    throw new Error("Sezon się rozpoczął — typy specjalne są zablokowane.");
+    throw new Error("Sezon się rozpoczął — typ mistrza jest zablokowany.");
   }
 
-  await saveSpecialPrediction(user.id, championTeamId, topScorer);
+  await saveSpecialPrediction(user.id, championTeamId);
   revalidatePath("/typy-specjalne");
   revalidatePath("/ranking");
 }

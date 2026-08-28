@@ -207,7 +207,6 @@ function ResultsSection({
 
 function SpecialResultSection({ initialResult }: { initialResult: SpecialResult }) {
   const [championTeamId, setChampionTeamId] = useState(initialResult.championTeamId ?? "");
-  const [topScorer, setTopScorer] = useState(initialResult.topScorer ?? "");
   const [saved, setSaved] = useState(initialResult);
   const [pending, setPending] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -219,9 +218,8 @@ function SpecialResultSection({ initialResult }: { initialResult: SpecialResult 
     setError(null);
     try {
       const championId = championTeamId || null;
-      const scorer = topScorer.trim() || null;
-      await setSpecialResultAction(championId, scorer);
-      setSaved({ championTeamId: championId, topScorer: scorer });
+      await setSpecialResultAction(championId);
+      setSaved({ championTeamId: championId });
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 1200);
     } catch (e) {
@@ -234,10 +232,10 @@ function SpecialResultSection({ initialResult }: { initialResult: SpecialResult 
   return (
     <section className="space-y-3">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Wyniki specjalne (koniec sezonu)
+        Wynik specjalny (koniec sezonu)
       </h2>
       <p className="text-xs text-zinc-500">
-        Wpisz, gdy będą znane — automatycznie doliczy po 10 pkt każdej osobie z trafionym typem.
+        Wpisz, gdy będzie znany — automatycznie doliczy po 10 pkt każdej osobie z trafionym typem.
       </p>
       <form
         onSubmit={handleSave}
@@ -258,15 +256,6 @@ function SpecialResultSection({ initialResult }: { initialResult: SpecialResult 
             ))}
           </select>
         </div>
-        <div className="flex-1 space-y-1">
-          <label className="text-xs text-zinc-400">👑 Król strzelców</label>
-          <input
-            value={topScorer}
-            onChange={(e) => setTopScorer(e.target.value)}
-            placeholder="np. Kylian Mbappé"
-            className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm outline-none focus:border-[#dc2626]"
-          />
-        </div>
         <button
           type="submit"
           disabled={pending}
@@ -276,12 +265,8 @@ function SpecialResultSection({ initialResult }: { initialResult: SpecialResult 
         </button>
       </form>
       {error && <p className="text-xs text-red-400">{error}</p>}
-      {(saved.championTeamId || saved.topScorer) && (
-        <p className="text-xs text-zinc-500">
-          Aktualnie ustawione: {saved.championTeamId ? getTeam(saved.championTeamId)?.name : "—"}
-          {" · "}
-          {saved.topScorer ?? "—"}
-        </p>
+      {saved.championTeamId && (
+        <p className="text-xs text-zinc-500">Aktualnie ustawione: {getTeam(saved.championTeamId)?.name}</p>
       )}
     </section>
   );

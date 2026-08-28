@@ -55,21 +55,24 @@ create table if not exists results (
   updated_at timestamptz not null default now()
 );
 
--- Jednorazowe typy specjalne na cały sezon (mistrz ligi, król strzelców).
+-- Jednorazowy typ specjalny na cały sezon (mistrz ligi).
 create table if not exists special_predictions (
   user_id uuid primary key references users(id) on delete cascade,
   champion_team_id text,
-  top_scorer text,
   saved_at timestamptz not null default now()
 );
 
 -- Jeden wiersz (singleton): faktyczny wynik sezonu, ustawiany przez admina.
 create table if not exists special_result (
   id smallint primary key default 1 check (id = 1),
-  champion_team_id text,
-  top_scorer text
+  champion_team_id text
 );
 insert into special_result (id) values (1) on conflict (id) do nothing;
+
+-- Migracja: usuń kolumnę króla strzelców, jeśli tabele już istniały z nią
+-- (funkcja typowania króla strzelców została wycofana).
+alter table special_predictions drop column if exists top_scorer;
+alter table special_result drop column if exists top_scorer;
 
 -- Konto administratora. Pozostałych graczy dodaje się przez panel /admin
 -- (samo imię + kod dostępu) albo bezpośrednio w tabeli `users`.

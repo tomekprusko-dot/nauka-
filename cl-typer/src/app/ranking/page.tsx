@@ -40,7 +40,7 @@ export default async function RankingPage() {
         </p>
         <p className="mt-2 text-xs text-zinc-500">
           🥇 3 pkt za trafiony typ (1/X/2) &nbsp;·&nbsp; 0 pkt za chybiony typ &nbsp;·&nbsp;
-          👑 +10 pkt za trafionego mistrza ligi i +10 pkt za króla strzelców.
+          👑 +10 pkt za trafionego mistrza Polski.
         </p>
       </div>
 

@@ -78,24 +78,15 @@ export default async function RegulaminPage() {
         </ul>
       </Section>
 
-      <Section number={5} icon="👑" title="Typy specjalne">
+      <Section number={5} icon="👑" title="Typ specjalny">
         <p>
           Przed rozpoczęciem rozgrywek (do pierwszego meczu sezonu) każdy typuje
-          dodatkowo, jednorazowo na cały sezon:
+          dodatkowo, jednorazowo na cały sezon, kto zostanie{" "}
+          <strong>Mistrzem Polski</strong> — trafiony typ to <strong>+10 punktów</strong>.
         </p>
-        <ul className="list-disc space-y-1 pl-5">
-          <li>
-            <strong>Mistrza Polski</strong> — trafiony typ to{" "}
-            <strong>+10 punktów</strong>.
-          </li>
-          <li>
-            <strong>Króla strzelców rozgrywek</strong> — trafiony typ to{" "}
-            <strong>+10 punktów</strong>.
-          </li>
-        </ul>
         <p>
-          Oba typy ustawiasz na stronie „Typy specjalne”. Po starcie sezonu są
-          zablokowane, a punkty doliczane są dopiero po zakończeniu rozgrywek, gdy
+          Typ ustawiasz na stronie „Wytypuj mistrza”. Po starcie sezonu jest
+          zablokowany, a punkty doliczane są dopiero po zakończeniu rozgrywek, gdy
           administrator wpisze ostateczne rozstrzygnięcie.
         </p>
       </Section>
@@ -103,7 +94,7 @@ export default async function RegulaminPage() {
       <Section number={6} icon="📊" title="Ranking">
         <p>
           Ranking to suma punktów ze wszystkich rozegranych meczów sezonu oraz
-          typów specjalnych. Przy równej liczbie punktów wyżej w tabeli plasuje się
+          typu specjalnego. Przy równej liczbie punktów wyżej w tabeli plasuje się
           osoba z większą liczbą trafionych typów.
         </p>
       </Section>

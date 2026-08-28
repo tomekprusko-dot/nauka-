@@ -6,8 +6,8 @@ ją dodać do ekranu głównego jak natywną aplikację.
 
 ## Status projektu
 
-**Etap 2: prawdziwy backend.** Logowanie, terminarz, typy, typy specjalne
-(mistrz Polski + król strzelców) i ranking działają na współdzielonej bazie
+**Etap 2: prawdziwy backend.** Logowanie, terminarz, typy, typ specjalny
+(mistrz Polski) i ranking działają na współdzielonej bazie
 danych (Supabase Postgres) — dane są wspólne dla wszystkich urządzeń, nie
 lokalne w przeglądarce. Sesja logowania to podpisane, bezpieczne ciasteczko;
 wszystkie zapisy przechodzą przez Server Actions z autoryzacją po stronie
@@ -44,9 +44,9 @@ Typerzy wybierają tylko zwycięzcę albo remis (1/X/2), bez dokładnego wyniku
 bramkowego. Admin (`/admin`) dodaje/usuwa zaproszone osoby (samo imię + kod
 dostępu, działa od razu na dowolnym urządzeniu) oraz wpisuje dokładne wyniki
 meczów (na ich podstawie apka sama wylicza, czy typ 1/X/2 był trafiony) i
-wyniki specjalne na koniec sezonu, na podstawie których liczony jest ranking
+wynik specjalny na koniec sezonu, na podstawie których liczony jest ranking
 (3 pkt za trafiony typ zwycięzcy/remisu, +10 pkt za trafionego mistrza
-Polski, +10 pkt za trafionego króla strzelców).
+Polski).
 
 ## Wdrożenie
 
