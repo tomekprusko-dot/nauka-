@@ -16,16 +16,36 @@ create table if not exists users (
   created_at timestamptz not null default now()
 );
 
--- Typy na wynik pojedynczego meczu (jeden typ na osobę na mecz).
+-- Typy na wynik pojedynczego meczu: tylko zwycięzca/remis (bez dokładnego
+-- wyniku bramkowego) — jeden typ na osobę na mecz. 'H' = wygrana gospodarzy,
+-- 'D' = remis, 'A' = wygrana gości.
 create table if not exists predictions (
   id bigint generated always as identity primary key,
   user_id uuid not null references users(id) on delete cascade,
   fixture_id text not null,
-  home_goals int not null,
-  away_goals int not null,
+  outcome text not null check (outcome in ('H', 'D', 'A')),
   saved_at timestamptz not null default now(),
   unique (user_id, fixture_id)
 );
+
+-- Migracja z wcześniejszej wersji (typowanie dokładnego wyniku bramkowego):
+-- usuwa stare kolumny, jeśli tabela już istniała z nimi. Bezpieczne do
+-- wielokrotnego uruchomienia i na świeżej instalacji (bez tych kolumn).
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'predictions' and column_name = 'home_goals'
+  ) then
+    delete from predictions where home_goals is not null and away_goals is not null;
+    alter table predictions drop column home_goals;
+    alter table predictions drop column away_goals;
+  end if;
+end $$;
+alter table predictions add column if not exists outcome text;
+alter table predictions alter column outcome set not null;
+alter table predictions drop constraint if exists predictions_outcome_check;
+alter table predictions add constraint predictions_outcome_check check (outcome in ('H', 'D', 'A'));
 
 -- Oficjalne wyniki meczów wpisywane przez admina.
 create table if not exists results (

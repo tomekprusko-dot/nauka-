@@ -1,25 +1,16 @@
-import { FixtureResult, Prediction } from "@/lib/types";
+import { FixtureResult, MatchOutcome, Prediction } from "@/lib/types";
 
-export const POINTS_EXACT = 3;
-export const POINTS_OUTCOME = 1;
+export const POINTS_CORRECT = 3;
 export const POINTS_MISS = 0;
 export const POINTS_SPECIAL = 10;
 
-function outcome(homeGoals: number, awayGoals: number): "H" | "D" | "A" {
+export function resultOutcome(homeGoals: number, awayGoals: number): MatchOutcome {
   if (homeGoals > awayGoals) return "H";
   if (homeGoals < awayGoals) return "A";
   return "D";
 }
 
 export function scorePrediction(prediction: Prediction, result: FixtureResult): number {
-  const exact =
-    prediction.homeGoals === result.homeGoals && prediction.awayGoals === result.awayGoals;
-  if (exact) return POINTS_EXACT;
-
-  const sameOutcome =
-    outcome(prediction.homeGoals, prediction.awayGoals) ===
-    outcome(result.homeGoals, result.awayGoals);
-  if (sameOutcome) return POINTS_OUTCOME;
-
-  return POINTS_MISS;
+  const actual = resultOutcome(result.homeGoals, result.awayGoals);
+  return prediction.outcome === actual ? POINTS_CORRECT : POINTS_MISS;
 }

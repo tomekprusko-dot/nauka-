@@ -44,11 +44,13 @@ Otwórz [http://localhost:3000](http://localhost:3000).
 | Kuba | KUBA123 | użytkownik |
 | Ola | OLA123 | użytkownik |
 
-Admin (`/admin`) dodaje/usuwa zaproszone osoby (samo imię + kod dostępu,
-działa od razu na dowolnym urządzeniu) oraz wpisuje wyniki meczów i wyniki
-specjalne na koniec sezonu, na podstawie których liczony jest ranking
-(3 pkt za dokładny wynik, 1 pkt za trafiony typ zwycięzcy/remisu, +10 pkt za
-trafionego mistrza Polski, +10 pkt za trafionego króla strzelców).
+Typerzy wybierają tylko zwycięzcę albo remis (1/X/2), bez dokładnego wyniku
+bramkowego. Admin (`/admin`) dodaje/usuwa zaproszone osoby (samo imię + kod
+dostępu, działa od razu na dowolnym urządzeniu) oraz wpisuje dokładne wyniki
+meczów (na ich podstawie apka sama wylicza, czy typ 1/X/2 był trafiony) i
+wyniki specjalne na koniec sezonu, na podstawie których liczony jest ranking
+(3 pkt za trafiony typ zwycięzcy/remisu, +10 pkt za trafionego mistrza
+Polski, +10 pkt za trafionego króla strzelców).
 
 ## Wdrożenie
 

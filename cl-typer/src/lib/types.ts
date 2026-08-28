@@ -31,19 +31,20 @@ export interface InvitedUser {
   role: UserRole;
 }
 
+/** 'H' = wygrana gospodarzy, 'D' = remis, 'A' = wygrana gości. */
+export type MatchOutcome = "H" | "D" | "A";
+
 export interface Prediction {
   userId: string;
   fixtureId: string;
-  homeGoals: number;
-  awayGoals: number;
+  outcome: MatchOutcome;
   savedAt: string;
 }
 
 export interface StandingsRow {
   user: InvitedUser;
   points: number;
-  exactHits: number;
-  outcomeHits: number;
+  correctHits: number;
   predictionsMade: number;
   specialPoints: number;
   rank: number;

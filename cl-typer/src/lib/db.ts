@@ -1,10 +1,11 @@
 import "server-only";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { fixtures } from "@/data/fixtures";
-import { scorePrediction, POINTS_EXACT, POINTS_OUTCOME, POINTS_SPECIAL } from "@/lib/scoring";
+import { scorePrediction, POINTS_SPECIAL } from "@/lib/scoring";
 import {
   FixtureResult,
   InvitedUser,
+  MatchOutcome,
   Prediction,
   SpecialPrediction,
   SpecialResult,
@@ -103,8 +104,7 @@ export async function setResult(fixtureId: string, homeGoals: number, awayGoals:
 interface PredictionRow {
   user_id: string;
   fixture_id: string;
-  home_goals: number;
-  away_goals: number;
+  outcome: MatchOutcome;
   saved_at: string;
 }
 
@@ -112,8 +112,7 @@ function rowToPrediction(row: PredictionRow): Prediction {
   return {
     userId: row.user_id,
     fixtureId: row.fixture_id,
-    homeGoals: row.home_goals,
-    awayGoals: row.away_goals,
+    outcome: row.outcome,
     savedAt: row.saved_at,
   };
 }
@@ -135,8 +134,7 @@ export async function getUserPredictions(userId: string): Promise<Record<string,
 export async function savePrediction(
   userId: string,
   fixtureId: string,
-  homeGoals: number,
-  awayGoals: number,
+  outcome: MatchOutcome,
 ): Promise<void> {
   const { error } = await supabaseServer()
     .from("predictions")
@@ -144,8 +142,7 @@ export async function savePrediction(
       {
         user_id: userId,
         fixture_id: fixtureId,
-        home_goals: homeGoals,
-        away_goals: awayGoals,
+        outcome,
         saved_at: new Date().toISOString(),
       },
       { onConflict: "user_id,fixture_id" },
@@ -258,8 +255,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
   const base = users.map((user) => {
     const userPredictions = allPredictions.filter((p) => p.userId === user.id);
     const picks: { matchday: number; kickoff: string; score: number }[] = [];
-    let exactHits = 0;
-    let outcomeHits = 0;
+    let correctHits = 0;
     let points = 0;
     let previousPoints = 0;
 
@@ -271,8 +267,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
       const score = scorePrediction(prediction, result);
       points += score;
       if (fixture.matchday !== latestResolvedMatchday) previousPoints += score;
-      if (score === POINTS_EXACT) exactHits += 1;
-      else if (score === POINTS_OUTCOME) outcomeHits += 1;
+      if (score > 0) correctHits += 1;
       picks.push({ matchday: fixture.matchday, kickoff: fixture.kickoff, score });
     }
 
@@ -294,8 +289,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
       user,
       points,
       previousPoints,
-      exactHits,
-      outcomeHits,
+      correctHits,
       predictionsMade: userPredictions.length,
       specialPoints,
       form,
@@ -303,7 +297,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
     };
   });
 
-  const ranked = [...base].sort((a, b) => b.points - a.points || b.exactHits - a.exactHits);
+  const ranked = [...base].sort((a, b) => b.points - a.points || b.correctHits - a.correctHits);
   const previousRanked = [...base].sort((a, b) => b.previousPoints - a.previousPoints);
   const previousRankByUserId = new Map<string, number>();
   previousRanked.forEach((row, i) => previousRankByUserId.set(row.user.id, i + 1));
@@ -311,8 +305,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
   return ranked.map((row, i) => ({
     user: row.user,
     points: row.points,
-    exactHits: row.exactHits,
-    outcomeHits: row.outcomeHits,
+    correctHits: row.correctHits,
     predictionsMade: row.predictionsMade,
     specialPoints: row.specialPoints,
     form: row.form,

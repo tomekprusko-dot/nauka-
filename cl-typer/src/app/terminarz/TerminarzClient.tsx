@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getTeam } from "@/data/teams";
-import { Fixture, FixtureResult, Prediction } from "@/lib/types";
+import { Fixture, FixtureResult, MatchOutcome, Prediction } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
 import { scorePrediction } from "@/lib/scoring";
 import { savePredictionAction } from "./actions";
@@ -26,15 +26,55 @@ function formatTime(iso: string) {
 function PointsBadge({ prediction, result }: { prediction: Prediction; result: FixtureResult }) {
   const score = scorePrediction(prediction, result);
   const style =
-    score === 3
+    score > 0
       ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"
-      : score === 1
-        ? "border-sky-400/40 bg-sky-400/10 text-sky-300"
-        : "border-white/15 bg-white/5 text-zinc-400";
+      : "border-white/15 bg-white/5 text-zinc-400";
   return (
     <span className={`ml-2 rounded-full border px-2 py-0.5 text-xs font-bold ${style}`}>
       {score > 0 ? `+${score} pkt` : "0 pkt"}
     </span>
+  );
+}
+
+const OUTCOME_LABEL: Record<MatchOutcome, string> = { H: "1", D: "X", A: "2" };
+
+function OutcomePicker({
+  homeName,
+  awayName,
+  value,
+  disabled,
+  onChange,
+}: {
+  homeName: string;
+  awayName: string;
+  value: MatchOutcome | null;
+  disabled: boolean;
+  onChange: (outcome: MatchOutcome) => void;
+}) {
+  const options: { outcome: MatchOutcome; title: string }[] = [
+    { outcome: "H", title: `Wygrana: ${homeName}` },
+    { outcome: "D", title: "Remis" },
+    { outcome: "A", title: `Wygrana: ${awayName}` },
+  ];
+  return (
+    <div className="flex items-center gap-1.5">
+      {options.map(({ outcome, title }) => (
+        <button
+          key={outcome}
+          type="button"
+          title={title}
+          disabled={disabled}
+          onClick={() => onChange(outcome)}
+          className={`h-9 w-9 rounded-lg border text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+            value === outcome
+              ? "border-[#dc2626] bg-[#dc2626]/20 text-white"
+              : "border-white/15 bg-black/30 text-zinc-300 hover:border-white/30"
+          }`}
+        >
+          {OUTCOME_LABEL[outcome]}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -47,21 +87,19 @@ function FixtureRow({
   fixture: Fixture;
   prediction: Prediction | undefined;
   result: FixtureResult | undefined;
-  onSaved: (fixtureId: string, home: number, away: number) => void;
+  onSaved: (fixtureId: string, outcome: MatchOutcome) => void;
 }) {
   const home = getTeam(fixture.homeTeamId);
   const away = getTeam(fixture.awayTeamId);
 
-  const [homeGoals, setHomeGoals] = useState<number | "">(prediction?.homeGoals ?? "");
-  const [awayGoals, setAwayGoals] = useState<number | "">(prediction?.awayGoals ?? "");
+  const [outcome, setOutcome] = useState<MatchOutcome | null>(prediction?.outcome ?? null);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
 
   useEffect(() => {
-    setHomeGoals(prediction?.homeGoals ?? "");
-    setAwayGoals(prediction?.awayGoals ?? "");
+    setOutcome(prediction?.outcome ?? null);
   }, [prediction]);
 
   useEffect(() => {
@@ -69,12 +107,12 @@ function FixtureRow({
   }, [fixture.kickoff]);
 
   async function handleSave() {
-    if (homeGoals === "" || awayGoals === "") return;
+    if (!outcome) return;
     setError(null);
     setSaving(true);
     try {
-      await savePredictionAction(fixture.id, homeGoals, awayGoals);
-      onSaved(fixture.id, homeGoals, awayGoals);
+      await savePredictionAction(fixture.id, outcome);
+      onSaved(fixture.id, outcome);
       setSaved(true);
       setTimeout(() => setSaved(false), 1200);
     } catch (e) {
@@ -113,41 +151,31 @@ function FixtureRow({
           <span className="font-semibold text-[#dc2626]">{formatTime(fixture.kickoff)}</span>
         </div>
         <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min={0}
-            max={20}
-            disabled={locked || saving}
-            value={homeGoals}
-            onChange={(e) => setHomeGoals(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-center text-sm outline-none focus:border-[#dc2626] disabled:opacity-40"
-          />
-          <span className="text-zinc-500">:</span>
-          <input
-            type="number"
-            min={0}
-            max={20}
-            disabled={locked || saving}
-            value={awayGoals}
-            onChange={(e) => setAwayGoals(e.target.value === "" ? "" : Number(e.target.value))}
-            className="w-14 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-center text-sm outline-none focus:border-[#dc2626] disabled:opacity-40"
-          />
           {!locked ? (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="ml-2 rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
-            >
-              {saved ? "Zapisano ✓" : saving ? "Zapisywanie..." : "Zapisz"}
-            </button>
+            <>
+              <OutcomePicker
+                homeName={home?.shortName ?? fixture.homeTeamId}
+                awayName={away?.shortName ?? fixture.awayTeamId}
+                value={outcome}
+                disabled={saving}
+                onChange={setOutcome}
+              />
+              <button
+                onClick={handleSave}
+                disabled={saving || !outcome}
+                className="ml-1 rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {saved ? "Zapisano ✓" : saving ? "Zapisywanie..." : "Zapisz"}
+              </button>
+            </>
           ) : result ? (
-            <span className="ml-2 flex items-center rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300">
+            <span className="flex items-center rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300">
               Wynik: <strong className="ml-1">{result.homeGoals}:{result.awayGoals}</strong>
               {prediction && <PointsBadge prediction={prediction} result={result} />}
             </span>
           ) : (
-            <span className="ml-2 rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-400">
-              🔒 Zablokowane
+            <span className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-400">
+              🔒 {prediction ? `Twój typ: ${OUTCOME_LABEL[prediction.outcome]}` : "Zablokowane"}
             </span>
           )}
         </div>
@@ -186,10 +214,10 @@ export default function TerminarzClient({
     setCurrentMatchday(upcoming ? upcoming.matchday : (fixtures[fixtures.length - 1]?.matchday ?? null));
   }, [fixtures]);
 
-  function handleSaved(fixtureId: string, home: number, away: number) {
+  function handleSaved(fixtureId: string, outcome: MatchOutcome) {
     setPredictions((prev) => ({
       ...prev,
-      [fixtureId]: { userId: "", fixtureId, homeGoals: home, awayGoals: away, savedAt: new Date().toISOString() },
+      [fixtureId]: { userId: "", fixtureId, outcome, savedAt: new Date().toISOString() },
     }));
   }
 
@@ -208,8 +236,8 @@ export default function TerminarzClient({
       <div>
         <h1 className="font-display gold-text text-3xl">Terminarz i typy</h1>
         <p className="mt-1 text-sm text-zinc-400">
-          Wpisz przewidywany wynik przed rozpoczęciem meczu. Po jego starcie typ jest
-          zablokowany.
+          Wytypuj zwycięzcę (1), remis (X) albo wygraną gości (2) przed rozpoczęciem meczu.
+          Po jego starcie typ jest zablokowany.
         </p>
         <p className="mt-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
           Kolejki 1-5 to prawdziwe wyniki sezonu 2026/27. Kolejka 6 i kolejne są na razie

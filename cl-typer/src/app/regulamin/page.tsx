@@ -46,10 +46,11 @@ export default async function RegulaminPage() {
 
       <Section number={2} icon="✍️" title="Jak typować">
         <p>
-          Dla każdego meczu podajesz przewidywany dokładny wynik (liczbę bramek
-          gospodarzy i gości). Typ zapisujesz przyciskiem „Zapisz” na stronie
-          Terminarz — możesz go zmieniać dowolną liczbę razy aż do rozpoczęcia
-          meczu.
+          Dla każdego meczu wybierasz zwycięzcę albo remis: <strong>1</strong> —
+          wygrana gospodarzy, <strong>X</strong> — remis, <strong>2</strong> — wygrana
+          gości. Nie podajesz dokładnego wyniku bramkowego. Typ zapisujesz przyciskiem
+          „Zapisz” na stronie Terminarz — możesz go zmieniać dowolną liczbę razy aż do
+          rozpoczęcia meczu.
         </p>
       </Section>
 
@@ -66,18 +67,13 @@ export default async function RegulaminPage() {
       <Section number={4} icon="🏆" title="Punktacja">
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <strong>3 punkty</strong> — trafiony dokładny wynik (np. typowałeś 2:1 i
-            padło dokładnie 2:1).
+            <strong>3 punkty</strong> — trafiony typ zwycięzcy albo remisu (np.
+            typowałeś 1 — wygraną gospodarzy — i faktycznie wygrali gospodarze, bez
+            względu na wynik).
           </li>
           <li>
-            <strong>1 punkt</strong> — trafiony sam typ zwycięzcy meczu albo remisu,
-            ale niedokładny wynik (np. typowałeś 2:1, a padło 3:1 — obie strony
-            wskazują na wygraną gospodarzy).
-          </li>
-          <li>
-            <strong>0 punktów</strong> — chybiony typ (wskazany inny wynik meczu niż
-            faktyczny — np. typowałeś wygraną gospodarzy, a wygrali goście) albo brak
-            typu przed startem meczu.
+            <strong>0 punktów</strong> — chybiony typ (wskazałeś inny wynik meczu niż
+            faktyczny) albo brak typu przed startem meczu.
           </li>
         </ul>
       </Section>
@@ -108,7 +104,7 @@ export default async function RegulaminPage() {
         <p>
           Ranking to suma punktów ze wszystkich rozegranych meczów sezonu oraz
           typów specjalnych. Przy równej liczbie punktów wyżej w tabeli plasuje się
-          osoba z większą liczbą trafionych dokładnych wyników (3-punktowych typów).
+          osoba z większą liczbą trafionych typów.
         </p>
       </Section>
 

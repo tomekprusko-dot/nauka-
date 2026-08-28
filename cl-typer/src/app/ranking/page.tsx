@@ -39,9 +39,8 @@ export default async function RankingPage() {
           Rywalizacja ze znajomymi 🤝⚽ — sprawdź, jak stoisz w lidze.
         </p>
         <p className="mt-2 text-xs text-zinc-500">
-          🥇 3 pkt za trafiony dokładny wynik &nbsp;·&nbsp; 1 pkt za trafiony typ
-          zwycięzcy/remisu &nbsp;·&nbsp; 0 pkt za chybiony typ &nbsp;·&nbsp; 👑 +10 pkt za
-          trafionego mistrza ligi i +10 pkt za króla strzelców.
+          🥇 3 pkt za trafiony typ (1/X/2) &nbsp;·&nbsp; 0 pkt za chybiony typ &nbsp;·&nbsp;
+          👑 +10 pkt za trafionego mistrza ligi i +10 pkt za króla strzelców.
         </p>
       </div>
 
@@ -75,7 +74,6 @@ export default async function RankingPage() {
               <th className="px-4 py-3">Gracz</th>
               <th className="px-4 py-3">Forma</th>
               <th className="px-4 py-3 text-right">Typy</th>
-              <th className="px-4 py-3 text-right">Trafione wyniki</th>
               <th className="px-4 py-3 text-right">Trafione typy</th>
               <th className="px-4 py-3 text-right">Specjalne</th>
               <th className="px-4 py-3 text-right">Punkty</th>
@@ -114,8 +112,7 @@ export default async function RankingPage() {
                     <FormDots form={row.form} />
                   </td>
                   <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400">{row.exactHits}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400">{row.outcomeHits}</td>
+                  <td className="px-4 py-3 text-right text-zinc-400">{row.correctHits}</td>
                   <td className="px-4 py-3 text-right text-zinc-400">
                     {row.specialPoints > 0 ? `👑 ${row.specialPoints}` : "—"}
                   </td>
