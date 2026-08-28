@@ -3,11 +3,12 @@ import { Fixture } from "@/lib/types";
 /**
  * Pełny terminarz sezonu PKO BP Ekstraklasa 2026/27 — 18 drużyn, 34 kolejki
  * (podwójny system kołowy: każda drużyna gra z każdą inną raz u siebie i raz
- * na wyjeździe). Kolejki 1-5 to prawdziwe pary i terminy (sezon ruszył 24
- * lipca 2026), zebrane z publicznych wyników — wyniki tych meczów są w
- * `results` w bazie (patrz `scripts` w historii commitów). Kolejki 6+ są
- * nadal wygenerowane algorytmem "koła" jako przykładowe — podmień je na
- * oficjalny terminarz PZPN/Ekstraklasa.org, gdy runda 6 dobiegnie końca.
+ * na wyjeździe). Kolejki 1-7 to prawdziwe pary i terminy (sezon ruszył 24
+ * lipca 2026), zebrane z publicznych źródeł — kolejki 1-5 mają już wyniki
+ * w tabeli `results` w bazie, kolejki 6-7 są dopiero do wytypowania (wyniki
+ * dojdą, gdy zostaną rozegrane). Kolejka 8+ jest nadal wygenerowana
+ * algorytmem "koła" jako przykładowa — podmień na oficjalny terminarz
+ * PZPN/Ekstraklasa.org, gdy zbliży się jej termin.
  */
 export const fixtures: Fixture[] = [
   // Kolejki 1-5: prawdziwe pary i terminy (sezon ruszył 24 lipca 2026), ID
@@ -59,24 +60,27 @@ export const fixtures: Fixture[] = [
   { id: "r5-7", matchday: 5, homeTeamId: "pogon", awayTeamId: "wisla-krakow", kickoff: "2026-08-23T18:15:00Z" },
   { id: "r5-8", matchday: 5, homeTeamId: "rakow", awayTeamId: "gornik-zabrze", kickoff: "2026-09-03T18:00:00Z" },
   { id: "r5-9", matchday: 5, homeTeamId: "lech", awayTeamId: "jagiellonia", kickoff: "2026-09-03T18:00:00Z" },
-  { id: "md6-1", matchday: 6, homeTeamId: "radomiak", awayTeamId: "legia", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-2", matchday: 6, homeTeamId: "zaglebie-lubin", awayTeamId: "widzew", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-3", matchday: 6, homeTeamId: "wisla-plock", awayTeamId: "motor-lublin", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-4", matchday: 6, homeTeamId: "piast", awayTeamId: "korona", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-5", matchday: 6, homeTeamId: "gks-katowice", awayTeamId: "pogon", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-6", matchday: 6, homeTeamId: "jagiellonia", awayTeamId: "gornik-zabrze", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-7", matchday: 6, homeTeamId: "cracovia", awayTeamId: "lech", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-8", matchday: 6, homeTeamId: "wieczysta", awayTeamId: "rakow", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md6-9", matchday: 6, homeTeamId: "slask", awayTeamId: "wisla-krakow", kickoff: "2026-10-03T17:00:00Z" },
-  { id: "md7-1", matchday: 7, homeTeamId: "legia", awayTeamId: "zaglebie-lubin", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-2", matchday: 7, homeTeamId: "radomiak", awayTeamId: "wisla-plock", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-3", matchday: 7, homeTeamId: "widzew", awayTeamId: "piast", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-4", matchday: 7, homeTeamId: "motor-lublin", awayTeamId: "gks-katowice", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-5", matchday: 7, homeTeamId: "korona", awayTeamId: "jagiellonia", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-6", matchday: 7, homeTeamId: "pogon", awayTeamId: "cracovia", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-7", matchday: 7, homeTeamId: "gornik-zabrze", awayTeamId: "wieczysta", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-8", matchday: 7, homeTeamId: "lech", awayTeamId: "slask", kickoff: "2026-10-10T17:00:00Z" },
-  { id: "md7-9", matchday: 7, homeTeamId: "rakow", awayTeamId: "wisla-krakow", kickoff: "2026-10-10T17:00:00Z" },
+  // Kolejka 6: prawdziwe pary i godziny (28-30 sierpnia 2026).
+  { id: "r6-1", matchday: 6, homeTeamId: "wisla-plock", awayTeamId: "korona", kickoff: "2026-08-28T16:00:00Z" },
+  { id: "r6-2", matchday: 6, homeTeamId: "legia", awayTeamId: "slask", kickoff: "2026-08-28T18:30:00Z" },
+  { id: "r6-3", matchday: 6, homeTeamId: "radomiak", awayTeamId: "cracovia", kickoff: "2026-08-29T10:15:00Z" },
+  { id: "r6-4", matchday: 6, homeTeamId: "motor-lublin", awayTeamId: "piast", kickoff: "2026-08-29T12:45:00Z" },
+  { id: "r6-5", matchday: 6, homeTeamId: "wisla-krakow", awayTeamId: "wieczysta", kickoff: "2026-08-29T15:30:00Z" },
+  { id: "r6-6", matchday: 6, homeTeamId: "zaglebie-lubin", awayTeamId: "pogon", kickoff: "2026-08-29T18:15:00Z" },
+  { id: "r6-7", matchday: 6, homeTeamId: "rakow", awayTeamId: "jagiellonia", kickoff: "2026-08-30T12:45:00Z" },
+  { id: "r6-8", matchday: 6, homeTeamId: "gornik-zabrze", awayTeamId: "gks-katowice", kickoff: "2026-08-30T15:30:00Z" },
+  { id: "r6-9", matchday: 6, homeTeamId: "widzew", awayTeamId: "lech", kickoff: "2026-08-30T18:15:00Z" },
+  // Kolejka 7: prawdziwe pary (5-7 września 2026); dokładne godziny poza
+  // Pogoń-Wisła Płock są przybliżone (zbiorczy termin "sobota, 5 września").
+  { id: "r7-1", matchday: 7, homeTeamId: "cracovia", awayTeamId: "gornik-zabrze", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-2", matchday: 7, homeTeamId: "widzew", awayTeamId: "radomiak", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-3", matchday: 7, homeTeamId: "jagiellonia", awayTeamId: "slask", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-4", matchday: 7, homeTeamId: "piast", awayTeamId: "gks-katowice", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-5", matchday: 7, homeTeamId: "korona", awayTeamId: "wisla-krakow", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-6", matchday: 7, homeTeamId: "wieczysta", awayTeamId: "zaglebie-lubin", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-7", matchday: 7, homeTeamId: "motor-lublin", awayTeamId: "legia", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-8", matchday: 7, homeTeamId: "lech", awayTeamId: "rakow", kickoff: "2026-09-05T15:00:00Z" },
+  { id: "r7-9", matchday: 7, homeTeamId: "pogon", awayTeamId: "wisla-plock", kickoff: "2026-09-07T18:30:00Z" },
   { id: "md8-1", matchday: 8, homeTeamId: "wisla-plock", awayTeamId: "legia", kickoff: "2026-10-17T17:00:00Z" },
   { id: "md8-2", matchday: 8, homeTeamId: "piast", awayTeamId: "zaglebie-lubin", kickoff: "2026-10-17T17:00:00Z" },
   { id: "md8-3", matchday: 8, homeTeamId: "gks-katowice", awayTeamId: "radomiak", kickoff: "2026-10-17T17:00:00Z" },

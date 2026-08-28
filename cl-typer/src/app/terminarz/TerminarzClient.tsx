@@ -240,8 +240,10 @@ export default function TerminarzClient({
           Po jego starcie typ jest zablokowany.
         </p>
         <p className="mt-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
-          Kolejki 1-5 to prawdziwe wyniki sezonu 2026/27. Kolejka 6 i kolejne są na razie
-          przykładowe, do podmiany na pełny oficjalny terminarz PZPN/Ekstraklasa.org.
+          Kolejki 1-5 to prawdziwe wyniki sezonu 2026/27, kolejki 6-7 to prawdziwy
+          terminarz do wytypowania (wyniki dojdą po rozegraniu). Kolejka 8 i dalsze są
+          na razie przykładowe, do podmiany na pełny oficjalny terminarz
+          PZPN/Ekstraklasa.org.
         </p>
       </div>
 
