@@ -1,4 +1,4 @@
--- Typer Ligi Mistrzów — schemat bazy danych.
+-- Typer ESA — schemat bazy danych.
 -- Wklej całość w Supabase Dashboard → SQL Editor → Run.
 -- Bezpiecznie uruchomić wielokrotnie (create if not exists / on conflict do nothing).
 

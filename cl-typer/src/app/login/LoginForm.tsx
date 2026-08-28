@@ -14,7 +14,7 @@ export default function LoginForm() {
       <div className="flex flex-col items-center text-center">
         <Trophy className="trophy-glow h-24 w-24" />
         <h1 className="font-display gold-text mt-3 text-5xl leading-none">
-          Typer Ekstraklasy
+          Typer ESA
         </h1>
         <p className="font-display mt-1 text-xl tracking-widest text-zinc-300">
           SEZON 2026 / 27

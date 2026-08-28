@@ -24,7 +24,7 @@ export default function NavBar({ user }: { user: InvitedUser | null }) {
         <Link href="/terminarz" className="flex items-center gap-2 font-semibold text-white">
           <Trophy className="h-6 w-6" />
           <span className="font-display hidden text-lg tracking-wide sm:inline">
-            Typer Ekstraklasy 2026/27
+            Typer ESA 2026/27
           </span>
         </Link>
         <nav className="flex flex-wrap items-center gap-1 text-sm">

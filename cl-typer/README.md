@@ -1,4 +1,4 @@
-# Typer Ekstraklasy 2026/27
+# Typer ESA 2026/27
 
 Aplikacja (PWA) do typowania wyników meczy PKO BP Ekstraklasy 2026/27 w
 gronie zaproszonych osób. Działa w przeglądarce na iOS i Androidzie i można
