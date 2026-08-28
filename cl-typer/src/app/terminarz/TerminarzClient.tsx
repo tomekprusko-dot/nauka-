@@ -5,6 +5,7 @@ import { getTeam } from "@/data/teams";
 import { Fixture, FixtureResult, MatchOutcome, Prediction } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
 import { scorePrediction } from "@/lib/scoring";
+import { TYPING_OPENS_FROM_MATCHDAY } from "@/data/fixtures";
 import { savePredictionAction, deletePredictionAction } from "./actions";
 
 function formatDate(iso: string) {
@@ -126,8 +127,9 @@ function FixtureRow({
   }, [prediction]);
 
   useEffect(() => {
-    setLocked(new Date(fixture.kickoff).getTime() <= Date.now());
-  }, [fixture.kickoff]);
+    const kickoffPassed = new Date(fixture.kickoff).getTime() <= Date.now();
+    setLocked(kickoffPassed || fixture.matchday < TYPING_OPENS_FROM_MATCHDAY);
+  }, [fixture.kickoff, fixture.matchday]);
 
   // Green "Zapisano" only while the selected pick matches what's actually
   // saved — picking something else immediately reverts to needing a
@@ -255,8 +257,10 @@ export default function TerminarzClient({
     // Fixtures aren't guaranteed to be in chronological order (postponed
     // matches keep their original matchday but move to a later date), so
     // find the earliest future kickoff rather than the first array match.
+    // Only matchdays open for typing count — a postponed catch-up match
+    // from an earlier, closed matchday shouldn't be reported as "current".
     const upcoming = fixtures
-      .filter((f) => new Date(f.kickoff).getTime() > now)
+      .filter((f) => f.matchday >= TYPING_OPENS_FROM_MATCHDAY && new Date(f.kickoff).getTime() > now)
       .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())[0];
     setCurrentMatchday(upcoming ? upcoming.matchday : (fixtures[fixtures.length - 1]?.matchday ?? null));
   }, [fixtures]);
@@ -297,10 +301,10 @@ export default function TerminarzClient({
           Po jego starcie typ jest zablokowany.
         </p>
         <p className="mt-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
-          Kolejki 1-5 to prawdziwe wyniki sezonu 2026/27, kolejki 6-7 to prawdziwy
-          terminarz do wytypowania (wyniki dojdą po rozegraniu). Kolejka 8 i dalsze są
-          na razie przykładowe, do podmiany na pełny oficjalny terminarz
-          PZPN/Ekstraklasa.org.
+          Kolejki 1-6 to prawdziwe mecze sezonu 2026/27, ale typowanie na nie jest już
+          zamknięte — wyniki dojdą automatycznie po rozegraniu. Kolejka 7 to pierwsza
+          otwarta do typowania. Kolejka 8 i dalsze są na razie przykładowe, do podmiany
+          na pełny oficjalny terminarz PZPN/Ekstraklasa.org.
         </p>
       </div>
 

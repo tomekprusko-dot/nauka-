@@ -17,11 +17,11 @@ function formatDeadline(iso: string) {
 }
 
 export default function TypySpecjalneClient({
-  tournamentStart,
+  deadline,
   initialPrediction,
   result,
 }: {
-  tournamentStart: string;
+  deadline: string;
   initialPrediction: SpecialPrediction | null;
   result: SpecialResult;
 }) {
@@ -33,8 +33,8 @@ export default function TypySpecjalneClient({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLocked(new Date(tournamentStart).getTime() <= Date.now());
-  }, [tournamentStart]);
+    setLocked(new Date(deadline).getTime() <= Date.now());
+  }, [deadline]);
 
   async function handleSave() {
     setError(null);
@@ -58,13 +58,11 @@ export default function TypySpecjalneClient({
     <div className="space-y-6">
       <div>
         <h1 className="font-display gold-text text-3xl">Wytypuj mistrza</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Jednorazowy typ na cały sezon — wytypuj go przed startem rozgrywek.
-        </p>
+        <p className="mt-1 text-sm text-zinc-400">Jednorazowy typ na cały sezon.</p>
         <p className="mt-2 flex items-center gap-1.5 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
           <span aria-hidden>🔒</span>
-          Typ można zmieniać do rozpoczęcia pierwszego meczu sezonu —{" "}
-          <span className="capitalize">{formatDeadline(tournamentStart)}</span>. Potem jest
+          Typ można zmieniać do{" "}
+          <span className="capitalize">{formatDeadline(deadline)}</span>. Potem jest
           zablokowany do końca sezonu.
         </p>
       </div>
@@ -120,7 +118,7 @@ export default function TypySpecjalneClient({
           {saving ? "Zapisywanie..." : justSaved ? "Zapisano ✓" : "Zapisz typ mistrza"}
         </button>
       ) : (
-        <p className="text-sm text-zinc-400">🔒 Sezon się rozpoczął — typ jest zablokowany.</p>
+        <p className="text-sm text-zinc-400">🔒 Termin minął — typ jest zablokowany.</p>
       )}
     </div>
   );

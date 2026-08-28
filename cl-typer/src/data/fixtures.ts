@@ -326,7 +326,14 @@ export const fixtures: Fixture[] = [
   { id: "md34-9", matchday: 34, homeTeamId: "wisla-plock", awayTeamId: "piast", kickoff: "2027-04-17T17:00:00Z" },
 ];
 
-/** Kickoff pierwszego meczu sezonu — typy specjalne blokują się w tym momencie. */
-export function getTournamentStart(): string {
-  return fixtures.reduce((earliest, f) => (f.kickoff < earliest ? f.kickoff : earliest), fixtures[0].kickoff);
-}
+/**
+ * Typowanie meczów jest zamknięte dla każdej kolejki przed tą liczbą,
+ * niezależnie od kickoffu pojedynczego meczu — bez tego przełożony mecz ze
+ * starej kolejki (nowy termin w przyszłości) zostawałby otwarty na
+ * typowanie na długo po tym, jak reszta tamtej kolejki się skończyła.
+ */
+export const TYPING_OPENS_FROM_MATCHDAY = 7;
+
+/** Deadline na typ specjalny (mistrz Polski) — stała data, nie kickoff meczu,
+ * bo apka wystartowała już w trakcie sezonu. */
+export const SPECIAL_PICK_DEADLINE = "2026-09-10T21:59:59Z";

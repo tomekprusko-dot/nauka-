@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { savePrediction, deletePrediction } from "@/lib/db";
-import { fixtures } from "@/data/fixtures";
+import { fixtures, TYPING_OPENS_FROM_MATCHDAY } from "@/data/fixtures";
 import { MatchOutcome } from "@/lib/types";
 
 const VALID_OUTCOMES: MatchOutcome[] = ["H", "D", "A"];
@@ -12,6 +12,9 @@ function requireUnlockedFixture(fixtureId: string) {
   const fixture = fixtures.find((f) => f.id === fixtureId);
   if (!fixture) {
     throw new Error("Nieznany mecz.");
+  }
+  if (fixture.matchday < TYPING_OPENS_FROM_MATCHDAY) {
+    throw new Error("Typowanie tej kolejki jest zamknięte.");
   }
   if (new Date(fixture.kickoff).getTime() <= Date.now()) {
     throw new Error("Ten mecz już się rozpoczął — typ jest zablokowany.");

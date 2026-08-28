@@ -62,6 +62,11 @@ export default async function RegulaminPage() {
           czy mecz faktycznie już trwa. Brak zapisanego typu przed startem meczu = 0
           punktów za ten mecz.
         </p>
+        <p>
+          Typowanie w apce ruszyło od 7. kolejki — wcześniejsze kolejki (rozegrane
+          przed startem apki) są zamknięte na typy, również te przełożone mecze z tych
+          kolejek, które odbędą się w późniejszym terminie.
+        </p>
       </Section>
 
       <Section number={4} icon="🏆" title="Punktacja">
@@ -80,14 +85,13 @@ export default async function RegulaminPage() {
 
       <Section number={5} icon="👑" title="Typ specjalny">
         <p>
-          Przed rozpoczęciem rozgrywek (do pierwszego meczu sezonu) każdy typuje
-          dodatkowo, jednorazowo na cały sezon, kto zostanie{" "}
+          Każdy typuje dodatkowo, jednorazowo na cały sezon, kto zostanie{" "}
           <strong>Mistrzem Polski</strong> — trafiony typ to <strong>+10 punktów</strong>.
         </p>
         <p>
-          Typ ustawiasz na stronie „Wytypuj mistrza”. Po starcie sezonu jest
-          zablokowany, a punkty doliczane są dopiero po zakończeniu rozgrywek, gdy
-          administrator wpisze ostateczne rozstrzygnięcie.
+          Typ ustawiasz na stronie „Wytypuj mistrza” — można go zmieniać do 10 września
+          2026. Po tym terminie jest zablokowany, a punkty doliczane są dopiero po
+          zakończeniu rozgrywek, gdy administrator wpisze ostateczne rozstrzygnięcie.
         </p>
       </Section>
 
