@@ -68,6 +68,13 @@ export interface SpecialResult {
   championTeamId: string | null;
 }
 
+/** A short note left by the automated fixtures/results sync when it needs manual attention. */
+export interface AutomationLogEntry {
+  id: number;
+  message: string;
+  createdAt: string;
+}
+
 /** One team's row in the real Ekstraklasa league table (not the typers' ranking). */
 export interface LeagueTableRow {
   teamId: string;

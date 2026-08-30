@@ -4,6 +4,7 @@ import { fixtures } from "@/data/fixtures";
 import { teams } from "@/data/teams";
 import { scorePrediction, POINTS_SPECIAL } from "@/lib/scoring";
 import {
+  AutomationLogEntry,
   FixtureResult,
   InvitedUser,
   LeagueTableRow,
@@ -352,4 +353,19 @@ export async function computeLeagueTable(): Promise<LeagueTableRow[]> {
   return [...table.values()]
     .map((row) => ({ ...row, goalDiff: row.goalsFor - row.goalsAgainst }))
     .sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
+}
+
+export async function addAutomationLog(message: string): Promise<void> {
+  const { error } = await supabaseServer().from("automation_log").insert({ message });
+  if (error) throw error;
+}
+
+export async function getAutomationLog(limit = 20): Promise<AutomationLogEntry[]> {
+  const { data, error } = await supabaseServer()
+    .from("automation_log")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []).map((row) => ({ id: row.id, message: row.message, createdAt: row.created_at }));
 }

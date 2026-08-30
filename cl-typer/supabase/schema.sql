@@ -80,6 +80,15 @@ insert into users (name, email, access_code, role) values
   ('Tomek', 'tomekprusko@gmail.com', 'Tomek123', 'admin')
 on conflict (email) do nothing;
 
+-- Krótki log automatyzacji (np. "nie udało się potwierdzić wyniku X mimo
+-- kilku prób") — widoczny w panelu /admin, żeby admin wiedział, gdy coś
+-- wymaga ręcznej interwencji, zamiast cichego pominięcia.
+create table if not exists automation_log (
+  id bigint generated always as identity primary key,
+  message text not null,
+  created_at timestamptz not null default now()
+);
+
 -- RLS włączone, bez żadnych policy — to celowe: jedyny klucz, który może
 -- czytać/zapisywać te tabele, to service_role (używany wyłącznie po stronie
 -- serwera Next.js, nigdy w przeglądarce). Przeglądarka nie łączy się z
@@ -89,3 +98,4 @@ alter table predictions enable row level security;
 alter table results enable row level security;
 alter table special_predictions enable row level security;
 alter table special_result enable row level security;
+alter table automation_log enable row level security;

@@ -3,8 +3,44 @@
 import { FormEvent, useState } from "react";
 import { getTeam, teams } from "@/data/teams";
 import TeamBadge from "@/components/TeamBadge";
-import { Fixture, FixtureResult, InvitedUser, SpecialResult, Team } from "@/lib/types";
+import { AutomationLogEntry, Fixture, FixtureResult, InvitedUser, SpecialResult, Team } from "@/lib/types";
 import { addUserAction, removeUserAction, setResultAction, setSpecialResultAction } from "./actions";
+
+function formatLogDate(iso: string) {
+  return new Date(iso).toLocaleString("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function AutomationLogSection({ entries }: { entries: AutomationLogEntry[] }) {
+  if (entries.length === 0) return null;
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
+        Log automatyzacji
+      </h2>
+      <p className="text-xs text-zinc-500">
+        Sytuacje, w których automatyczne sprawdzanie terminarza/wyników nie mogło czegoś
+        dokończyć samodzielnie i potrzebna jest Twoja uwaga.
+      </p>
+      <div className="space-y-2">
+        {entries.map((entry) => (
+          <div
+            key={entry.id}
+            className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200"
+          >
+            <span className="mr-2 text-xs text-amber-400/70">{formatLogDate(entry.createdAt)}</span>
+            {entry.message}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function UsersSection({ initialUsers }: { initialUsers: InvitedUser[] }) {
   const [users, setUsers] = useState(initialUsers);
@@ -277,11 +313,13 @@ export default function AdminClient({
   fixtures,
   initialResults,
   initialSpecialResult,
+  automationLog,
 }: {
   initialUsers: InvitedUser[];
   fixtures: Fixture[];
   initialResults: Record<string, FixtureResult>;
   initialSpecialResult: SpecialResult;
+  automationLog: AutomationLogEntry[];
 }) {
   return (
     <div className="space-y-10">
@@ -291,6 +329,7 @@ export default function AdminClient({
           Zarządzaj dostępem osób oraz wpisuj wyniki meczów.
         </p>
       </div>
+      <AutomationLogSection entries={automationLog} />
       <UsersSection initialUsers={initialUsers} />
       <ResultsSection fixtures={fixtures} initialResults={initialResults} />
       <SpecialResultSection initialResult={initialSpecialResult} />
