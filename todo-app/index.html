@@ -21,25 +21,49 @@
   <div class="app">
     <header class="topbar">
       <div class="topbar-row">
-        <div>
-          <h1>Zadania</h1>
-          <p class="today-label" id="todayLabel"></p>
+        <div class="topbar-heading">
+          <button class="back-btn hidden" id="backBtn" aria-label="Wstecz">←</button>
+          <div>
+            <h1 id="viewTitle">Zadania</h1>
+            <p class="today-label" id="todayLabel"></p>
+          </div>
         </div>
         <button class="icon-btn" id="settingsBtn" aria-label="Ustawienia">⚙</button>
       </div>
     </header>
 
-    <nav class="daystrip" id="dayStrip"></nav>
+    <div class="view" id="tasksView">
+      <nav class="daystrip" id="dayStrip"></nav>
 
-    <div class="tag-filter-strip" id="tagFilterStrip">
-      <button type="button" class="tag-filter-chip active" data-tag="all">Wszystkie</button>
-      <button type="button" class="tag-filter-chip" data-tag="praca">💼 Praca</button>
-      <button type="button" class="tag-filter-chip" data-tag="prywatne">🏠 Prywatne</button>
+      <div class="tag-filter-strip" id="tagFilterStrip">
+        <button type="button" class="tag-filter-chip active" data-tag="all">Wszystkie</button>
+        <button type="button" class="tag-filter-chip" data-tag="praca">💼 Praca</button>
+        <button type="button" class="tag-filter-chip" data-tag="prywatne">🏠 Prywatne</button>
+      </div>
+
+      <main class="content" id="content"></main>
     </div>
 
-    <main class="content" id="content"></main>
+    <div class="view hidden" id="notesListView">
+      <main class="content" id="notesListContent"></main>
+    </div>
 
-    <button class="fab" id="addBtn" aria-label="Dodaj zadanie">+</button>
+    <div class="view hidden" id="notesDetailView">
+      <main class="content" id="notesDetailContent"></main>
+    </div>
+
+    <button class="fab" id="addBtn" aria-label="Dodaj">+</button>
+
+    <nav class="bottom-tabs">
+      <button type="button" class="tab-btn active" id="tabTasksBtn">
+        <span class="tab-icon">✅</span>
+        <span class="tab-label">Zadania</span>
+      </button>
+      <button type="button" class="tab-btn" id="tabNotesBtn">
+        <span class="tab-icon">📝</span>
+        <span class="tab-label">Notatki</span>
+      </button>
+    </nav>
   </div>
 
   <div class="sheet-overlay" id="sheetOverlay">
@@ -97,11 +121,29 @@
     </div>
   </div>
 
+  <div class="sheet-overlay" id="simpleSheetOverlay">
+    <div class="sheet" id="simpleSheet">
+      <div class="sheet-handle"></div>
+      <h2 id="simpleSheetTitle">Nowa lista</h2>
+      <form id="simpleForm">
+        <label>
+          <span id="simpleSheetLabel">Nazwa</span>
+          <input type="text" id="simpleInput" placeholder="np. Wakacje" required maxlength="200">
+        </label>
+        <div class="sheet-actions">
+          <button type="button" class="btn-secondary" id="simpleCancelBtn">Anuluj</button>
+          <button type="submit" class="btn-primary" id="simpleSaveBtn">Zapisz</button>
+        </div>
+        <button type="button" class="delete-link hidden" id="simpleDeleteBtn">Usuń</button>
+      </form>
+    </div>
+  </div>
+
   <div class="sheet-overlay" id="settingsOverlay">
     <div class="sheet" id="settingsSheet">
       <div class="sheet-handle"></div>
       <h2>Ustawienia</h2>
-      <p class="settings-info">Zadań łącznie: <b id="taskCount">0</b></p>
+      <p class="settings-info">Zadań łącznie: <b id="taskCount">0</b> &middot; List notatek: <b id="notebookCount">0</b></p>
       <div class="settings-list">
         <button type="button" class="btn-secondary settings-btn" id="exportBtn">⬇️&nbsp; Eksportuj kopię zapasową</button>
         <button type="button" class="btn-secondary settings-btn" id="importBtn">⬆️&nbsp; Importuj kopię zapasową</button>

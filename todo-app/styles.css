@@ -43,6 +43,17 @@ html, body {
 .today-label { margin: 4px 0 0; opacity: 0.85; font-size: 0.9rem; }
 
 .topbar-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.topbar-heading { display: flex; align-items: center; gap: 6px; }
+.back-btn {
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0 6px 0 0;
+  cursor: pointer;
+}
+.back-btn.hidden { display: none; }
 
 .icon-btn {
   flex: 0 0 auto;
@@ -127,9 +138,17 @@ html, body {
 .tag-filter-chip.active[data-tag="praca"] { background: var(--tag-praca); border-color: var(--tag-praca); color: #fff; }
 .tag-filter-chip.active[data-tag="prywatne"] { background: var(--tag-prywatne); border-color: var(--tag-prywatne); color: #fff; }
 
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.view.hidden { display: none; }
+
 .content {
   flex: 1;
-  padding: 16px 16px calc(100px + var(--safe-bottom));
+  padding: 16px 16px calc(160px + var(--safe-bottom));
   overflow-y: auto;
 }
 
@@ -225,7 +244,7 @@ html, body {
 .fab {
   position: fixed;
   right: 20px;
-  bottom: calc(24px + var(--safe-bottom));
+  bottom: calc(84px + var(--safe-bottom));
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -372,3 +391,82 @@ html, body {
 .settings-info { font-size: 0.85rem; color: var(--muted); margin: -4px 0 14px; }
 .settings-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
 .settings-btn { width: 100%; text-align: left; }
+
+/* ---- Bottom tab bar ---- */
+
+.bottom-tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid #e6e6ee;
+  padding-bottom: var(--safe-bottom);
+  z-index: 15;
+}
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 9px 0 7px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tab-btn .tab-icon { font-size: 1.25rem; line-height: 1; opacity: 0.55; }
+.tab-btn.active { color: var(--accent-b); }
+.tab-btn.active .tab-icon { opacity: 1; }
+
+/* ---- Notebooks (Notatki) ---- */
+
+.notebook-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 1px 3px rgba(20,20,40,0.06);
+}
+.notebook-body { flex: 1; min-width: 0; cursor: pointer; }
+.notebook-name { font-size: 1rem; font-weight: 700; word-break: break-word; }
+.notebook-progress { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+.notebook-progress-bar {
+  margin-top: 8px;
+  height: 6px;
+  border-radius: 3px;
+  background: #eceef4;
+  overflow: hidden;
+}
+.notebook-progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+  border-radius: 3px;
+}
+.notebook-edit {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1.05rem;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+.note-item-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(20,20,40,0.06);
+}
+.note-item-text { flex: 1; min-width: 0; font-size: 0.98rem; font-weight: 600; cursor: pointer; word-break: break-word; }
+.note-item-card.done .note-item-text { text-decoration: line-through; color: var(--muted); }

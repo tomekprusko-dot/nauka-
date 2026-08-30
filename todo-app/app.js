@@ -2,6 +2,8 @@
   'use strict';
 
   const STORAGE_KEY = 'zadania.tasks.v1';
+  const STORAGE_KEY_NOTEBOOKS = 'zadania.notebooks.v1';
+  const STORAGE_KEY_NOTEITEMS = 'zadania.noteitems.v1';
   const DOW = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
   const MONTHS = ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca',
     'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'];
@@ -38,6 +40,24 @@
     taskRepeat: document.getElementById('taskRepeat'),
     repeatIntervalRow: document.getElementById('repeatIntervalRow'),
     repeatDays: document.getElementById('repeatDays'),
+    viewTitle: document.getElementById('viewTitle'),
+    backBtn: document.getElementById('backBtn'),
+    tasksView: document.getElementById('tasksView'),
+    notesListView: document.getElementById('notesListView'),
+    notesDetailView: document.getElementById('notesDetailView'),
+    notesListContent: document.getElementById('notesListContent'),
+    notesDetailContent: document.getElementById('notesDetailContent'),
+    tabTasksBtn: document.getElementById('tabTasksBtn'),
+    tabNotesBtn: document.getElementById('tabNotesBtn'),
+    notebookCount: document.getElementById('notebookCount'),
+    simpleSheetOverlay: document.getElementById('simpleSheetOverlay'),
+    simpleSheetTitle: document.getElementById('simpleSheetTitle'),
+    simpleSheetLabel: document.getElementById('simpleSheetLabel'),
+    simpleForm: document.getElementById('simpleForm'),
+    simpleInput: document.getElementById('simpleInput'),
+    simpleCancelBtn: document.getElementById('simpleCancelBtn'),
+    simpleSaveBtn: document.getElementById('simpleSaveBtn'),
+    simpleDeleteBtn: document.getElementById('simpleDeleteBtn'),
   };
 
   const TAG_LABELS = { praca: '💼 Praca', prywatne: '🏠 Prywatne' };
@@ -85,11 +105,43 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }
 
+  function loadNotebooks() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_NOTEBOOKS);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveNotebooks(notebooks) {
+    localStorage.setItem(STORAGE_KEY_NOTEBOOKS, JSON.stringify(notebooks));
+  }
+
+  function loadNoteItems() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_NOTEITEMS);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveNoteItems(noteItems) {
+    localStorage.setItem(STORAGE_KEY_NOTEITEMS, JSON.stringify(noteItems));
+  }
+
   let tasks = loadTasks();
-  let filter = 'all'; // 'all' | 'none' | 'YYYY-MM-DD'
+  let notebooks = loadNotebooks();
+  let noteItems = loadNoteItems();
+  let filter = 'all'; // 'all' | 'none' | 'overdue' | 'YYYY-MM-DD'
   let editingId = null;
   let tagFilter = 'all'; // 'all' | 'praca' | 'prywatne'
   let selectedTag = null; // null | 'praca' | 'prywatne' (in the add/edit sheet)
+  let currentView = 'tasks'; // 'tasks' | 'notesList' | 'notesDetail'
+  let currentNotebookId = null;
+  let simpleMode = null; // 'notebook' | 'item'
+  let simpleEditId = null;
 
   function visibleTasks() {
     if (tagFilter === 'all') return tasks;
@@ -412,7 +464,6 @@
     el.sheetOverlay.classList.remove('open');
   }
 
-  el.addBtn.addEventListener('click', openSheet);
   el.cancelBtn.addEventListener('click', closeSheet);
   el.taskNoDate.addEventListener('change', applyNoDateToggle);
   el.taskRepeat.addEventListener('change', applyRepeatToggle);
@@ -475,10 +526,214 @@
     render();
   });
 
+  // ---------- Notes (Notatki) ----------
+
+  function sortNoteItems(list) {
+    return [...list].sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      return a.createdAt - b.createdAt;
+    });
+  }
+
+  function deleteNotebookWithConfirm(id) {
+    const nb = notebooks.find(n => n.id === id);
+    if (!nb) return false;
+    if (!confirm(`Usunąć listę „${nb.name}” wraz z jej pozycjami?`)) return false;
+    notebooks = notebooks.filter(n => n.id !== id);
+    noteItems = noteItems.filter(i => i.notebookId !== id);
+    saveNotebooks(notebooks);
+    saveNoteItems(noteItems);
+    return true;
+  }
+
+  function renderNotesList() {
+    el.notesListContent.innerHTML = '';
+    if (!notebooks.length) {
+      el.notesListContent.innerHTML = '<div class="empty-state">Brak list. Dodaj pierwszą przyciskiem +</div>';
+      return;
+    }
+    const listEl = document.createElement('div');
+    listEl.className = 'task-list';
+    notebooks.forEach(nb => {
+      const items = noteItems.filter(i => i.notebookId === nb.id);
+      const done = items.filter(i => i.done).length;
+      const total = items.length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+
+      const card = document.createElement('div');
+      card.className = 'notebook-card';
+
+      const body = document.createElement('div');
+      body.className = 'notebook-body';
+      body.addEventListener('click', () => {
+        currentNotebookId = nb.id;
+        switchView('notesDetail');
+      });
+
+      const name = document.createElement('div');
+      name.className = 'notebook-name';
+      name.textContent = nb.name;
+      body.appendChild(name);
+
+      const progress = document.createElement('div');
+      progress.className = 'notebook-progress';
+      progress.textContent = total ? `${done} z ${total} zaznaczone` : 'Brak pozycji';
+      body.appendChild(progress);
+
+      const bar = document.createElement('div');
+      bar.className = 'notebook-progress-bar';
+      const fill = document.createElement('div');
+      fill.className = 'notebook-progress-fill';
+      fill.style.width = `${percent}%`;
+      bar.appendChild(fill);
+      body.appendChild(bar);
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'notebook-edit';
+      editBtn.setAttribute('aria-label', 'Edytuj nazwę listy');
+      editBtn.textContent = '✎';
+      editBtn.addEventListener('click', () => openNotebookSheet(nb.id));
+
+      const del = document.createElement('button');
+      del.className = 'task-delete';
+      del.setAttribute('aria-label', 'Usuń listę');
+      del.textContent = '✕';
+      del.addEventListener('click', () => {
+        if (deleteNotebookWithConfirm(nb.id)) render();
+      });
+
+      card.appendChild(body);
+      card.appendChild(editBtn);
+      card.appendChild(del);
+      listEl.appendChild(card);
+    });
+    el.notesListContent.appendChild(listEl);
+  }
+
+  function renderNotesDetail() {
+    el.notesDetailContent.innerHTML = '';
+    const items = noteItems.filter(i => i.notebookId === currentNotebookId);
+    if (!items.length) {
+      el.notesDetailContent.innerHTML = '<div class="empty-state">Brak pozycji na liście. Dodaj pierwszą przyciskiem +</div>';
+      return;
+    }
+    const listEl = document.createElement('div');
+    listEl.className = 'task-list';
+    sortNoteItems(items).forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'note-item-card' + (item.done ? ' done' : '');
+
+      const check = document.createElement('button');
+      check.className = 'task-check';
+      check.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      check.addEventListener('click', () => {
+        item.done = !item.done;
+        saveNoteItems(noteItems);
+        render();
+      });
+
+      const text = document.createElement('div');
+      text.className = 'note-item-text';
+      text.textContent = item.text;
+      text.addEventListener('click', () => openItemSheet(item.id));
+
+      const del = document.createElement('button');
+      del.className = 'task-delete';
+      del.setAttribute('aria-label', 'Usuń pozycję');
+      del.textContent = '✕';
+      del.addEventListener('click', () => {
+        noteItems = noteItems.filter(i => i.id !== item.id);
+        saveNoteItems(noteItems);
+        render();
+      });
+
+      card.appendChild(check);
+      card.appendChild(text);
+      card.appendChild(del);
+      listEl.appendChild(card);
+    });
+    el.notesDetailContent.appendChild(listEl);
+  }
+
+  function openNotebookSheet(editId = null) {
+    simpleMode = 'notebook';
+    simpleEditId = editId;
+    const nb = editId ? notebooks.find(n => n.id === editId) : null;
+    el.simpleSheetTitle.textContent = editId ? 'Edytuj listę' : 'Nowa lista';
+    el.simpleSheetLabel.textContent = 'Nazwa listy';
+    el.simpleInput.placeholder = 'np. Wakacje';
+    el.simpleInput.value = nb ? nb.name : '';
+    el.simpleSaveBtn.textContent = editId ? 'Zapisz zmiany' : 'Zapisz';
+    el.simpleDeleteBtn.classList.toggle('hidden', !editId);
+    el.simpleSheetOverlay.classList.add('open');
+    setTimeout(() => el.simpleInput.focus(), 200);
+  }
+
+  function openItemSheet(editId = null) {
+    simpleMode = 'item';
+    simpleEditId = editId;
+    const item = editId ? noteItems.find(i => i.id === editId) : null;
+    el.simpleSheetTitle.textContent = editId ? 'Edytuj pozycję' : 'Nowa pozycja';
+    el.simpleSheetLabel.textContent = 'Co dodać do listy?';
+    el.simpleInput.placeholder = 'np. Ładowarka do telefonu';
+    el.simpleInput.value = item ? item.text : '';
+    el.simpleSaveBtn.textContent = editId ? 'Zapisz zmiany' : 'Zapisz';
+    el.simpleDeleteBtn.classList.toggle('hidden', !editId);
+    el.simpleSheetOverlay.classList.add('open');
+    setTimeout(() => el.simpleInput.focus(), 200);
+  }
+
+  function closeSimpleSheet() {
+    el.simpleSheetOverlay.classList.remove('open');
+  }
+
+  el.simpleCancelBtn.addEventListener('click', closeSimpleSheet);
+  el.simpleSheetOverlay.addEventListener('click', (e) => {
+    if (e.target === el.simpleSheetOverlay) closeSimpleSheet();
+  });
+
+  el.simpleForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const value = el.simpleInput.value.trim();
+    if (!value) return;
+    if (simpleMode === 'notebook') {
+      if (simpleEditId) {
+        const nb = notebooks.find(n => n.id === simpleEditId);
+        if (nb) nb.name = value;
+      } else {
+        notebooks.push({ id: uid(), name: value, createdAt: Date.now() });
+      }
+      saveNotebooks(notebooks);
+    } else if (simpleMode === 'item') {
+      if (simpleEditId) {
+        const item = noteItems.find(i => i.id === simpleEditId);
+        if (item) item.text = value;
+      } else {
+        noteItems.push({ id: uid(), notebookId: currentNotebookId, text: value, done: false, createdAt: Date.now() });
+      }
+      saveNoteItems(noteItems);
+    }
+    closeSimpleSheet();
+    render();
+  });
+
+  el.simpleDeleteBtn.addEventListener('click', () => {
+    if (!simpleEditId) return;
+    if (simpleMode === 'notebook') {
+      if (!deleteNotebookWithConfirm(simpleEditId)) return;
+    } else if (simpleMode === 'item') {
+      noteItems = noteItems.filter(i => i.id !== simpleEditId);
+      saveNoteItems(noteItems);
+    }
+    closeSimpleSheet();
+    render();
+  });
+
   // ---------- Settings: export / import ----------
 
   function openSettings() {
     el.taskCount.textContent = tasks.length;
+    el.notebookCount.textContent = notebooks.length;
     el.settingsOverlay.classList.add('open');
   }
 
@@ -493,7 +748,7 @@
   });
 
   el.exportBtn.addEventListener('click', () => {
-    const payload = JSON.stringify({ exportedAt: new Date().toISOString(), tasks }, null, 2);
+    const payload = JSON.stringify({ exportedAt: new Date().toISOString(), tasks, notebooks, noteItems }, null, 2);
     const blob = new Blob([payload], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -516,6 +771,9 @@
         const parsed = JSON.parse(reader.result);
         const importedTasks = Array.isArray(parsed) ? parsed : parsed.tasks;
         if (!Array.isArray(importedTasks)) throw new Error('invalid backup format');
+        const importedNotebooks = Array.isArray(parsed.notebooks) ? parsed.notebooks : [];
+        const importedNoteItems = Array.isArray(parsed.noteItems) ? parsed.noteItems : [];
+
         const existingIds = new Set(tasks.map(t => t.id));
         let added = 0;
         importedTasks.forEach(t => {
@@ -526,9 +784,33 @@
           }
         });
         saveTasks(tasks);
+
+        const existingNotebookIds = new Set(notebooks.map(n => n.id));
+        let addedNotebooks = 0;
+        importedNotebooks.forEach(n => {
+          if (n && n.id && n.name && !existingNotebookIds.has(n.id)) {
+            notebooks.push(n);
+            existingNotebookIds.add(n.id);
+            addedNotebooks++;
+          }
+        });
+        saveNotebooks(notebooks);
+
+        const existingItemIds = new Set(noteItems.map(i => i.id));
+        let addedItems = 0;
+        importedNoteItems.forEach(i => {
+          if (i && i.id && i.notebookId && !existingItemIds.has(i.id)) {
+            noteItems.push(i);
+            existingItemIds.add(i.id);
+            addedItems++;
+          }
+        });
+        saveNoteItems(noteItems);
+
         render();
         el.taskCount.textContent = tasks.length;
-        alert(`Zaimportowano ${added} zadań.`);
+        el.notebookCount.textContent = notebooks.length;
+        alert(`Zaimportowano ${added} zadań, ${addedNotebooks} list notatek i ${addedItems} pozycji.`);
       } catch {
         alert('Nie udało się wczytać pliku kopii zapasowej.');
       } finally {
@@ -550,18 +832,61 @@
     render();
   });
 
+  // ---------- View switching (Zadania / Notatki) ----------
+
+  function switchView(view) {
+    currentView = view;
+    el.tasksView.classList.toggle('hidden', view !== 'tasks');
+    el.notesListView.classList.toggle('hidden', view !== 'notesList');
+    el.notesDetailView.classList.toggle('hidden', view !== 'notesDetail');
+    el.tabTasksBtn.classList.toggle('active', view === 'tasks');
+    el.tabNotesBtn.classList.toggle('active', view === 'notesList' || view === 'notesDetail');
+    el.backBtn.classList.toggle('hidden', view !== 'notesDetail');
+    el.addBtn.setAttribute('aria-label',
+      view === 'tasks' ? 'Dodaj zadanie' : view === 'notesList' ? 'Dodaj listę' : 'Dodaj pozycję');
+    render();
+  }
+
+  el.tabTasksBtn.addEventListener('click', () => switchView('tasks'));
+  el.tabNotesBtn.addEventListener('click', () => switchView('notesList'));
+  el.backBtn.addEventListener('click', () => switchView('notesList'));
+
+  el.addBtn.addEventListener('click', () => {
+    if (currentView === 'tasks') openSheet();
+    else if (currentView === 'notesList') openNotebookSheet();
+    else if (currentView === 'notesDetail') openItemSheet();
+  });
+
   // ---------- Header ----------
 
   function renderHeader() {
-    const now = new Date();
-    const label = `${DOW_LONG[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
-    el.todayLabel.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    if (currentView === 'tasks') {
+      const now = new Date();
+      const label = `${DOW_LONG[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+      el.viewTitle.textContent = 'Zadania';
+      el.todayLabel.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    } else if (currentView === 'notesList') {
+      el.viewTitle.textContent = 'Notatki';
+      el.todayLabel.textContent = notebooks.length ? `${notebooks.length} list` : 'Twoje listy i checklisty';
+    } else if (currentView === 'notesDetail') {
+      const nb = notebooks.find(n => n.id === currentNotebookId);
+      const items = noteItems.filter(i => i.notebookId === currentNotebookId);
+      const done = items.filter(i => i.done).length;
+      el.viewTitle.textContent = nb ? nb.name : 'Lista';
+      el.todayLabel.textContent = items.length ? `${done} z ${items.length} zaznaczone` : 'Brak pozycji';
+    }
   }
 
   function render() {
     renderHeader();
-    renderDayStrip();
-    renderContent();
+    if (currentView === 'tasks') {
+      renderDayStrip();
+      renderContent();
+    } else if (currentView === 'notesList') {
+      renderNotesList();
+    } else if (currentView === 'notesDetail') {
+      renderNotesDetail();
+    }
   }
 
   render();
