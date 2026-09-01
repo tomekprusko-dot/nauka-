@@ -1,14 +1,15 @@
 import { requireUser } from "@/lib/auth";
-import { getUserPredictions, getResults, computeStandings } from "@/lib/db";
+import { getUserPredictions, getResults, computeStandings, getFixtureNotes } from "@/lib/db";
 import { fixtures } from "@/data/fixtures";
 import TerminarzClient from "./TerminarzClient";
 
 export default async function TerminarzPage() {
   const user = await requireUser();
-  const [predictions, results, standings] = await Promise.all([
+  const [predictions, results, standings, fixtureNotes] = await Promise.all([
     getUserPredictions(user.id),
     getResults(),
     computeStandings(),
+    getFixtureNotes(),
   ]);
   const myRow = standings.find((r) => r.user.id === user.id);
 
@@ -17,6 +18,7 @@ export default async function TerminarzPage() {
       fixtures={fixtures}
       initialPredictions={predictions}
       results={results}
+      fixtureNotes={fixtureNotes}
       myPoints={myRow?.points ?? 0}
       myRank={myRow?.rank ?? null}
       hotStreak={myRow?.hotStreak ?? 0}

@@ -89,6 +89,15 @@ create table if not exists automation_log (
   created_at timestamptz not null default now()
 );
 
+-- Krótkie ciekawostki/kontekst przed meczem (kontuzje, forma, bezpośrednie
+-- starcia) — zbierane z sieci, wyświetlane w Terminarzu pod danym meczem po
+-- rozwinięciu. 3-5 zwięzłych zdań na mecz, każde już ze swoim emoji.
+create table if not exists fixture_notes (
+  fixture_id text primary key,
+  notes text[] not null,
+  updated_at timestamptz not null default now()
+);
+
 -- RLS włączone, bez żadnych policy — to celowe: jedyny klucz, który może
 -- czytać/zapisywać te tabele, to service_role (używany wyłącznie po stronie
 -- serwera Next.js, nigdy w przeglądarce). Przeglądarka nie łączy się z
@@ -99,3 +108,4 @@ alter table results enable row level security;
 alter table special_predictions enable row level security;
 alter table special_result enable row level security;
 alter table automation_log enable row level security;
+alter table fixture_notes enable row level security;

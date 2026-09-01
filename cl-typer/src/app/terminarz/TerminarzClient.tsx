@@ -90,12 +90,14 @@ function FixtureRow({
   fixture,
   prediction,
   result,
+  notes,
   onSaved,
   onReset,
 }: {
   fixture: Fixture;
   prediction: Prediction | undefined;
   result: FixtureResult | undefined;
+  notes: string[] | undefined;
   onSaved: (fixtureId: string, outcome: MatchOutcome) => void;
   onReset: (fixtureId: string) => void;
 }) {
@@ -106,6 +108,7 @@ function FixtureRow({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
   useEffect(() => {
     setOutcome(prediction?.outcome ?? null);
@@ -151,70 +154,95 @@ function FixtureRow({
   }
 
   const hasPrediction = prediction !== undefined;
+  const hasNotes = Boolean(notes && notes.length > 0);
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl border bg-white/5 p-4 transition-colors sm:flex-row sm:items-center sm:justify-between ${
+      className={`rounded-xl border bg-white/5 p-4 transition-colors ${
         hasPrediction ? "border-[#dc2626]/30" : "border-white/10"
       }`}
     >
-      <div className="flex flex-1 items-center gap-2">
-        <TeamBadge team={home} />
-        <p className="font-medium">
-          {home?.name ?? fixture.homeTeamId}
-          <span className="mx-1.5 text-zinc-500" aria-hidden>
-            ⚽
-          </span>
-          {away?.name ?? fixture.awayTeamId}
-        </p>
-        <TeamBadge team={away} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 items-center gap-2">
+          <TeamBadge team={home} />
+          <p className="font-medium">
+            {home?.name ?? fixture.homeTeamId}
+            <span className="mx-1.5 text-zinc-500" aria-hidden>
+              ⚽
+            </span>
+            {away?.name ?? fixture.awayTeamId}
+          </p>
+          <TeamBadge team={away} />
+        </div>
+
+        <div className="flex flex-col gap-1.5 sm:items-end">
+          <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1 text-xs">
+            <span aria-hidden>📅</span>
+            <span className="capitalize text-zinc-200">{formatDate(fixture.kickoff)}</span>
+            <span className="text-zinc-500">•</span>
+            <span aria-hidden>🕐</span>
+            <span className="font-semibold text-[#dc2626]">{formatTime(fixture.kickoff)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {!locked ? (
+              <>
+                <OutcomePicker
+                  homeName={home?.shortName ?? fixture.homeTeamId}
+                  awayName={away?.shortName ?? fixture.awayTeamId}
+                  value={outcome}
+                  isSaved={isSaved}
+                  disabled={saving}
+                  onChange={setOutcome}
+                />
+                <button
+                  onClick={isSaved ? handleReset : handleSave}
+                  disabled={saving || (!outcome && !isSaved)}
+                  title={isSaved ? "Kliknij, żeby skasować typ" : undefined}
+                  className={`ml-1 rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed ${
+                    isSaved
+                      ? "bg-emerald-500 disabled:opacity-60"
+                      : "bg-gradient-to-b from-[#f87171] to-[#991b1b] disabled:opacity-60"
+                  }`}
+                >
+                  {saving ? (isSaved ? "Kasowanie..." : "Zapisywanie...") : isSaved ? "Zapisano ✓" : "Zapisz"}
+                </button>
+              </>
+            ) : result ? (
+              <span className="flex items-center rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300">
+                Wynik: <strong className="ml-1">{result.homeGoals}:{result.awayGoals}</strong>
+                {prediction && <PointsBadge prediction={prediction} result={result} />}
+              </span>
+            ) : (
+              <span className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-400">
+                🔒 {prediction ? `Twój typ: ${OUTCOME_LABEL[prediction.outcome]}` : "Zablokowane"}
+              </span>
+            )}
+          </div>
+          {error && <p className="text-xs text-red-400">{error}</p>}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1.5 sm:items-end">
-        <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1 text-xs">
-          <span aria-hidden>📅</span>
-          <span className="capitalize text-zinc-200">{formatDate(fixture.kickoff)}</span>
-          <span className="text-zinc-500">•</span>
-          <span aria-hidden>🕐</span>
-          <span className="font-semibold text-[#dc2626]">{formatTime(fixture.kickoff)}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {!locked ? (
-            <>
-              <OutcomePicker
-                homeName={home?.shortName ?? fixture.homeTeamId}
-                awayName={away?.shortName ?? fixture.awayTeamId}
-                value={outcome}
-                isSaved={isSaved}
-                disabled={saving}
-                onChange={setOutcome}
-              />
-              <button
-                onClick={isSaved ? handleReset : handleSave}
-                disabled={saving || (!outcome && !isSaved)}
-                title={isSaved ? "Kliknij, żeby skasować typ" : undefined}
-                className={`ml-1 rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed ${
-                  isSaved
-                    ? "bg-emerald-500 disabled:opacity-60"
-                    : "bg-gradient-to-b from-[#f87171] to-[#991b1b] disabled:opacity-60"
-                }`}
-              >
-                {saving ? (isSaved ? "Kasowanie..." : "Zapisywanie...") : isSaved ? "Zapisano ✓" : "Zapisz"}
-              </button>
-            </>
-          ) : result ? (
-            <span className="flex items-center rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300">
-              Wynik: <strong className="ml-1">{result.homeGoals}:{result.awayGoals}</strong>
-              {prediction && <PointsBadge prediction={prediction} result={result} />}
+      {hasNotes && (
+        <div className="mt-3 border-t border-white/10 pt-3">
+          <button
+            type="button"
+            onClick={() => setNotesOpen((v) => !v)}
+            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-zinc-200"
+          >
+            <span className={`transition-transform ${notesOpen ? "rotate-90" : ""}`} aria-hidden>
+              ▶
             </span>
-          ) : (
-            <span className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-400">
-              🔒 {prediction ? `Twój typ: ${OUTCOME_LABEL[prediction.outcome]}` : "Zablokowane"}
-            </span>
+            📰 Ciekawostki przed meczem {notesOpen ? "" : `(${notes!.length})`}
+          </button>
+          {notesOpen && (
+            <ul className="mt-2 space-y-1.5 text-sm text-zinc-300">
+              {notes!.map((note, i) => (
+                <li key={i}>{note}</li>
+              ))}
+            </ul>
           )}
         </div>
-        {error && <p className="text-xs text-red-400">{error}</p>}
-      </div>
+      )}
     </div>
   );
 }
@@ -223,6 +251,7 @@ export default function TerminarzClient({
   fixtures,
   initialPredictions,
   results,
+  fixtureNotes,
   myPoints,
   myRank,
   hotStreak,
@@ -230,6 +259,7 @@ export default function TerminarzClient({
   fixtures: Fixture[];
   initialPredictions: Record<string, Prediction>;
   results: Record<string, FixtureResult>;
+  fixtureNotes: Record<string, string[]>;
   myPoints: number;
   myRank: number | null;
   hotStreak: number;
@@ -367,6 +397,7 @@ export default function TerminarzClient({
                 fixture={fixture}
                 prediction={predictions[fixture.id]}
                 result={results[fixture.id]}
+                notes={fixtureNotes[fixture.id]}
                 onSaved={handleSaved}
                 onReset={handleReset}
               />

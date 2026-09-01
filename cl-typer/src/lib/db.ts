@@ -104,6 +104,17 @@ export async function setResult(fixtureId: string, homeGoals: number, awayGoals:
   if (error) throw error;
 }
 
+export async function getFixtureNotes(): Promise<Record<string, string[]>> {
+  const { data, error } = await supabaseServer().from("fixture_notes").select("*");
+  // Ciekawostki są dodatkiem kosmetycznym — jeśli tabela jeszcze nie istnieje
+  // (migracja SQL nie została wklejona) albo zapytanie się nie powiedzie,
+  // Terminarz ma dalej działać normalnie, tylko bez tej sekcji.
+  if (error) return {};
+  const out: Record<string, string[]> = {};
+  for (const row of data as { fixture_id: string; notes: string[] }[]) out[row.fixture_id] = row.notes;
+  return out;
+}
+
 interface PredictionRow {
   user_id: string;
   fixture_id: string;
