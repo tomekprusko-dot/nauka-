@@ -287,6 +287,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
       correctHits,
       predictionsMade: userPredictions.length,
       specialPoints,
+      championTeamId: allSpecialPredictions[user.id]?.championTeamId ?? null,
       form,
       hotStreak,
     };
@@ -303,6 +304,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
     correctHits: row.correctHits,
     predictionsMade: row.predictionsMade,
     specialPoints: row.specialPoints,
+    championTeamId: row.championTeamId,
     form: row.form,
     hotStreak: row.hotStreak,
     rank: i + 1,

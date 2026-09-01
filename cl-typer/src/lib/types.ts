@@ -54,6 +54,8 @@ export interface StandingsRow {
   form: number[];
   /** Consecutive most-recent scoring (non-zero) picks, only set once it reaches 3+. */
   hotStreak: number;
+  /** This user's champion pick, if any — only shown in the UI once the pick deadline has passed. */
+  championTeamId: string | null;
 }
 
 /** A user's one-off, pre-season pick: who wins it all. */

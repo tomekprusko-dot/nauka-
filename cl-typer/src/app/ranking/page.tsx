@@ -1,5 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { computeStandings } from "@/lib/db";
+import { SPECIAL_PICK_DEADLINE } from "@/data/fixtures";
+import { getTeam } from "@/data/teams";
+import TeamBadge from "@/components/TeamBadge";
 import FormDots from "@/components/FormDots";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -30,6 +33,7 @@ export default async function RankingPage() {
   const user = await requireUser();
   const rows = await computeStandings();
   const myRow = rows.find((r) => r.user.id === user.id);
+  const picksRevealed = Date.now() >= new Date(SPECIAL_PICK_DEADLINE).getTime();
 
   return (
     <div className="space-y-4">
@@ -67,7 +71,7 @@ export default async function RankingPage() {
       )}
 
       <div className="overflow-x-auto rounded-xl border border-white/10">
-        <table className="w-full min-w-[680px] text-sm">
+        <table className="w-full min-w-[760px] text-sm">
           <thead className="bg-white/5 text-left text-xs uppercase tracking-wide text-zinc-400">
             <tr>
               <th className="px-4 py-3">#</th>
@@ -75,7 +79,7 @@ export default async function RankingPage() {
               <th className="px-4 py-3">Forma</th>
               <th className="px-4 py-3 text-right">Typy</th>
               <th className="px-4 py-3 text-right">Trafione typy</th>
-              <th className="px-4 py-3 text-right">Specjalne</th>
+              <th className="px-4 py-3 text-right">Mistrz Ligi</th>
               <th className="px-4 py-3 text-right">Punkty</th>
             </tr>
           </thead>
@@ -113,8 +117,22 @@ export default async function RankingPage() {
                   </td>
                   <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
                   <td className="px-4 py-3 text-right text-zinc-400">{row.correctHits}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400">
-                    {row.specialPoints > 0 ? `👑 ${row.specialPoints}` : "—"}
+                  <td className="whitespace-nowrap px-4 py-3 text-right text-zinc-400">
+                    {!picksRevealed ? (
+                      <span title="Typy odkryją się po terminie typowania mistrza">🔒</span>
+                    ) : row.championTeamId ? (
+                      <span
+                        className={`inline-flex items-center gap-1.5 ${
+                          row.specialPoints > 0 ? "text-emerald-400" : "text-zinc-400"
+                        }`}
+                      >
+                        {row.specialPoints > 0 && <span aria-hidden>👑</span>}
+                        <TeamBadge team={getTeam(row.championTeamId)} size="sm" />
+                        {getTeam(row.championTeamId)?.name ?? row.championTeamId}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
                 </tr>
