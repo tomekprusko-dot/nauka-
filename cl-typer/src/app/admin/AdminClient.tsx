@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { getTeam, teams } from "@/data/teams";
 import TeamBadge from "@/components/TeamBadge";
 import { AutomationLogEntry, Fixture, FixtureResult, InvitedUser, SpecialResult, Team } from "@/lib/types";
+import { formatMatchdayRange } from "@/lib/formatMatchdayRange";
 import { addUserAction, removeUserAction, setResultAction, setSpecialResultAction } from "./actions";
 
 function formatLogDate(iso: string) {
@@ -212,30 +213,91 @@ function ResultsSection({
   initialResults: Record<string, FixtureResult>;
 }) {
   const [results, setResults] = useState(initialResults);
+  const [currentMatchday, setCurrentMatchday] = useState<number | null>(null);
+  const hasScrolledToCurrent = useRef(false);
+
+  useEffect(() => {
+    const now = Date.now();
+    const upcoming = fixtures
+      .filter((f) => new Date(f.kickoff).getTime() > now)
+      .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime())[0];
+    setCurrentMatchday(upcoming ? upcoming.matchday : (fixtures[fixtures.length - 1]?.matchday ?? null));
+  }, [fixtures]);
+
+  useEffect(() => {
+    if (currentMatchday === null || hasScrolledToCurrent.current) return;
+    hasScrolledToCurrent.current = true;
+    document.getElementById(`admin-kolejka-${currentMatchday}`)?.scrollIntoView({ block: "start" });
+  }, [currentMatchday]);
 
   function handleSaved(fixtureId: string, home: number, away: number) {
     setResults((prev) => ({ ...prev, [fixtureId]: { fixtureId, homeGoals: home, awayGoals: away } }));
   }
 
+  const byMatchday = useMemo(() => {
+    const map = new Map<number, Fixture[]>();
+    for (const fixture of fixtures) {
+      const list = map.get(fixture.matchday) ?? [];
+      list.push(fixture);
+      map.set(fixture.matchday, list);
+    }
+    return [...map.entries()].sort((a, b) => a[0] - b[0]);
+  }, [fixtures]);
+
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Wyniki meczów
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
+          Wyniki meczów
+        </h2>
+        {currentMatchday !== null && (
+          <button
+            type="button"
+            onClick={() =>
+              document.getElementById(`admin-kolejka-${currentMatchday}`)?.scrollIntoView({ block: "start" })
+            }
+            className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-transform hover:scale-105 active:scale-95"
+          >
+            ⬇️ Przejdź do aktualnej kolejki
+          </button>
+        )}
+      </div>
       <p className="text-xs text-zinc-500">
         Wpisz ostateczny wynik po zakończeniu meczu — na tej podstawie liczony jest ranking.
       </p>
-      <div className="space-y-2">
-        {fixtures.map((fixture) => (
-          <ResultRow
-            key={fixture.id}
-            fixture={fixture}
-            home={getTeam(fixture.homeTeamId)}
-            away={getTeam(fixture.awayTeamId)}
-            initialResult={results[fixture.id]}
-            onSaved={handleSaved}
-          />
-        ))}
+      <div className="space-y-5">
+        {byMatchday.map(([matchday, list]) => {
+          const allKickedOff = list.every((f) => new Date(f.kickoff).getTime() <= Date.now());
+          return (
+            <div
+              key={matchday}
+              id={`admin-kolejka-${matchday}`}
+              className={`scroll-mt-24 space-y-2 ${allKickedOff ? "opacity-50 grayscale-[0.6]" : ""}`}
+            >
+              <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                Kolejka {matchday}
+                <span className="font-normal normal-case text-zinc-600">{formatMatchdayRange(list)}</span>
+                {matchday === currentMatchday && (
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                    Aktualna kolejka
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2">
+                {list.map((fixture) => (
+                  <ResultRow
+                    key={fixture.id}
+                    fixture={fixture}
+                    home={getTeam(fixture.homeTeamId)}
+                    away={getTeam(fixture.awayTeamId)}
+                    initialResult={results[fixture.id]}
+                    onSaved={handleSaved}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
