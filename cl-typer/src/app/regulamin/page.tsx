@@ -89,7 +89,7 @@ export default async function RegulaminPage() {
           <strong>Mistrzem Polski</strong> — trafiony typ to <strong>+10 punktów</strong>.
         </p>
         <p>
-          Typ ustawiasz na stronie „Wytypuj mistrza” — można go zmieniać do 10 września
+          Typ ustawiasz na stronie „Wytypuj mistrza” — można go zmieniać do 5 września
           2026. Po tym terminie jest zablokowany, a punkty doliczane są dopiero po
           zakończeniu rozgrywek, gdy administrator wpisze ostateczne rozstrzygnięcie.
         </p>

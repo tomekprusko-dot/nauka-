@@ -335,4 +335,4 @@ export const TYPING_OPENS_FROM_MATCHDAY = 7;
 
 /** Deadline na typ specjalny (mistrz Polski) — stała data, nie kickoff meczu,
  * bo apka wystartowała już w trakcie sezonu. */
-export const SPECIAL_PICK_DEADLINE = "2026-09-10T21:59:59Z";
+export const SPECIAL_PICK_DEADLINE = "2026-09-05T21:59:59Z";
