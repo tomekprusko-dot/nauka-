@@ -384,7 +384,7 @@ export async function getLatestMatchdayRecap(): Promise<MatchdayRecap | null> {
   // Kosmetyczny dodatek — jeśli tabela jeszcze nie istnieje albo coś pójdzie
   // nie tak, Tabela typerów ma dalej działać normalnie, tylko bez baneru.
   if (error || !data) return null;
-  return { matchday: data.matchday, recap: data.recap, createdAt: data.created_at };
+  return { matchday: data.matchday, recap: data.recap, points: data.points ?? {}, createdAt: data.created_at };
 }
 
 export async function getAutomationLog(limit = 20): Promise<AutomationLogEntry[]> {

@@ -100,12 +100,15 @@ create table if not exists fixture_notes (
 
 -- Uszczypliwe podsumowanie każdej zakończonej kolejki (kto typował najgorzej
 -- w tej konkretnej kolejce) — jedno zdanie/akapit generowane automatycznie,
+-- plus punkty każdej osoby w tej kolejce (points: { "Imię": punkty }),
 -- wyświetlane na górze Tabeli typerów.
 create table if not exists matchday_recaps (
   matchday int primary key,
   recap text not null,
+  points jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
+alter table matchday_recaps add column if not exists points jsonb not null default '{}'::jsonb;
 
 -- RLS włączone, bez żadnych policy — to celowe: jedyny klucz, który może
 -- czytać/zapisywać te tabele, to service_role (używany wyłącznie po stronie

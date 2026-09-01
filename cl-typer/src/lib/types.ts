@@ -81,6 +81,8 @@ export interface AutomationLogEntry {
 export interface MatchdayRecap {
   matchday: number;
   recap: string;
+  /** Each user's name mapped to the points they scored in just this matchday. */
+  points: Record<string, number>;
   createdAt: string;
 }
 
