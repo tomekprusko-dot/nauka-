@@ -7,7 +7,6 @@ import {
   AutomationLogEntry,
   FixtureResult,
   InvitedUser,
-  LeagueTableRow,
   MatchdayRecap,
   MatchOutcome,
   NamedPrediction,
@@ -15,6 +14,7 @@ import {
   SpecialPrediction,
   SpecialResult,
   StandingsRow,
+  TeamDetail,
   UserRole,
 } from "@/lib/types";
 
@@ -338,21 +338,48 @@ export async function computeStandings(): Promise<StandingsRow[]> {
   }));
 }
 
-/** The real Ekstraklasa league table (team standings), computed from played fixtures. */
-export async function computeLeagueTable(): Promise<LeagueTableRow[]> {
-  const results = await getResults();
+/**
+ * The real Ekstraklasa league table, one full profile per team: position,
+ * points, home/away splits, full match history, and — from our own
+ * `predictions` table — how our typers have actually picked matches
+ * involving this team (win/draw/loss %), aggregated across the season.
+ */
+export async function computeTeamDetails(): Promise<Record<string, TeamDetail>> {
+  const [results, allPredictions] = await Promise.all([getResults(), getAllPredictions()]);
+  const fixtureById = new Map(fixtures.map((f) => [f.id, f]));
 
-  const table = new Map<string, LeagueTableRow>(
+  const emptySplit = () => ({ played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0 });
+  const details = new Map<string, TeamDetail>(
     teams.map((team) => [
       team.id,
-      { teamId: team.id, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0 },
+      {
+        teamId: team.id,
+        rank: 0,
+        points: 0,
+        played: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDiff: 0,
+        home: emptySplit(),
+        away: emptySplit(),
+        form: [],
+        matches: [],
+        fanSentiment: null,
+      },
     ]),
   );
 
-  for (const fixture of fixtures) {
+  const playedFixtures = fixtures
+    .filter((f) => results[f.id])
+    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
+
+  for (const fixture of playedFixtures) {
     const result = results[fixture.id];
-    const home = table.get(fixture.homeTeamId);
-    const away = table.get(fixture.awayTeamId);
+    const home = details.get(fixture.homeTeamId);
+    const away = details.get(fixture.awayTeamId);
     if (!result || !home || !away) continue;
 
     home.played += 1;
@@ -361,26 +388,103 @@ export async function computeLeagueTable(): Promise<LeagueTableRow[]> {
     home.goalsAgainst += result.awayGoals;
     away.goalsFor += result.awayGoals;
     away.goalsAgainst += result.homeGoals;
+    home.home.played += 1;
+    away.away.played += 1;
+    home.home.goalsFor += result.homeGoals;
+    home.home.goalsAgainst += result.awayGoals;
+    away.away.goalsFor += result.awayGoals;
+    away.away.goalsAgainst += result.homeGoals;
 
+    let homeOutcome: "W" | "D" | "L";
+    let awayOutcome: "W" | "D" | "L";
     if (result.homeGoals > result.awayGoals) {
       home.won += 1;
       home.points += 3;
+      home.home.won += 1;
       away.lost += 1;
+      away.away.lost += 1;
+      homeOutcome = "W";
+      awayOutcome = "L";
     } else if (result.homeGoals < result.awayGoals) {
       away.won += 1;
       away.points += 3;
+      away.away.won += 1;
       home.lost += 1;
+      home.home.lost += 1;
+      homeOutcome = "L";
+      awayOutcome = "W";
     } else {
       home.drawn += 1;
       away.drawn += 1;
       home.points += 1;
       away.points += 1;
+      home.home.drawn += 1;
+      away.away.drawn += 1;
+      homeOutcome = "D";
+      awayOutcome = "D";
     }
+
+    home.matches.push({
+      fixtureId: fixture.id,
+      matchday: fixture.matchday,
+      opponentId: fixture.awayTeamId,
+      isHome: true,
+      goalsFor: result.homeGoals,
+      goalsAgainst: result.awayGoals,
+      outcome: homeOutcome,
+    });
+    away.matches.push({
+      fixtureId: fixture.id,
+      matchday: fixture.matchday,
+      opponentId: fixture.homeTeamId,
+      isHome: false,
+      goalsFor: result.awayGoals,
+      goalsAgainst: result.homeGoals,
+      outcome: awayOutcome,
+    });
   }
 
-  return [...table.values()]
-    .map((row) => ({ ...row, goalDiff: row.goalsFor - row.goalsAgainst }))
-    .sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor);
+  for (const detail of details.values()) {
+    detail.goalDiff = detail.goalsFor - detail.goalsAgainst;
+    detail.form = detail.matches.slice(-5).map((m) => m.outcome);
+  }
+
+  const ranked = [...details.values()].sort(
+    (a, b) => b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor,
+  );
+  ranked.forEach((detail, i) => (detail.rank = i + 1));
+
+  const sentimentCounts = new Map<string, { win: number; draw: number; loss: number }>();
+  for (const prediction of allPredictions) {
+    const fixture = fixtureById.get(prediction.fixtureId);
+    if (!fixture) continue;
+    for (const { teamId, isHomeTeam } of [
+      { teamId: fixture.homeTeamId, isHomeTeam: true },
+      { teamId: fixture.awayTeamId, isHomeTeam: false },
+    ]) {
+      const counts = sentimentCounts.get(teamId) ?? { win: 0, draw: 0, loss: 0 };
+      if (prediction.outcome === "D") counts.draw += 1;
+      else if ((isHomeTeam && prediction.outcome === "H") || (!isHomeTeam && prediction.outcome === "A")) {
+        counts.win += 1;
+      } else {
+        counts.loss += 1;
+      }
+      sentimentCounts.set(teamId, counts);
+    }
+  }
+  for (const [teamId, counts] of sentimentCounts) {
+    const detail = details.get(teamId);
+    const total = counts.win + counts.draw + counts.loss;
+    if (!detail || total === 0) continue;
+    detail.fanSentiment = {
+      winPct: Math.round((counts.win / total) * 100),
+      drawPct: Math.round((counts.draw / total) * 100),
+      lossPct: Math.round((counts.loss / total) * 100),
+      totalPicks: total,
+    };
+  }
+
+  return Object.fromEntries(details);
 }
 
 export async function addAutomationLog(message: string): Promise<void> {

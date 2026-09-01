@@ -94,8 +94,39 @@ export interface MatchdayRecap {
 }
 
 /** One team's row in the real Ekstraklasa league table (not the typers' ranking). */
-export interface LeagueTableRow {
+interface SplitRecord {
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+}
+
+/** One played match from a single team's point of view (opponent, venue, score, W/D/L). */
+export interface TeamMatchRecord {
+  fixtureId: string;
+  matchday: number;
+  opponentId: string;
+  isHome: boolean;
+  goalsFor: number;
+  goalsAgainst: number;
+  outcome: "W" | "D" | "L";
+}
+
+/** How our own typers have picked matches involving this team, aggregated across the season so far. */
+export interface FanSentiment {
+  winPct: number;
+  drawPct: number;
+  lossPct: number;
+  totalPicks: number;
+}
+
+/** One team's full profile in the real Ekstraklasa table — position, splits, history, and our typers' sentiment. */
+export interface TeamDetail {
   teamId: string;
+  rank: number;
+  points: number;
   played: number;
   won: number;
   drawn: number;
@@ -103,5 +134,11 @@ export interface LeagueTableRow {
   goalsFor: number;
   goalsAgainst: number;
   goalDiff: number;
-  points: number;
+  home: SplitRecord;
+  away: SplitRecord;
+  /** Last up to 5 results, oldest to newest. */
+  form: ("W" | "D" | "L")[];
+  /** Every played match this season, oldest to newest. */
+  matches: TeamMatchRecord[];
+  fanSentiment: FanSentiment | null;
 }
