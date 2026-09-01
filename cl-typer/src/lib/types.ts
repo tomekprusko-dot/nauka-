@@ -77,6 +77,13 @@ export interface AutomationLogEntry {
   createdAt: string;
 }
 
+/** An auto-generated, needling recap of who typed worst in a completed matchday. */
+export interface MatchdayRecap {
+  matchday: number;
+  recap: string;
+  createdAt: string;
+}
+
 /** One team's row in the real Ekstraklasa league table (not the typers' ranking). */
 export interface LeagueTableRow {
   teamId: string;

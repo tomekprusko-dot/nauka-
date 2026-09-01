@@ -98,6 +98,15 @@ create table if not exists fixture_notes (
   updated_at timestamptz not null default now()
 );
 
+-- Uszczypliwe podsumowanie każdej zakończonej kolejki (kto typował najgorzej
+-- w tej konkretnej kolejce) — jedno zdanie/akapit generowane automatycznie,
+-- wyświetlane na górze Tabeli typerów.
+create table if not exists matchday_recaps (
+  matchday int primary key,
+  recap text not null,
+  created_at timestamptz not null default now()
+);
+
 -- RLS włączone, bez żadnych policy — to celowe: jedyny klucz, który może
 -- czytać/zapisywać te tabele, to service_role (używany wyłącznie po stronie
 -- serwera Next.js, nigdy w przeglądarce). Przeglądarka nie łączy się z
@@ -109,3 +118,4 @@ alter table special_predictions enable row level security;
 alter table special_result enable row level security;
 alter table automation_log enable row level security;
 alter table fixture_notes enable row level security;
+alter table matchday_recaps enable row level security;

@@ -1,5 +1,5 @@
 import { requireUser } from "@/lib/auth";
-import { computeStandings } from "@/lib/db";
+import { computeStandings, getLatestMatchdayRecap } from "@/lib/db";
 import { SPECIAL_PICK_DEADLINE } from "@/data/fixtures";
 import { getTeam } from "@/data/teams";
 import TeamBadge from "@/components/TeamBadge";
@@ -32,7 +32,7 @@ function RankDelta({ rank, previousRank }: { rank: number; previousRank: number 
 
 export default async function RankingPage() {
   const user = await requireUser();
-  const rows = await computeStandings();
+  const [rows, recap] = await Promise.all([computeStandings(), getLatestMatchdayRecap()]);
   const myRow = rows.find((r) => r.user.id === user.id);
   const picksRevealed = Date.now() >= new Date(SPECIAL_PICK_DEADLINE).getTime();
 
@@ -48,6 +48,15 @@ export default async function RankingPage() {
           👑 +10 pkt za trafionego mistrza Polski.
         </p>
       </div>
+
+      {recap && (
+        <div className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-400/10 px-4 py-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-fuchsia-300">
+            🎤 Podsumowanie kolejki {recap.matchday}
+          </p>
+          <p className="mt-1 text-sm text-zinc-100">{recap.recap}</p>
+        </div>
+      )}
 
       {myRow && (
         <div className="flex flex-wrap items-center gap-4 rounded-xl border border-[#dc2626]/30 bg-[#dc2626]/10 px-4 py-3">

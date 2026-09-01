@@ -8,6 +8,7 @@ import {
   FixtureResult,
   InvitedUser,
   LeagueTableRow,
+  MatchdayRecap,
   MatchOutcome,
   Prediction,
   SpecialPrediction,
@@ -371,6 +372,19 @@ export async function computeLeagueTable(): Promise<LeagueTableRow[]> {
 export async function addAutomationLog(message: string): Promise<void> {
   const { error } = await supabaseServer().from("automation_log").insert({ message });
   if (error) throw error;
+}
+
+export async function getLatestMatchdayRecap(): Promise<MatchdayRecap | null> {
+  const { data, error } = await supabaseServer()
+    .from("matchday_recaps")
+    .select("*")
+    .order("matchday", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // Kosmetyczny dodatek — jeśli tabela jeszcze nie istnieje albo coś pójdzie
+  // nie tak, Tabela typerów ma dalej działać normalnie, tylko bez baneru.
+  if (error || !data) return null;
+  return { matchday: data.matchday, recap: data.recap, createdAt: data.created_at };
 }
 
 export async function getAutomationLog(limit = 20): Promise<AutomationLogEntry[]> {
