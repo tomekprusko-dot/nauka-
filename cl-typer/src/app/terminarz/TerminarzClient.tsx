@@ -297,8 +297,8 @@ export default function TerminarzClient({
         </p>
         <p className="mt-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-300">
           Kolejki 1-6 to prawdziwe mecze sezonu 2026/27, ale typowanie na nie jest już
-          zamknięte — wyniki dojdą automatycznie po rozegraniu. Kolejka 7 to pierwsza
-          otwarta do typowania. Kolejka 8 i dalsze są na razie przykładowe, do podmiany
+          zamknięte — wyniki dojdą automatycznie po rozegraniu. Kolejki 7-8 są otwarte
+          do typowania. Kolejka 9 i dalsze są na razie przykładowe, do podmiany
           na pełny oficjalny terminarz PZPN/Ekstraklasa.org.
         </p>
       </div>
