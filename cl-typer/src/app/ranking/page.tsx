@@ -76,11 +76,11 @@ export default async function RankingPage() {
             <tr>
               <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">Gracz</th>
-              <th className="px-4 py-3">Forma</th>
+              <th className="px-4 py-3 text-right">Punkty</th>
               <th className="px-4 py-3 text-right">Typy</th>
               <th className="px-4 py-3 text-right">Trafione typy</th>
+              <th className="px-4 py-3">Forma</th>
               <th className="px-4 py-3 text-right">Mistrz Ligi</th>
-              <th className="px-4 py-3 text-right">Punkty</th>
             </tr>
           </thead>
           <tbody>
@@ -112,11 +112,12 @@ export default async function RankingPage() {
                       </span>
                     )}
                   </td>
+                  <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
+                  <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
+                  <td className="px-4 py-3 text-right text-zinc-400">{row.correctHits}</td>
                   <td className="px-4 py-3">
                     <FormDots form={row.form} />
                   </td>
-                  <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>
-                  <td className="px-4 py-3 text-right text-zinc-400">{row.correctHits}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-right text-zinc-400">
                     {!picksRevealed ? (
                       <span title="Typy odkryją się po terminie typowania mistrza">🔒</span>
@@ -134,14 +135,13 @@ export default async function RankingPage() {
                       "—"
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-zinc-500 sm:hidden">Przesuń tabelę w bok, żeby zobaczyć kolumnę Punkty.</p>
+      <p className="text-xs text-zinc-500 sm:hidden">Przesuń tabelę w bok, żeby zobaczyć kolumnę Mistrz Ligi.</p>
 
       {rows.length === 0 && (
         <p className="text-sm text-zinc-500">Brak jeszcze żadnych typów.</p>
