@@ -5,6 +5,7 @@
 const PLAYER_AVATARS: Record<string, string> = {
   simba: "/avatars/simba.png",
   albańczyk: "/avatars/albanczyk.png",
+  malinozzi: "/avatars/malinozzi.png",
 };
 
 export function getPlayerAvatar(name: string): string | null {
