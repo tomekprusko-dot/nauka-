@@ -41,6 +41,13 @@ export interface Prediction {
   savedAt: string;
 }
 
+/** One person's pick on a fixture, with their name resolved — for the "how did others type" reveal. */
+export interface NamedPrediction {
+  userId: string;
+  userName: string;
+  outcome: MatchOutcome;
+}
+
 export interface StandingsRow {
   user: InvitedUser;
   points: number;

@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getTeam } from "@/data/teams";
-import { Fixture, FixtureResult, MatchOutcome, Prediction } from "@/lib/types";
+import { Fixture, FixtureResult, MatchOutcome, NamedPrediction, Prediction } from "@/lib/types";
 import TeamBadge from "@/components/TeamBadge";
-import { scorePrediction } from "@/lib/scoring";
+import PlayerAvatar from "@/components/PlayerAvatar";
+import { resultOutcome, scorePrediction } from "@/lib/scoring";
 import { TYPING_OPENS_FROM_MATCHDAY } from "@/data/fixtures";
 import { formatMatchdayRange } from "@/lib/formatMatchdayRange";
 import { savePredictionAction, deletePredictionAction } from "./actions";
@@ -91,6 +92,7 @@ function FixtureRow({
   prediction,
   result,
   notes,
+  othersPredictions,
   onSaved,
   onReset,
 }: {
@@ -98,6 +100,7 @@ function FixtureRow({
   prediction: Prediction | undefined;
   result: FixtureResult | undefined;
   notes: string[] | undefined;
+  othersPredictions: NamedPrediction[];
   onSaved: (fixtureId: string, outcome: MatchOutcome) => void;
   onReset: (fixtureId: string) => void;
 }) {
@@ -108,15 +111,18 @@ function FixtureRow({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
+  const [kickoffPassed, setKickoffPassed] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [othersOpen, setOthersOpen] = useState(false);
 
   useEffect(() => {
     setOutcome(prediction?.outcome ?? null);
   }, [prediction]);
 
   useEffect(() => {
-    const kickoffPassed = new Date(fixture.kickoff).getTime() <= Date.now();
-    setLocked(kickoffPassed || fixture.matchday < TYPING_OPENS_FROM_MATCHDAY);
+    const passed = new Date(fixture.kickoff).getTime() <= Date.now();
+    setKickoffPassed(passed);
+    setLocked(passed || fixture.matchday < TYPING_OPENS_FROM_MATCHDAY);
   }, [fixture.kickoff, fixture.matchday]);
 
   // Green "Zapisano" only while the selected pick matches what's actually
@@ -243,6 +249,43 @@ function FixtureRow({
           )}
         </div>
       )}
+
+      {kickoffPassed && othersPredictions.length > 0 && (
+        <div className="mt-3 border-t border-white/10 pt-3">
+          <button
+            type="button"
+            onClick={() => setOthersOpen((v) => !v)}
+            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-zinc-200"
+          >
+            <span className={`transition-transform ${othersOpen ? "rotate-90" : ""}`} aria-hidden>
+              ▶
+            </span>
+            {othersOpen ? "👥 Zwiń typy innych" : `👥 Jak typowali inni (${othersPredictions.length})`}
+          </button>
+          {othersOpen && (
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {othersPredictions.map((p) => {
+                const hit = result ? p.outcome === resultOutcome(result.homeGoals, result.awayGoals) : null;
+                const style =
+                  hit === null
+                    ? "border-white/15 bg-white/5 text-zinc-300"
+                    : hit
+                      ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-300"
+                      : "border-white/15 bg-white/5 text-zinc-400";
+                return (
+                  <li
+                    key={p.userId}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${style}`}
+                  >
+                    <PlayerAvatar name={p.userName} size="sm" />
+                    {p.userName}: {OUTCOME_LABEL[p.outcome]}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -252,6 +295,8 @@ export default function TerminarzClient({
   initialPredictions,
   results,
   fixtureNotes,
+  predictionsByFixture,
+  currentUserId,
   myPoints,
   myRank,
   hotStreak,
@@ -260,6 +305,8 @@ export default function TerminarzClient({
   initialPredictions: Record<string, Prediction>;
   results: Record<string, FixtureResult>;
   fixtureNotes: Record<string, string[]>;
+  predictionsByFixture: Record<string, NamedPrediction[]>;
+  currentUserId: string;
   myPoints: number;
   myRank: number | null;
   hotStreak: number;
@@ -398,6 +445,9 @@ export default function TerminarzClient({
                 prediction={predictions[fixture.id]}
                 result={results[fixture.id]}
                 notes={fixtureNotes[fixture.id]}
+                othersPredictions={(predictionsByFixture[fixture.id] ?? []).filter(
+                  (p) => p.userId !== currentUserId,
+                )}
                 onSaved={handleSaved}
                 onReset={handleReset}
               />

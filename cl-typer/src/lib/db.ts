@@ -10,6 +10,7 @@ import {
   LeagueTableRow,
   MatchdayRecap,
   MatchOutcome,
+  NamedPrediction,
   Prediction,
   SpecialPrediction,
   SpecialResult,
@@ -143,6 +144,19 @@ export async function getUserPredictions(userId: string): Promise<Record<string,
   if (error) throw error;
   const out: Record<string, Prediction> = {};
   for (const row of data as PredictionRow[]) out[row.fixture_id] = rowToPrediction(row);
+  return out;
+}
+
+/** Every prediction ever made, grouped by fixture, with names resolved — used to reveal how everyone typed once a match has kicked off. */
+export async function getPredictionsByFixture(): Promise<Record<string, NamedPrediction[]>> {
+  const [predictions, users] = await Promise.all([getAllPredictions(), getUsers()]);
+  const nameById = new Map(users.map((u) => [u.id, u.name]));
+  const out: Record<string, NamedPrediction[]> = {};
+  for (const p of predictions) {
+    const list = out[p.fixtureId] ?? [];
+    list.push({ userId: p.userId, userName: nameById.get(p.userId) ?? "?", outcome: p.outcome });
+    out[p.fixtureId] = list;
+  }
   return out;
 }
 
