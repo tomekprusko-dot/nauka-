@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Trophy from "@/components/Trophy";
+import PlayerAvatar from "@/components/PlayerAvatar";
 import { logoutAction } from "@/app/login/actions";
 import type { InvitedUser } from "@/lib/types";
 
@@ -55,7 +56,8 @@ export default function NavBar({ user }: { user: InvitedUser | null }) {
             </Link>
           )}
         </nav>
-        <div className="flex items-center gap-3 text-sm text-zinc-300">
+        <div className="flex items-center gap-2 text-sm text-zinc-300">
+          <PlayerAvatar name={user.name} size="sm" />
           <span className="hidden sm:inline">{user.name}</span>
           <form action={logoutAction}>
             <button

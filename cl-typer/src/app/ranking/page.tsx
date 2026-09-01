@@ -3,6 +3,7 @@ import { computeStandings } from "@/lib/db";
 import { SPECIAL_PICK_DEADLINE } from "@/data/fixtures";
 import { getTeam } from "@/data/teams";
 import TeamBadge from "@/components/TeamBadge";
+import PlayerAvatar from "@/components/PlayerAvatar";
 import FormDots from "@/components/FormDots";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -100,17 +101,20 @@ export default async function RankingPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 font-medium">
-                    {row.user.name}
-                    {medal === "🥇" && (
-                      <span className="ml-2 text-xs font-normal text-[#dc2626]">
-                        Największy Ekspert
-                      </span>
-                    )}
-                    {row.hotStreak >= 3 && (
-                      <span className="ml-2 text-xs font-normal text-amber-400" title={`${row.hotStreak} trafionych typów z rzędu`}>
-                        🔥 {row.hotStreak}
-                      </span>
-                    )}
+                    <span className="flex flex-wrap items-center gap-2">
+                      <PlayerAvatar name={row.user.name} size="sm" />
+                      {row.user.name}
+                      {medal === "🥇" && (
+                        <span className="text-xs font-normal text-[#dc2626]">
+                          Największy Ekspert
+                        </span>
+                      )}
+                      {row.hotStreak >= 3 && (
+                        <span className="text-xs font-normal text-amber-400" title={`${row.hotStreak} trafionych typów z rzędu`}>
+                          🔥 {row.hotStreak}
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-right font-semibold">{row.points}</td>
                   <td className="px-4 py-3 text-right text-zinc-400">{row.predictionsMade}</td>

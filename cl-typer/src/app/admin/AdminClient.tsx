@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { getTeam, teams } from "@/data/teams";
 import TeamBadge from "@/components/TeamBadge";
+import PlayerAvatar from "@/components/PlayerAvatar";
 import { AutomationLogEntry, Fixture, FixtureResult, InvitedUser, SpecialResult, Team } from "@/lib/types";
 import { formatMatchdayRange } from "@/lib/formatMatchdayRange";
 import { addUserAction, removeUserAction, setResultAction, setSpecialResultAction } from "./actions";
@@ -91,11 +92,14 @@ function UsersSection({ initialUsers }: { initialUsers: InvitedUser[] }) {
             key={u.id}
             className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm"
           >
-            <div>
-              <p className="font-medium">
-                {u.name} {u.role === "admin" && <span className="text-xs text-amber-400">(admin)</span>}
-              </p>
-              <p className="text-xs text-zinc-400">kod: {u.accessCode}</p>
+            <div className="flex items-center gap-2">
+              <PlayerAvatar name={u.name} size="sm" />
+              <div>
+                <p className="font-medium">
+                  {u.name} {u.role === "admin" && <span className="text-xs text-amber-400">(admin)</span>}
+                </p>
+                <p className="text-xs text-zinc-400">kod: {u.accessCode}</p>
+              </div>
             </div>
             {u.role !== "admin" && (
               <button
