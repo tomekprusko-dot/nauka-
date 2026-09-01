@@ -232,7 +232,7 @@ function FixtureRow({
             <span className={`transition-transform ${notesOpen ? "rotate-90" : ""}`} aria-hidden>
               ▶
             </span>
-            📰 Ciekawostki przed meczem {notesOpen ? "" : `(${notes!.length})`}
+            {notesOpen ? "📰 Zwiń ciekawostki" : `📰 Ciekawostki przed meczem (${notes!.length})`}
           </button>
           {notesOpen && (
             <ul className="mt-2 space-y-1.5 text-sm text-zinc-300">
