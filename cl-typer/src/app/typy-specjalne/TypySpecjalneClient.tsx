@@ -29,12 +29,13 @@ export default function TypySpecjalneClient({
   const [locked, setLocked] = useState(false);
   const [championTeamId, setChampionTeamId] = useState<string | null>(initialPrediction?.championTeamId ?? null);
   const [saving, setSaving] = useState(false);
-  const [justSaved, setJustSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLocked(new Date(deadline).getTime() <= Date.now());
   }, [deadline]);
+
+  const isSaved = championTeamId !== null && championTeamId === (saved?.championTeamId ?? null);
 
   async function handleSave() {
     setError(null);
@@ -42,8 +43,6 @@ export default function TypySpecjalneClient({
     try {
       await saveSpecialPredictionAction(championTeamId);
       setSaved({ userId: "", championTeamId, savedAt: new Date().toISOString() });
-      setJustSaved(true);
-      setTimeout(() => setJustSaved(false), 1200);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Nie udało się zapisać typu.");
     } finally {
@@ -53,6 +52,7 @@ export default function TypySpecjalneClient({
 
   const championResolved = Boolean(result.championTeamId);
   const championHit = championResolved && saved?.championTeamId === result.championTeamId;
+  const savedTeam = saved?.championTeamId ? getTeam(saved.championTeamId) : null;
 
   return (
     <div className="space-y-6">
@@ -65,6 +65,12 @@ export default function TypySpecjalneClient({
           <span className="capitalize">{formatDeadline(deadline)}</span>. Potem jest
           zablokowany do końca sezonu.
         </p>
+        {savedTeam && (
+          <p className="mt-2 flex items-center gap-2 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-300">
+            <TeamBadge team={savedTeam} size="sm" />
+            Twój mistrz: <strong>{savedTeam.name}</strong>
+          </p>
+        )}
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -112,10 +118,12 @@ export default function TypySpecjalneClient({
       {!locked ? (
         <button
           onClick={handleSave}
-          disabled={saving}
-          className="w-full rounded-lg bg-gradient-to-b from-[#f87171] to-[#991b1b] px-4 py-2.5 text-sm font-bold text-white transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 sm:w-auto"
+          disabled={saving || !championTeamId}
+          className={`w-full rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto ${
+            isSaved ? "bg-emerald-500" : "bg-gradient-to-b from-[#f87171] to-[#991b1b]"
+          }`}
         >
-          {saving ? "Zapisywanie..." : justSaved ? "Zapisano ✓" : "Zapisz typ mistrza"}
+          {saving ? "Zapisywanie..." : isSaved ? "Zapisano ✓" : "Zapisz typ mistrza"}
         </button>
       ) : (
         <p className="text-sm text-zinc-400">🔒 Termin minął — typ jest zablokowany.</p>
