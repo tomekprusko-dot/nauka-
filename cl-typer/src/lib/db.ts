@@ -1,6 +1,6 @@
 import "server-only";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { fixtures } from "@/data/fixtures";
+import { fixtures, TYPING_OPENS_FROM_MATCHDAY } from "@/data/fixtures";
 import { teams } from "@/data/teams";
 import { scorePrediction, POINTS_SPECIAL } from "@/lib/scoring";
 import {
@@ -264,11 +264,15 @@ export async function computeStandings(): Promise<StandingsRow[]> {
 
   // The most recently played matchday with at least one recorded result —
   // used to compute each user's rank *before* that round, for an
-  // "Awans/Spadek o X pozycji" badge.
+  // "Awans/Spadek o X pozycji" badge. Only typeable matchdays count — the
+  // catch-up matches from closed rounds (postponed for European cups)
+  // don't belong to the typer competition, even once their real result
+  // comes in.
   let latestResolvedMatchday: number | null = null;
   for (const fixtureId of Object.keys(results)) {
     const fixture = fixtureById.get(fixtureId);
-    if (fixture && (latestResolvedMatchday === null || fixture.matchday > latestResolvedMatchday)) {
+    if (!fixture || fixture.matchday < TYPING_OPENS_FROM_MATCHDAY) continue;
+    if (latestResolvedMatchday === null || fixture.matchday > latestResolvedMatchday) {
       latestResolvedMatchday = fixture.matchday;
     }
   }
@@ -283,7 +287,7 @@ export async function computeStandings(): Promise<StandingsRow[]> {
     for (const prediction of userPredictions) {
       const result = results[prediction.fixtureId];
       const fixture = fixtureById.get(prediction.fixtureId);
-      if (!result || !fixture) continue;
+      if (!result || !fixture || fixture.matchday < TYPING_OPENS_FROM_MATCHDAY) continue;
 
       const score = scorePrediction(prediction, result);
       points += score;
@@ -457,7 +461,7 @@ export async function computeTeamDetails(): Promise<Record<string, TeamDetail>> 
   const sentimentCounts = new Map<string, { win: number; draw: number; loss: number }>();
   for (const prediction of allPredictions) {
     const fixture = fixtureById.get(prediction.fixtureId);
-    if (!fixture) continue;
+    if (!fixture || fixture.matchday < TYPING_OPENS_FROM_MATCHDAY) continue;
     for (const { teamId, isHomeTeam } of [
       { teamId: fixture.homeTeamId, isHomeTeam: true },
       { teamId: fixture.awayTeamId, isHomeTeam: false },
