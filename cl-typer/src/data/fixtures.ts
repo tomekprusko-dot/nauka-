@@ -335,5 +335,9 @@ export const fixtures: Fixture[] = [
 export const TYPING_OPENS_FROM_MATCHDAY = 7;
 
 /** Deadline na typ specjalny (mistrz Polski) — stała data, nie kickoff meczu,
- * bo apka wystartowała już w trakcie sezonu. */
-export const SPECIAL_PICK_DEADLINE = "2026-09-05T21:59:59Z";
+ * bo apka wystartowała już w trakcie sezonu.
+ *
+ * TYMCZASOWO przedłużone do 08.09.2026 24:00 czasu polskiego (22:00 UTC),
+ * żeby Malinozzi mógł dogonić zaległy typ — wraca do pierwotnej wartości
+ * automatycznie po tym terminie. */
+export const SPECIAL_PICK_DEADLINE = "2026-09-08T22:00:00Z";
