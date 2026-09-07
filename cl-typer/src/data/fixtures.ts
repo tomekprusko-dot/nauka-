@@ -81,7 +81,7 @@ export const fixtures: Fixture[] = [
   { id: "r7-6", matchday: 7, homeTeamId: "wieczysta", awayTeamId: "zaglebie-lubin", kickoff: "2026-09-07T16:00:00Z" },
   { id: "r7-9", matchday: 7, homeTeamId: "pogon", awayTeamId: "wisla-plock", kickoff: "2026-09-07T18:30:00Z" },
   // Kolejka 8: prawdziwe pary i godziny (11-14 września 2026, potwierdzone terminarzem PKO BP Ekstraklasy).
-  { id: "r8-1", matchday: 8, homeTeamId: "motor-lublin", awayTeamId: "rakow", kickoff: "2026-09-11T16:00:00Z" },
+  { id: "r8-1", matchday: 8, homeTeamId: "rakow", awayTeamId: "motor-lublin", kickoff: "2026-09-11T16:00:00Z" },
   { id: "r8-2", matchday: 8, homeTeamId: "wisla-krakow", awayTeamId: "jagiellonia", kickoff: "2026-09-11T18:30:00Z" },
   { id: "r8-3", matchday: 8, homeTeamId: "slask", awayTeamId: "korona", kickoff: "2026-09-12T12:45:00Z" },
   { id: "r8-4", matchday: 8, homeTeamId: "gornik-zabrze", awayTeamId: "lech", kickoff: "2026-09-12T15:30:00Z" },
