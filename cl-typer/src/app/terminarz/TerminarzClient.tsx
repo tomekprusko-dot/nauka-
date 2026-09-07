@@ -87,6 +87,75 @@ function OutcomePicker({
   );
 }
 
+function MatchdaySection({
+  matchday,
+  list,
+  currentMatchday,
+  predictions,
+  results,
+  fixtureNotes,
+  predictionsByFixture,
+  currentUserId,
+  onSaved,
+  onReset,
+}: {
+  matchday: number;
+  list: Fixture[];
+  currentMatchday: number | null;
+  predictions: Record<string, Prediction>;
+  results: Record<string, FixtureResult>;
+  fixtureNotes: Record<string, string[]>;
+  predictionsByFixture: Record<string, NamedPrediction[]>;
+  currentUserId: string;
+  onSaved: (fixtureId: string, outcome: MatchOutcome) => void;
+  onReset: (fixtureId: string) => void;
+}) {
+  // Any real matchday whose games have all kicked off is "finished" and
+  // fades out the same way the pre-launch closed rounds (1-6) always do —
+  // computed post-mount (like FixtureRow's own lock state) to avoid an
+  // SSR/client Date.now() mismatch.
+  const [finished, setFinished] = useState(false);
+  useEffect(() => {
+    setFinished(list.every((f) => new Date(f.kickoff).getTime() <= Date.now()));
+  }, [list]);
+
+  const dimmed = matchday < TYPING_OPENS_FROM_MATCHDAY || finished;
+
+  return (
+    <div
+      id={`kolejka-${matchday}`}
+      className={`scroll-mt-24 space-y-3 ${dimmed ? "opacity-50 grayscale-[0.6]" : ""}`}
+    >
+      <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+        <span aria-hidden>⚽</span>
+        Kolejka {matchday}
+        <span className="font-normal normal-case text-zinc-500">{formatMatchdayRange(list)}</span>
+        {matchday === currentMatchday && (
+          <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+            Aktualna kolejka
+          </span>
+        )}
+      </h2>
+      <div className="space-y-2">
+        {list.map((fixture) => (
+          <FixtureRow
+            key={fixture.id}
+            fixture={fixture}
+            prediction={predictions[fixture.id]}
+            result={results[fixture.id]}
+            notes={fixtureNotes[fixture.id]}
+            othersPredictions={(predictionsByFixture[fixture.id] ?? []).filter(
+              (p) => p.userId !== currentUserId,
+            )}
+            onSaved={onSaved}
+            onReset={onReset}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FixtureRow({
   fixture,
   prediction,
@@ -423,40 +492,19 @@ export default function TerminarzClient({
       </div>
 
       {byMatchday.map(([matchday, list]) => (
-        <div
+        <MatchdaySection
           key={matchday}
-          id={`kolejka-${matchday}`}
-          className={`scroll-mt-24 space-y-3 ${
-            matchday < TYPING_OPENS_FROM_MATCHDAY ? "opacity-50 grayscale-[0.6]" : ""
-          }`}
-        >
-          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
-            <span aria-hidden>⚽</span>
-            Kolejka {matchday}
-            <span className="font-normal normal-case text-zinc-500">{formatMatchdayRange(list)}</span>
-            {matchday === currentMatchday && (
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
-                Aktualna kolejka
-              </span>
-            )}
-          </h2>
-          <div className="space-y-2">
-            {list.map((fixture) => (
-              <FixtureRow
-                key={fixture.id}
-                fixture={fixture}
-                prediction={predictions[fixture.id]}
-                result={results[fixture.id]}
-                notes={fixtureNotes[fixture.id]}
-                othersPredictions={(predictionsByFixture[fixture.id] ?? []).filter(
-                  (p) => p.userId !== currentUserId,
-                )}
-                onSaved={handleSaved}
-                onReset={handleReset}
-              />
-            ))}
-          </div>
-        </div>
+          matchday={matchday}
+          list={list}
+          currentMatchday={currentMatchday}
+          predictions={predictions}
+          results={results}
+          fixtureNotes={fixtureNotes}
+          predictionsByFixture={predictionsByFixture}
+          currentUserId={currentUserId}
+          onSaved={handleSaved}
+          onReset={handleReset}
+        />
       ))}
     </div>
   );
