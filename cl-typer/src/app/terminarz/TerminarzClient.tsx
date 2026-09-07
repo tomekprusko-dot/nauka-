@@ -216,6 +216,9 @@ function FixtureRow({
             ) : result ? (
               <span className="flex items-center rounded-lg border border-white/15 px-3 py-1.5 text-xs text-zinc-300">
                 Wynik: <strong className="ml-1">{result.homeGoals}:{result.awayGoals}</strong>
+                <span className="ml-2 text-zinc-500">
+                  Twój typ: {prediction ? OUTCOME_LABEL[prediction.outcome] : "brak"}
+                </span>
                 {prediction && <PointsBadge prediction={prediction} result={result} />}
               </span>
             ) : (
