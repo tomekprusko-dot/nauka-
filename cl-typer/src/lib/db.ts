@@ -580,15 +580,24 @@ export async function computeTrashTalkStats(): Promise<TrashTalkStats> {
       matchdayPerformances.push({ userName: user.name, matchday, points });
     }
 
+    // Longest run of consecutive hits/misses ANYWHERE in the season so far —
+    // not just the currently-trailing run, which would miss a streak that
+    // happened mid-season and was later broken (e.g. 5 in a row in the
+    // middle of a matchday, followed by a couple of misses at the end).
     let hot = 0;
-    for (let i = picks.length - 1; i >= 0; i--) {
-      if (picks[i].score === 0) break;
-      hot += 1;
-    }
+    let hotRun = 0;
     let cold = 0;
-    for (let i = picks.length - 1; i >= 0; i--) {
-      if (picks[i].score > 0) break;
-      cold += 1;
+    let coldRun = 0;
+    for (const p of picks) {
+      if (p.score > 0) {
+        hotRun += 1;
+        coldRun = 0;
+      } else {
+        coldRun += 1;
+        hotRun = 0;
+      }
+      hot = Math.max(hot, hotRun);
+      cold = Math.max(cold, coldRun);
     }
     if (hot > 0 && (hottestStreak === null || hot > hottestStreak.streak)) {
       hottestStreak = { userName: user.name, streak: hot };

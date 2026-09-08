@@ -93,14 +93,14 @@ export default async function TrashTalkPage() {
         <StatCard emoji="💩" label="Najgorsza kolejka w historii" tone="bad" perf={stats.worstMatchday} />
         <StreakCard
           emoji="🔥"
-          label="Najgorętsza seria (na żywo)"
+          label="Najdłuższa seria trafień w historii"
           tone="good"
           suffix="celnych"
           record={stats.hottestStreak}
         />
         <StreakCard
           emoji="🥶"
-          label="Najzimniejsza seria (na żywo)"
+          label="Najdłuższa seria pudeł w historii"
           tone="bad"
           suffix="bez trafienia"
           record={stats.coldestStreak}
