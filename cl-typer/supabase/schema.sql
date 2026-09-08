@@ -110,6 +110,16 @@ create table if not exists matchday_recaps (
 );
 alter table matchday_recaps add column if not exists points jsonb not null default '{}'::jsonb;
 
+-- Jedno zaczepne zdanie na kolejkę, wyświetlane w Terminarzu jako "zagrzewacz"
+-- do obstawiania przed jej rozpoczęciem (np. nawiązanie do wpadki z
+-- poprzedniej kolejki) — generowane automatycznie razem z ciekawostkami,
+-- gdy kolejka się otwiera do typowania.
+create table if not exists matchday_hype (
+  matchday int primary key,
+  hype text not null,
+  created_at timestamptz not null default now()
+);
+
 -- RLS włączone, bez żadnych policy — to celowe: jedyny klucz, który może
 -- czytać/zapisywać te tabele, to service_role (używany wyłącznie po stronie
 -- serwera Next.js, nigdy w przeglądarce). Przeglądarka nie łączy się z
@@ -122,3 +132,4 @@ alter table special_result enable row level security;
 alter table automation_log enable row level security;
 alter table fixture_notes enable row level security;
 alter table matchday_recaps enable row level security;
+alter table matchday_hype enable row level security;

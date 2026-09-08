@@ -26,6 +26,21 @@ function formatTime(iso: string) {
   });
 }
 
+function dayWord(n: number): string {
+  return n === 1 ? "dzień" : "dni";
+}
+
+function formatCountdown(ms: number): string {
+  if (ms <= 0) return "lada moment";
+  const totalMinutes = Math.floor(ms / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days} ${dayWord(days)} ${hours} godz.`;
+  if (hours > 0) return `${hours} godz. ${minutes} min.`;
+  return `${minutes} min.`;
+}
+
 function PointsBadge({ prediction, result }: { prediction: Prediction; result: FixtureResult }) {
   const score = scorePrediction(prediction, result);
   const style =
@@ -362,12 +377,75 @@ function FixtureRow({
   );
 }
 
+function HypeBanner({
+  fixtures,
+  predictionsByFixture,
+  totalUsers,
+  hype,
+}: {
+  fixtures: Fixture[];
+  predictionsByFixture: Record<string, NamedPrediction[]>;
+  totalUsers: number;
+  hype: string | undefined;
+}) {
+  const [countdown, setCountdown] = useState<string | null>(null);
+
+  useEffect(() => {
+    const now = Date.now();
+    const nextKickoff = fixtures
+      .map((f) => new Date(f.kickoff).getTime())
+      .filter((t) => t > now)
+      .sort((a, b) => a - b)[0];
+    setCountdown(nextKickoff ? formatCountdown(nextKickoff - now) : null);
+  }, [fixtures]);
+
+  // Ile osób ma już typ na KAŻDY mecz tej kolejki — przecięcie zbiorów
+  // userId po wszystkich meczach, nie suma, żeby nie liczyć kogoś, kto
+  // typował tylko jeden mecz z dziewięciu jako "gotowego".
+  const completeUsers = useMemo(() => {
+    if (fixtures.length === 0 || totalUsers === 0) return 0;
+    let intersection: Set<string> | null = null;
+    for (const fixture of fixtures) {
+      const userIds: Set<string> = new Set((predictionsByFixture[fixture.id] ?? []).map((p) => p.userId));
+      if (intersection === null) {
+        intersection = userIds;
+      } else {
+        const prev: Set<string> = intersection;
+        intersection = new Set([...prev].filter((id: string) => userIds.has(id)));
+      }
+    }
+    return intersection?.size ?? 0;
+  }, [fixtures, predictionsByFixture, totalUsers]);
+
+  return (
+    <div className="flex flex-wrap items-start gap-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
+      <span className="text-2xl" aria-hidden>
+        📣
+      </span>
+      <div className="min-w-[200px] flex-1">
+        {countdown && (
+          <p className="text-sm font-semibold text-amber-300">
+            ⏱️ Typy na najbliższy mecz zamykają się za {countdown}!
+          </p>
+        )}
+        <p className="text-xs text-zinc-300">
+          {completeUsers}/{totalUsers} typerów ma już komplet typów na tę kolejkę
+          {completeUsers < totalUsers ? " — nie zostawiaj tego na ostatnią chwilę." : " — wszyscy gotowi! 🔥"}
+        </p>
+        {hype && <p className="mt-1.5 text-sm italic text-white">&bdquo;{hype}&rdquo;</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function TerminarzClient({
   fixtures,
   initialPredictions,
   results,
   fixtureNotes,
   predictionsByFixture,
+  matchdayHype,
+  totalUsers,
   currentUserId,
   myPoints,
   myRank,
@@ -378,6 +456,8 @@ export default function TerminarzClient({
   results: Record<string, FixtureResult>;
   fixtureNotes: Record<string, string[]>;
   predictionsByFixture: Record<string, NamedPrediction[]>;
+  matchdayHype: Record<number, string>;
+  totalUsers: number;
   currentUserId: string;
   myPoints: number;
   myRank: number | null;
@@ -490,6 +570,15 @@ export default function TerminarzClient({
           </button>
         )}
       </div>
+
+      {currentMatchdayFixtures && (
+        <HypeBanner
+          fixtures={currentMatchdayFixtures}
+          predictionsByFixture={predictionsByFixture}
+          totalUsers={totalUsers}
+          hype={currentMatchday !== null ? matchdayHype[currentMatchday] : undefined}
+        />
+      )}
 
       {byMatchday.map(([matchday, list]) => (
         <MatchdaySection

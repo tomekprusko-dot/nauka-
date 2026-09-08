@@ -120,6 +120,17 @@ export async function getFixtureNotes(): Promise<Record<string, string[]>> {
   return out;
 }
 
+/** One zaczepka (hype line) per matchday, keyed by matchday number — shown in
+ * Terminarz to needle people into typing before the round starts. Same
+ * "cosmetic, never crash the page" resilience as getFixtureNotes. */
+export async function getMatchdayHype(): Promise<Record<number, string>> {
+  const { data, error } = await supabaseServer().from("matchday_hype").select("*");
+  if (error) return {};
+  const out: Record<number, string> = {};
+  for (const row of data as { matchday: number; hype: string }[]) out[row.matchday] = row.hype;
+  return out;
+}
+
 interface PredictionRow {
   user_id: string;
   fixture_id: string;
