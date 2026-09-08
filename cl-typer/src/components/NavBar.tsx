@@ -12,6 +12,7 @@ const links = [
   { href: "/tabela-ligi", label: "Tabela ligi" },
   { href: "/typy-specjalne", label: "Wytypuj mistrza" },
   { href: "/ranking", label: "Tabela typerów" },
+  { href: "/trash-talk", label: "Przytyki" },
   { href: "/regulamin", label: "Regulamin" },
 ];
 

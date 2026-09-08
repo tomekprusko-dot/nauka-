@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { computeStandings, getLatestMatchdayRecap } from "@/lib/db";
 import { SPECIAL_PICK_DEADLINE } from "@/data/fixtures";
@@ -5,6 +6,7 @@ import { getTeam } from "@/data/teams";
 import TeamBadge from "@/components/TeamBadge";
 import PlayerAvatar from "@/components/PlayerAvatar";
 import FormDots from "@/components/FormDots";
+import MatchdayRecapCard from "@/components/MatchdayRecapCard";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -50,36 +52,14 @@ export default async function RankingPage() {
       </div>
 
       {recap && (
-        <div className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-400/10 px-4 py-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-fuchsia-300">
-            🎤 Podsumowanie kolejki {recap.matchday}
-          </p>
-          {Object.keys(recap.points).length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {Object.entries(recap.points)
-                .sort((a, b) => b[1] - a[1])
-                .map(([name, pts], i, arr) => {
-                  const isTop = i === 0 && pts > (arr[arr.length - 1]?.[1] ?? pts);
-                  const isBottom = i === arr.length - 1 && arr.length > 1 && pts < (arr[0]?.[1] ?? pts);
-                  return (
-                    <span
-                      key={name}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                        isTop
-                          ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-300"
-                          : isBottom
-                            ? "border-red-400/40 bg-red-400/15 text-red-300"
-                            : "border-white/15 bg-white/5 text-zinc-300"
-                      }`}
-                    >
-                      <PlayerAvatar name={name} size="sm" />
-                      {name} — {pts} pkt
-                    </span>
-                  );
-                })}
-            </div>
-          )}
-          <p className="mt-2 text-sm text-zinc-100">{recap.recap}</p>
+        <div className="space-y-2">
+          <MatchdayRecapCard recap={recap} />
+          <Link
+            href="/trash-talk"
+            className="inline-block text-xs font-semibold text-fuchsia-300 hover:text-fuchsia-200"
+          >
+            🎤 Zobacz całe archiwum przytyków i rekordy sezonu →
+          </Link>
         </div>
       )}
 

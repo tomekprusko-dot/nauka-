@@ -7,6 +7,7 @@ import {
   AutomationLogEntry,
   FixtureResult,
   InvitedUser,
+  MatchdayPerformance,
   MatchdayRecap,
   MatchOutcome,
   NamedPrediction,
@@ -14,7 +15,9 @@ import {
   SpecialPrediction,
   SpecialResult,
   StandingsRow,
+  StreakRecord,
   TeamDetail,
+  TrashTalkStats,
   UserRole,
 } from "@/lib/types";
 
@@ -517,4 +520,79 @@ export async function getAutomationLog(limit = 20): Promise<AutomationLogEntry[]
     .limit(limit);
   if (error) throw error;
   return (data ?? []).map((row) => ({ id: row.id, message: row.message, createdAt: row.created_at }));
+}
+
+/** Every matchday recap ever generated, newest first — the full trash-talk archive. */
+export async function getAllMatchdayRecaps(): Promise<MatchdayRecap[]> {
+  const { data, error } = await supabaseServer()
+    .from("matchday_recaps")
+    .select("*")
+    .order("matchday", { ascending: false });
+  // Kosmetyczny dodatek — jeśli tabela jeszcze nie istnieje, strona archiwum
+  // ma dalej działać normalnie, tylko bez historii.
+  if (error) return [];
+  return (data ?? []).map((row) => ({
+    matchday: row.matchday,
+    recap: row.recap,
+    points: row.points ?? {},
+    createdAt: row.created_at,
+  }));
+}
+
+/**
+ * Live-computed "hall of fame / hall of shame" for the trash-talk archive:
+ * best and worst single-matchday score anyone has ever put up, and the
+ * longest currently-running hit streak and miss streak across all typers.
+ */
+export async function computeTrashTalkStats(): Promise<TrashTalkStats> {
+  const [users, results, allPredictions] = await Promise.all([getUsers(), getResults(), getAllPredictions()]);
+  const fixtureById = new Map(fixtures.map((f) => [f.id, f]));
+
+  const matchdayPerformances: MatchdayPerformance[] = [];
+  let hottestStreak: StreakRecord | null = null;
+  let coldestStreak: StreakRecord | null = null;
+
+  for (const user of users) {
+    const picks: { matchday: number; kickoff: string; score: number }[] = [];
+    for (const prediction of allPredictions) {
+      if (prediction.userId !== user.id) continue;
+      const result = results[prediction.fixtureId];
+      const fixture = fixtureById.get(prediction.fixtureId);
+      if (!result || !fixture || fixture.matchday < TYPING_OPENS_FROM_MATCHDAY) continue;
+      picks.push({ matchday: fixture.matchday, kickoff: fixture.kickoff, score: scorePrediction(prediction, result) });
+    }
+    picks.sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
+
+    const pointsByMatchday = new Map<number, number>();
+    for (const p of picks) pointsByMatchday.set(p.matchday, (pointsByMatchday.get(p.matchday) ?? 0) + p.score);
+    for (const [matchday, points] of pointsByMatchday) {
+      matchdayPerformances.push({ userName: user.name, matchday, points });
+    }
+
+    let hot = 0;
+    for (let i = picks.length - 1; i >= 0; i--) {
+      if (picks[i].score === 0) break;
+      hot += 1;
+    }
+    let cold = 0;
+    for (let i = picks.length - 1; i >= 0; i--) {
+      if (picks[i].score > 0) break;
+      cold += 1;
+    }
+    if (hot > 0 && (hottestStreak === null || hot > hottestStreak.streak)) {
+      hottestStreak = { userName: user.name, streak: hot };
+    }
+    if (cold > 0 && (coldestStreak === null || cold > coldestStreak.streak)) {
+      coldestStreak = { userName: user.name, streak: cold };
+    }
+  }
+
+  let bestMatchday: MatchdayPerformance | null = null;
+  let worstMatchday: MatchdayPerformance | null = null;
+  for (const perf of matchdayPerformances) {
+    if (bestMatchday === null || perf.points > bestMatchday.points) bestMatchday = perf;
+    if (worstMatchday === null || perf.points < worstMatchday.points) worstMatchday = perf;
+  }
+
+  return { bestMatchday, worstMatchday, hottestStreak, coldestStreak };
 }

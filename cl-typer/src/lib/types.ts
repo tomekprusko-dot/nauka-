@@ -93,6 +93,27 @@ export interface MatchdayRecap {
   createdAt: string;
 }
 
+/** One user's total points in one specific matchday — used for the trash-talk "hall of fame". */
+export interface MatchdayPerformance {
+  userName: string;
+  matchday: number;
+  points: number;
+}
+
+/** A user's current run of consecutive scored (or missed) picks, oldest-to-newest. */
+export interface StreakRecord {
+  userName: string;
+  streak: number;
+}
+
+/** Fun, live-computed season records for the trash-talk archive page. */
+export interface TrashTalkStats {
+  bestMatchday: MatchdayPerformance | null;
+  worstMatchday: MatchdayPerformance | null;
+  hottestStreak: StreakRecord | null;
+  coldestStreak: StreakRecord | null;
+}
+
 /** One team's row in the real Ekstraklasa league table (not the typers' ranking). */
 interface SplitRecord {
   played: number;
