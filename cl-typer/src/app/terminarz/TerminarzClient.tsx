@@ -110,6 +110,8 @@ function MatchdaySection({
   results,
   fixtureNotes,
   predictionsByFixture,
+  matchdayHype,
+  totalUsers,
   currentUserId,
   onSaved,
   onReset,
@@ -121,6 +123,8 @@ function MatchdaySection({
   results: Record<string, FixtureResult>;
   fixtureNotes: Record<string, string[]>;
   predictionsByFixture: Record<string, NamedPrediction[]>;
+  matchdayHype: Record<number, string>;
+  totalUsers: number;
   currentUserId: string;
   onSaved: (fixtureId: string, outcome: MatchOutcome) => void;
   onReset: (fixtureId: string) => void;
@@ -151,6 +155,14 @@ function MatchdaySection({
           </span>
         )}
       </h2>
+      {matchday === currentMatchday && (
+        <HypeBanner
+          fixtures={list}
+          predictionsByFixture={predictionsByFixture}
+          totalUsers={totalUsers}
+          hype={matchdayHype[matchday]}
+        />
+      )}
       <div className="space-y-2">
         {list.map((fixture) => (
           <FixtureRow
@@ -571,15 +583,6 @@ export default function TerminarzClient({
         )}
       </div>
 
-      {currentMatchdayFixtures && (
-        <HypeBanner
-          fixtures={currentMatchdayFixtures}
-          predictionsByFixture={predictionsByFixture}
-          totalUsers={totalUsers}
-          hype={currentMatchday !== null ? matchdayHype[currentMatchday] : undefined}
-        />
-      )}
-
       {byMatchday.map(([matchday, list]) => (
         <MatchdaySection
           key={matchday}
@@ -590,6 +593,8 @@ export default function TerminarzClient({
           results={results}
           fixtureNotes={fixtureNotes}
           predictionsByFixture={predictionsByFixture}
+          matchdayHype={matchdayHype}
+          totalUsers={totalUsers}
           currentUserId={currentUserId}
           onSaved={handleSaved}
           onReset={handleReset}
