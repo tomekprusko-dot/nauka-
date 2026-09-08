@@ -444,11 +444,7 @@ function HypeBanner({
           {completeUsers}/{totalUsers} typerów ma już komplet typów na tę kolejkę
           {completeUsers < totalUsers ? " — nie zostawiaj tego na ostatnią chwilę." : " — wszyscy gotowi! 🔥"}
         </p>
-        {hype && (
-          <p className="mt-1.5 line-clamp-2 text-sm italic text-white" title={hype}>
-            &bdquo;{hype}&rdquo;
-          </p>
-        )}
+        {hype && <p className="mt-1.5 text-sm italic text-white">&bdquo;{hype}&rdquo;</p>}
       </div>
     </div>
   );
