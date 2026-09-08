@@ -143,7 +143,7 @@ function MatchdaySection({
   return (
     <div
       id={`kolejka-${matchday}`}
-      className={`scroll-mt-24 space-y-3 ${dimmed ? "opacity-50 grayscale-[0.6]" : ""}`}
+      className={`scroll-mt-28 space-y-3 ${dimmed ? "opacity-50 grayscale-[0.6]" : ""}`}
     >
       <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-400">
         <span aria-hidden>⚽</span>
@@ -444,7 +444,11 @@ function HypeBanner({
           {completeUsers}/{totalUsers} typerów ma już komplet typów na tę kolejkę
           {completeUsers < totalUsers ? " — nie zostawiaj tego na ostatnią chwilę." : " — wszyscy gotowi! 🔥"}
         </p>
-        {hype && <p className="mt-1.5 text-sm italic text-white">&bdquo;{hype}&rdquo;</p>}
+        {hype && (
+          <p className="mt-1.5 line-clamp-2 text-sm italic text-white" title={hype}>
+            &bdquo;{hype}&rdquo;
+          </p>
+        )}
       </div>
     </div>
   );
