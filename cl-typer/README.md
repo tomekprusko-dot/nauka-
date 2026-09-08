@@ -18,9 +18,9 @@ Logowanie odbywa się przez imię + kod dostępu (bez adresu e-mail — pole
 
 Lista drużyn w `src/data/teams.ts` to prawdziwa stawka 18 klubów sezonu
 2026/27. Terminarz w `src/data/fixtures.ts` (34 kolejki, 306 meczów) ma
-prawdziwe pary dla kolejek 1-8 (sezon ruszył 24 lipca 2026, dane zebrane
-z publicznych źródeł) — kolejki 1-6 mają już wyniki w bazie, 7-8 czekają
-na rozegranie. Kolejka 9 i dalsze są nadal wygenerowane algorytmem systemu
+prawdziwe pary dla kolejek 1-9 (sezon ruszył 24 lipca 2026, dane zebrane
+z publicznych źródeł) — kolejki 1-7 mają już wyniki w bazie, 8-9 czekają
+na rozegranie. Kolejka 10 i dalsze są nadal wygenerowane algorytmem systemu
 kołowego jako przykładowe. Podmień je na pełny oficjalny terminarz
 PZPN/Ekstraklasa.org i wypchnij zmianę — Vercel zbuduje nową wersję
 automatycznie.
