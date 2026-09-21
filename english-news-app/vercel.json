@@ -1,0 +1,7 @@
+{
+  "crons": [{ "path": "/api/refresh", "schedule": "0 6 * * *" }],
+  "functions": {
+    "api/articles/index.js": { "maxDuration": 60 },
+    "api/refresh.js": { "maxDuration": 60 }
+  }
+}
