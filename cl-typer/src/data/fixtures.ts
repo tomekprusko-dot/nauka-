@@ -49,7 +49,7 @@ export const fixtures: Fixture[] = [
   { id: "r4-5", matchday: 4, homeTeamId: "motor-lublin", awayTeamId: "gks-katowice", kickoff: "2026-08-15T15:30:00Z" },
   { id: "r4-6", matchday: 4, homeTeamId: "cracovia", awayTeamId: "rakow", kickoff: "2026-08-16T12:45:00Z" },
   { id: "r4-7", matchday: 4, homeTeamId: "gornik-zabrze", awayTeamId: "wisla-krakow", kickoff: "2026-08-16T15:30:00Z" },
-  { id: "r4-8", matchday: 4, homeTeamId: "wisla-plock", awayTeamId: "lech", kickoff: "2026-08-16T18:15:00Z" },
+  { id: "r4-8", matchday: 4, homeTeamId: "wisla-plock", awayTeamId: "lech", kickoff: "2026-12-17T17:00:00Z" },
   // Godzina orientacyjna — potwierdzona tylko data (16.12.2026), dokładna godzina jeszcze nieustalona.
   { id: "r4-9", matchday: 4, homeTeamId: "jagiellonia", awayTeamId: "pogon", kickoff: "2026-12-16T18:00:00Z" },
   { id: "r5-1", matchday: 5, homeTeamId: "cracovia", awayTeamId: "wieczysta", kickoff: "2026-08-21T16:00:00Z" },
