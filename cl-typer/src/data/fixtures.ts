@@ -4,9 +4,9 @@ import { Fixture } from "@/lib/types";
  * Pełny terminarz sezonu PKO BP Ekstraklasa 2026/27 — 18 drużyn, 34 kolejki
  * (podwójny system kołowy: każda drużyna gra z każdą inną raz u siebie i raz
  * na wyjeździe). Kolejki 1-13 to prawdziwe pary i terminy (sezon ruszył 24
- * lipca 2026), zebrane z publicznych źródeł — kolejki 1-11 mają już wyniki
- * w tabeli `results` w bazie, kolejki 12-13 są dopiero do wytypowania (wyniki
- * dojdą, gdy zostaną rozegrane). Kolejka 14+ jest nadal wygenerowana
+ * lipca 2026), zebrane z publicznych źródeł — kolejki 1-12 mają już wyniki
+ * w tabeli `results` w bazie, kolejka 13 jest dopiero do wytypowania (wyniki
+ * dojdą, gdy zostanie rozegrana). Kolejka 14+ jest nadal wygenerowana
  * algorytmem "koła" jako przykładowa — podmień na oficjalny terminarz
  * PZPN/Ekstraklasa.org, gdy zbliży się jej termin.
  */
