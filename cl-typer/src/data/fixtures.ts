@@ -3,10 +3,10 @@ import { Fixture } from "@/lib/types";
 /**
  * Pełny terminarz sezonu PKO BP Ekstraklasa 2026/27 — 18 drużyn, 34 kolejki
  * (podwójny system kołowy: każda drużyna gra z każdą inną raz u siebie i raz
- * na wyjeździe). Kolejki 1-13 to prawdziwe pary i terminy (sezon ruszył 24
+ * na wyjeździe). Kolejki 1-14 to prawdziwe pary i terminy (sezon ruszył 24
  * lipca 2026), zebrane z publicznych źródeł — kolejki 1-12 mają już wyniki
- * w tabeli `results` w bazie, kolejka 13 jest dopiero do wytypowania (wyniki
- * dojdą, gdy zostanie rozegrana). Kolejka 14+ jest nadal wygenerowana
+ * w tabeli `results` w bazie, kolejki 13-14 są dopiero do wytypowania (wyniki
+ * dojdą, gdy zostaną rozegrane). Kolejka 15+ jest nadal wygenerowana
  * algorytmem "koła" jako przykładowa — podmień na oficjalny terminarz
  * PZPN/Ekstraklasa.org, gdy zbliży się jej termin.
  */
@@ -137,15 +137,15 @@ export const fixtures: Fixture[] = [
   { id: "r13-7", matchday: 13, homeTeamId: "radomiak", awayTeamId: "slask", kickoff: "2026-11-02T17:00:00Z" },
   { id: "r13-8", matchday: 13, homeTeamId: "zaglebie-lubin", awayTeamId: "korona", kickoff: "2026-11-02T17:00:00Z" },
   { id: "r13-9", matchday: 13, homeTeamId: "rakow", awayTeamId: "pogon", kickoff: "2026-11-02T19:30:00Z" },
-  { id: "md14-1", matchday: 14, homeTeamId: "slask", awayTeamId: "legia", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-2", matchday: 14, homeTeamId: "wisla-krakow", awayTeamId: "wieczysta", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-3", matchday: 14, homeTeamId: "rakow", awayTeamId: "cracovia", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-4", matchday: 14, homeTeamId: "lech", awayTeamId: "jagiellonia", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-5", matchday: 14, homeTeamId: "gornik-zabrze", awayTeamId: "gks-katowice", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-6", matchday: 14, homeTeamId: "pogon", awayTeamId: "piast", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-7", matchday: 14, homeTeamId: "korona", awayTeamId: "wisla-plock", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-8", matchday: 14, homeTeamId: "motor-lublin", awayTeamId: "zaglebie-lubin", kickoff: "2026-11-28T17:00:00Z" },
-  { id: "md14-9", matchday: 14, homeTeamId: "widzew", awayTeamId: "radomiak", kickoff: "2026-11-28T17:00:00Z" },
+  { id: "r14-1", matchday: 14, homeTeamId: "motor-lublin", awayTeamId: "wisla-plock", kickoff: "2026-11-06T17:00:00Z" },
+  { id: "r14-2", matchday: 14, homeTeamId: "wisla-krakow", awayTeamId: "cracovia", kickoff: "2026-11-06T19:30:00Z" },
+  { id: "r14-3", matchday: 14, homeTeamId: "korona", awayTeamId: "radomiak", kickoff: "2026-11-07T11:15:00Z" },
+  { id: "r14-4", matchday: 14, homeTeamId: "slask", awayTeamId: "piast", kickoff: "2026-11-07T13:45:00Z" },
+  { id: "r14-5", matchday: 14, homeTeamId: "gornik-zabrze", awayTeamId: "wieczysta", kickoff: "2026-11-07T16:30:00Z" },
+  { id: "r14-6", matchday: 14, homeTeamId: "widzew", awayTeamId: "pogon", kickoff: "2026-11-07T19:15:00Z" },
+  { id: "r14-7", matchday: 14, homeTeamId: "jagiellonia", awayTeamId: "gks-katowice", kickoff: "2026-11-08T13:45:00Z" },
+  { id: "r14-8", matchday: 14, homeTeamId: "legia", awayTeamId: "rakow", kickoff: "2026-11-08T16:30:00Z" },
+  { id: "r14-9", matchday: 14, homeTeamId: "lech", awayTeamId: "zaglebie-lubin", kickoff: "2026-11-08T19:15:00Z" },
   { id: "md15-1", matchday: 15, homeTeamId: "legia", awayTeamId: "wisla-krakow", kickoff: "2026-12-05T17:00:00Z" },
   { id: "md15-2", matchday: 15, homeTeamId: "slask", awayTeamId: "rakow", kickoff: "2026-12-05T17:00:00Z" },
   { id: "md15-3", matchday: 15, homeTeamId: "wieczysta", awayTeamId: "lech", kickoff: "2026-12-05T17:00:00Z" },
