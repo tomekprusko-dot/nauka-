@@ -1,0 +1,54 @@
+/* Kolory jako zmienne CSS - tryb ciemny tylko je podmienia. */
+:root {
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light dark;
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text: #16181d;
+  --muted: #646a76;
+  --border: #dfe2e8;
+  --accent: #16a34a;
+  --accent-soft: #dcfce7;
+  --accent-text: #166534;
+  --warning-bg: #fef3c7;
+  --warning-text: #92400e;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --input-bg: #f8f9fb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --surface: #1a1d23;
+    --text: #eceef2;
+    --muted: #9aa0ab;
+    --border: #2c313a;
+    --accent: #22c55e;
+    --accent-soft: #14321f;
+    --accent-text: #86efac;
+    --warning-bg: #3b2c0b;
+    --warning-text: #fcd34d;
+    --danger: #f87171;
+    --danger-soft: #3b1515;
+    --input-bg: #121419;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
