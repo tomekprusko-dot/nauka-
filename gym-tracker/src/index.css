@@ -1,12 +1,16 @@
-/* Kolory jako zmienne CSS - tryb ciemny tylko je podmienia. */
+/* Układ: jedna kolumna pod telefon, przyklejony nagłówek, minutnik na dole.
+   Kolory jako zmienne CSS - tryb ciemny tylko je podmienia. Ciemny działa
+   zarówno z ustawień systemu, jak i z przełącznika motywu w Claude (data-theme). */
 :root {
-  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
-  color-scheme: light dark;
-  --bg: #f4f5f7;
+  --font-body: system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  font-family: var(--font-body);
+  color-scheme: light;
+  --bg: #f3f5f4;
   --surface: #ffffff;
-  --text: #16181d;
-  --muted: #646a76;
-  --border: #dfe2e8;
+  --text: #141917;
+  --muted: #5f6b66;
+  --border: #dbe1de;
   --accent: #16a34a;
   --accent-soft: #dcfce7;
   --accent-text: #166534;
@@ -14,25 +18,46 @@
   --warning-text: #92400e;
   --danger: #dc2626;
   --danger-soft: #fee2e2;
-  --input-bg: #f8f9fb;
+  --input-bg: #f7f9f8;
+  --on-accent: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1115;
-    --surface: #1a1d23;
-    --text: #eceef2;
-    --muted: #9aa0ab;
-    --border: #2c313a;
+  :root:not([data-theme="light"]) {
+    --bg: #0e1211;
+    --surface: #181e1c;
+    --text: #e9eeec;
+    --muted: #94a19b;
+    --border: #29312e;
     --accent: #22c55e;
-    --accent-soft: #14321f;
+    --accent-soft: #12301e;
     --accent-text: #86efac;
     --warning-bg: #3b2c0b;
     --warning-text: #fcd34d;
     --danger: #f87171;
     --danger-soft: #3b1515;
-    --input-bg: #121419;
+    --input-bg: #111614;
+    --on-accent: #06210f;
+    color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e1211;
+  --surface: #181e1c;
+  --text: #e9eeec;
+  --muted: #94a19b;
+  --border: #29312e;
+  --accent: #22c55e;
+  --accent-soft: #12301e;
+  --accent-text: #86efac;
+  --warning-bg: #3b2c0b;
+  --warning-text: #fcd34d;
+  --danger: #f87171;
+  --danger-soft: #3b1515;
+  --input-bg: #111614;
+  --on-accent: #06210f;
+  color-scheme: dark;
 }
 
 * {

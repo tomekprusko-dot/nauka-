@@ -10,7 +10,11 @@ Appka do prowadzenia 8-tygodniowego planu "wyciskanie 120 kg + klatka".
 - **Postęp**: plan a wykonanie, szacowany maks, historia ćwiczeń.
 - **Więcej**: wskazówki z planu i kopia zapasowa danych (eksport/import JSON).
 
-Dane zapisują się w `localStorage` przeglądarki.
+Gdy appka działa w Claude, wpisy zapisują się na koncie (baza `db` artifactu,
+kolekcja `logs`, jeden dokument na trening, np. `3-A`). Poza Claude, np. przy
+`npm run dev`, zapis idzie tylko do `localStorage` przeglądarki.
+
+Opublikowana wersja: https://claude.ai/artifact/9DfieVzkLaKuFaNyCdatZv
 
 ## Uruchomienie
 
@@ -19,9 +23,19 @@ npm install
 npm run dev
 ```
 
+## Wersja do Claude
+
+```bash
+npm run build:artifact
+```
+
+Powstaje jeden plik `dist-artifact/gym-tracker.html`. React ładuje się w nim
+z CDN (cdnjs), a cały kod appki i style są wklejone do środka.
+
 ## Gdzie co jest
 
 - `src/data/plan.js`: cały plan (ćwiczenia, serie, progresja). Tu zmieniasz plan.
 - `src/utils/training.js`: logika (podpowiedzi ciężarów, postęp, test maksa).
-- `src/utils/storage.js`: zapis i odczyt danych.
+- `src/utils/storage.js`: lokalna kopia danych (localStorage).
+- `src/utils/cloud.js`: zapis na koncie Claude (kolejka zapisów, łączenie zmian).
 - `src/components/`: widoki i elementy interfejsu.

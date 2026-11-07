@@ -1,25 +1,78 @@
 .app {
   max-width: 640px;
   margin: 0 auto;
-  padding: 0 16px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 32px;
+}
+
+/* Pasek nad przyklejonym nagłówkiem (pod wycięciem ekranu w telefonie). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
 }
 
 /* ---------- Nagłówek i zakładki ---------- */
 .app-header {
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 5;
   background: var(--bg);
-  padding: 12px 0 8px;
-  margin: 0 -16px;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-block: 12px 8px;
   border-bottom: 1px solid var(--border);
 }
 
+.app-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .app-header h1 {
-  margin: 0 0 8px;
-  font-size: 1.15rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.sync-badge.saved .sync-dot {
+  background: var(--accent);
+}
+
+.sync-badge.saving .sync-dot,
+.sync-badge.connecting .sync-dot {
+  background: var(--warning-text);
+}
+
+.sync-badge.error {
+  color: var(--danger);
+}
+
+.sync-badge.error .sync-dot {
+  background: var(--danger);
 }
 
 .tabs {
@@ -44,7 +97,7 @@
 
 .tab.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 main {
@@ -218,7 +271,8 @@ h2 {
 }
 
 .big-number {
-  font-size: 2rem;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
   font-weight: 800;
 }
 
@@ -273,7 +327,7 @@ h2 {
 .exercise-card.complete .exercise-number {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .tag {
@@ -383,7 +437,7 @@ h2 {
 .check-button.checked {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .link-button {
@@ -459,13 +513,13 @@ h2 {
 .result-button.ok.selected {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .result-button.fail.selected {
   background: var(--danger);
   border-color: var(--danger);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* ---------- Przyciski ---------- */
@@ -488,7 +542,7 @@ h2 {
 
 .primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .secondary {
@@ -520,7 +574,7 @@ button:disabled {
 
 .rest-timer.finished {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .rest-timer-bar {
@@ -532,7 +586,9 @@ button:disabled {
 .rest-timer-content {
   max-width: 640px;
   margin: 0 auto;
-  padding: 10px 16px;
+  padding-block: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: flex;
   align-items: center;
   gap: 8px;
@@ -544,7 +600,8 @@ button:disabled {
 }
 
 .rest-timer-time {
-  font-size: 1.6rem;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -585,7 +642,8 @@ button:disabled {
 }
 
 .stat-value {
-  font-size: 1.2rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
   font-weight: 800;
 }
 
@@ -642,4 +700,24 @@ td.fail {
 .exercise-name-cell {
   white-space: normal;
   min-width: 120px;
+}
+
+.button-row:first-child {
+  margin-top: 0;
+}
+
+.callout .button-row {
+  margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill,
+  .rest-timer-bar {
+    transition: none;
+  }
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

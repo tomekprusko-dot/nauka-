@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:artifact": "vite build --config vite.artifact.config.js && node scripts/pack-artifact.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
