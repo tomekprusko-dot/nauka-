@@ -1,5 +1,5 @@
 {
-  "name": "gym-tracker",
+  "name": "lawka-120",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,10 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "build:artifact": "vite build --config vite.artifact.config.js && node scripts/pack-artifact.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

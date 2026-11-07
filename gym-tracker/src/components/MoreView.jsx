@@ -1,37 +1,34 @@
 import { useRef, useState } from "react";
 import { TIPS } from "../data/plan";
 import { emptyData, isValidData } from "../utils/storage";
-import { connectDownloads } from "../utils/cloud";
 
-// Wskazówki z planu + kopia zapasowa danych.
-// Uwaga: w Claude okienka window.confirm() nie działają (od razu zwracają
-// false), więc potwierdzenia robimy jako przyciski na stronie.
-function MoreView({ data, syncStatus, onReplaceData }) {
+// Konto, wskazówki z planu i kopia zapasowa danych.
+// Potwierdzenia robimy jako przyciski na stronie, a nie window.confirm() -
+// tak wygląda to jak w prawdziwej appce.
+function MoreView({ data, account, onReplaceData }) {
   const fileInput = useRef(null);
   const [message, setMessage] = useState("");
   const [pendingImport, setPendingImport] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [signOutWarning, setSignOutWarning] = useState(false);
 
-  async function exportData() {
-    const filename = `trening-${new Date().toISOString().slice(0, 10)}.json`;
-    const json = JSON.stringify(data, null, 2);
-    const downloads = await connectDownloads();
-    if (downloads) {
-      // W Claude pobieranie idzie przez okienko potwierdzenia.
-      try {
-        await downloads.save({ filename, data: json });
-        setMessage("Zapisano plik z kopią.");
-      } catch (error) {
-        setMessage(error?.code === "declined" ? "Anulowano zapis pliku." : "Nie udało się zapisać pliku.");
-      }
+  function handleSignOut() {
+    // Wylogowanie czyści telefon - nie pozwalamy zgubić niewysłanych treningów.
+    if (account.hasUnsent()) {
+      setSignOutWarning(true);
       return;
     }
-    const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+    account.onSignOut();
+  }
+
+  function exportData() {
+    const filename = `lawka-120-${new Date().toISOString().slice(0, 10)}.json`;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     link.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     setMessage("Zapisano plik z kopią.");
   }
 
@@ -65,6 +62,36 @@ function MoreView({ data, syncStatus, onReplaceData }) {
 
   return (
     <section className="more">
+      <h2>Konto</h2>
+      <article className="exercise-card account-card">
+        {account.email ? (
+          <>
+            <p>
+              Zalogowano jako <strong>{account.email}</strong>. Treningi synchronizują się między
+              Twoimi urządzeniami.
+            </p>
+            <button type="button" className="secondary" onClick={handleSignOut}>
+              Wyloguj
+            </button>
+            {signOutWarning && (
+              <p className="form-error">
+                Część treningów nie jest jeszcze wysłana. Połącz się z internetem i poczekaj na
+                „Zsynchronizowano”, potem się wyloguj.
+              </p>
+            )}
+          </>
+        ) : account.available ? (
+          <>
+            <p>Treningi są tylko na tym telefonie. Zaloguj się, żeby mieć je w chmurze i na innych urządzeniach.</p>
+            <button type="button" className="primary" onClick={account.onSignIn}>
+              Zaloguj się
+            </button>
+          </>
+        ) : (
+          <p>Synchronizacja nie jest jeszcze skonfigurowana. Treningi są tylko na tym telefonie.</p>
+        )}
+      </article>
+
       <h2>Wskazówki z planu</h2>
       {TIPS.map((tip) => (
         <article key={tip.title} className="exercise-card">
@@ -75,10 +102,8 @@ function MoreView({ data, syncStatus, onReplaceData }) {
 
       <h2>Twoje dane</h2>
       <p className="small muted">
-        {syncStatus === "local"
-          ? "Wpisy są zapisywane tylko w tej przeglądarce. Co jakiś czas zrób kopię, żeby ich nie stracić."
-          : "Wpisy zapisują się na Twoim koncie Claude, więc widzisz je na każdym urządzeniu. Kopia do pliku to dodatkowe zabezpieczenie."}{" "}
-        Zapisanych treningów: {sessionCount}.
+        Kopia do pliku przyda się przy przenosinach albo jako dodatkowe zabezpieczenie. Zapisanych
+        treningów: {sessionCount}.
       </p>
       <div className="button-row">
         <button type="button" className="primary" onClick={exportData}>

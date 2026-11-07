@@ -1,10 +1,11 @@
-// Mała etykieta w nagłówku: czy wpisy są już bezpieczne na koncie.
+// Mała etykieta w nagłówku: czy wpisy są już bezpieczne w chmurze.
 const LABELS = {
   connecting: "Łączenie…",
   saving: "Zapisywanie…",
-  saved: "Zapisano na koncie",
+  saved: "Zsynchronizowano",
+  offline: "Offline, wyślę później",
   error: "Błąd zapisu",
-  local: "Tylko to urządzenie",
+  local: "Tylko ten telefon",
 };
 
 function SyncBadge({ status }) {

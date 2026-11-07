@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { beep } from "../utils/sound";
 
 // Pasek na dole ekranu, który odlicza przerwę między seriami.
 // Trzymamy godzinę końca (endsAt), a nie "ile zostało" - dzięki temu
-// odliczanie jest dokładne nawet, gdy telefon na chwilę uśpi kartę.
+// odliczanie jest dokładne nawet, gdy telefon na chwilę uśpi appkę.
 function RestTimer({ timer, onAdd, onClose }) {
   const [now, setNow] = useState(() => Date.now());
 
@@ -11,12 +12,28 @@ function RestTimer({ timer, onAdd, onClose }) {
     return () => clearInterval(id);
   }, []);
 
+  // Ekran nie gaśnie w trakcie przerwy (jeśli telefon na to pozwala).
+  useEffect(() => {
+    let lock = null;
+    navigator.wakeLock
+      ?.request("screen")
+      .then((sentinel) => {
+        lock = sentinel;
+      })
+      .catch(() => {});
+    return () => {
+      lock?.release().catch(() => {});
+    };
+  }, []);
+
   const remaining = Math.max(0, Math.ceil((timer.endsAt - now) / 1000));
   const finished = remaining === 0;
 
-  // Krótka wibracja, gdy przerwa się skończy (działa na Androidzie).
+  // Sygnał i wibracja (wibracja działa tylko na Androidzie), gdy przerwa się skończy.
   useEffect(() => {
-    if (finished && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    if (!finished) return;
+    beep();
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   }, [finished]);
 
   const minutes = Math.floor(remaining / 60);

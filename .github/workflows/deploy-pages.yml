@@ -1,0 +1,53 @@
+# Publikuje stronę na GitHub Pages po każdym wypchnięciu na główną gałąź:
+#   /        -> strona powitalna (index.html z katalogu głównego)
+#   /lawka/  -> appka "Ławka 120" (gym-tracker)
+name: Deploy na GitHub Pages
+
+on:
+  push:
+    branches: [claude/simple-html-welcome-page-evqwi2]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: gym-tracker/package-lock.json
+      - name: Zbuduj appkę
+        working-directory: gym-tracker
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+      - name: Złóż stronę
+        run: |
+          mkdir -p _site/lawka
+          cp index.html _site/
+          cp -r gym-tracker/dist/. _site/lawka/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
