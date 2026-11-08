@@ -1,8 +1,8 @@
 import { BENCH_PROGRESSION } from "../data/plan";
-import { getBenchResult, getSession, isSessionComplete } from "../utils/training";
+import { getBenchResult, getSession, isSessionComplete, isWeekDoneOutside } from "../utils/training";
 
 // Pasek z tygodniami 1-8. Kropka pod numerem mówi, jak poszło wyciskanie.
-function WeekPicker({ logs, week, onChange }) {
+function WeekPicker({ logs, settings, week, onChange }) {
   const sessionA = getSession("A");
   const sessionB = getSession("B");
 
@@ -13,7 +13,7 @@ function WeekPicker({ logs, week, onChange }) {
         const bothDone =
           isSessionComplete(logs, plan.week, sessionA) && isSessionComplete(logs, plan.week, sessionB);
         let status = "";
-        if (bothDone) status = "done";
+        if (bothDone || isWeekDoneOutside(settings, plan.week)) status = "done";
         else if (bench?.started && !bench.allHit && isSessionComplete(logs, plan.week, sessionA)) status = "missed";
         else if (bench?.started) status = "started";
 

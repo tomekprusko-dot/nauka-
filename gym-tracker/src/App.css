@@ -950,3 +950,27 @@ button:focus-visible {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ---------- Tydzień zrobiony poza appką ---------- */
+.week-outside {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.week-outside p {
+  flex: 1;
+  margin: 0;
+}
+
+.week-outside .link-button {
+  color: inherit;
+  font-size: 0.85rem;
+}
+
+.week-outside-link {
+  display: block;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  text-align: left;
+}

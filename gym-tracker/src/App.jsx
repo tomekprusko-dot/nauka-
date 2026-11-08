@@ -48,7 +48,7 @@ function App() {
   // Dane z localStorage pokazują się od razu (także bez internetu),
   // a dane z chmury dochodzą chwilę później.
   const [data, setData] = useState(() => loadData());
-  const [selected, setSelected] = useState(() => findNextSession(data.logs));
+  const [selected, setSelected] = useState(() => findNextSession(data.logs, data.settings));
   const [tab, setTab] = useState("workout");
   const [timer, setTimer] = useState(null);
   const [syncStatus, setSyncStatus] = useState(isSupabaseConfigured ? "connecting" : "local");
@@ -129,7 +129,10 @@ function App() {
 
         if (isFirstPull) {
           isFirstPull = false;
-          if (!userNavigatedRef.current) setSelected(findNextSession(remoteLogs));
+          if (!userNavigatedRef.current) {
+            const settings = queue.isBusy(SETTINGS_KEY) ? dataRef.current.settings : (remoteSettings ?? {});
+            setSelected(findNextSession(remoteLogs, settings));
+          }
         }
         setSyncStatus((status) => (status === "connecting" || status === "offline" ? "saved" : status));
       } catch {
@@ -176,17 +179,40 @@ function App() {
     queueRef.current?.schedule(key, nextLog);
   }
 
-  // Zmiana nazwy ćwiczenia. Pusta nazwa albo nazwa z planu = powrót do oryginału.
-  function renameExercise(exerciseId, name, originalName) {
-    const trimmed = name.trim();
-    const names = { ...(dataRef.current.settings.exerciseNames ?? {}) };
-    if (!trimmed || trimmed === originalName) delete names[exerciseId];
-    else names[exerciseId] = trimmed;
-    const settings = { ...dataRef.current.settings, exerciseNames: names };
+  // Wspólna funkcja do zmiany ustawień (nazwy ćwiczeń, tygodnie poza appką).
+  function updateSettings(updater) {
+    const settings = updater(dataRef.current.settings);
     const nextData = { ...dataRef.current, settings };
     dataRef.current = nextData;
     setData(nextData);
     queueRef.current?.schedule(SETTINGS_KEY, settings);
+    return settings;
+  }
+
+  // Zmiana nazwy ćwiczenia. Pusta nazwa albo nazwa z planu = powrót do oryginału.
+  function renameExercise(exerciseId, name, originalName) {
+    const trimmed = name.trim();
+    updateSettings((settings) => {
+      const names = { ...(settings.exerciseNames ?? {}) };
+      if (!trimmed || trimmed === originalName) delete names[exerciseId];
+      else names[exerciseId] = trimmed;
+      return { ...settings, exerciseNames: names };
+    });
+  }
+
+  // Oznacz / odznacz tydzień jako zrobiony poza appką. Po oznaczeniu
+  // przechodzimy od razu do pierwszego nieskończonego treningu.
+  function toggleWeekOutside(week) {
+    const settings = updateSettings((current) => {
+      const weeks = new Set(current.doneOutsideWeeks ?? []);
+      if (weeks.has(week)) weeks.delete(week);
+      else weeks.add(week);
+      return { ...current, doneOutsideWeeks: [...weeks].sort((a, b) => a - b) };
+    });
+    if (settings.doneOutsideWeeks.includes(week)) {
+      setSelected(findNextSession(dataRef.current.logs, settings));
+      window.scrollTo(0, 0);
+    }
   }
 
   // Wczytanie kopii albo wyczyszczenie - podmienia wszystkie treningi naraz.
@@ -226,7 +252,7 @@ function App() {
     const empty = emptyData();
     dataRef.current = empty;
     setData(empty);
-    setSelected(findNextSession({}));
+    setSelected(findNextSession({}, {}));
   }
 
   function startTimer(seconds, label) {
@@ -289,9 +315,10 @@ function App() {
         <InstallHint />
         {tab === "workout" && (
           <>
-            <WeekPicker logs={data.logs} week={selected.week} onChange={(week) => select({ week })} />
+            <WeekPicker logs={data.logs} settings={data.settings} week={selected.week} onChange={(week) => select({ week })} />
             <SessionTabs
               logs={data.logs}
+              settings={data.settings}
               week={selected.week}
               sessionId={selected.sessionId}
               onChange={(sessionId) => select({ sessionId })}
@@ -302,15 +329,16 @@ function App() {
               logs={data.logs}
               week={selected.week}
               session={activeSession}
-              exerciseNames={data.settings.exerciseNames}
+              settings={data.settings}
               onUpdateLog={(updater) => updateSessionLog(selected.week, selected.sessionId, updater)}
               onRenameExercise={(exerciseId, name) => renameExercise(exerciseId, name, EXERCISES[exerciseId].name)}
+              onToggleWeekOutside={toggleWeekOutside}
               onStartTimer={startTimer}
             />
           </>
         )}
         {tab === "progress" && (
-          <ProgressView logs={data.logs} exerciseNames={data.settings.exerciseNames} onOpenSession={openSession} />
+          <ProgressView logs={data.logs} settings={data.settings} onOpenSession={openSession} />
         )}
         {tab === "more" && (
           <MoreView

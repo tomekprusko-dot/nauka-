@@ -1,6 +1,6 @@
 import { BENCH_PROGRESSION, EXERCISES, WEEK_COUNT } from "../data/plan";
 import { formatKg, formatNumber, parseNumber } from "../utils/numbers";
-import { applyExerciseName, getBenchResult, getMaxTestBest, sessionKey } from "../utils/training";
+import { applyExerciseName, getBenchResult, getMaxTestBest, isWeekDoneOutside, sessionKey } from "../utils/training";
 
 const START_MAX = 105;
 
@@ -23,7 +23,8 @@ function bestSetInWeek(logs, exerciseId, week) {
   });
 }
 
-function ProgressView({ logs, exerciseNames, onOpenSession }) {
+function ProgressView({ logs, settings, onOpenSession }) {
+  const exerciseNames = settings.exerciseNames;
   const results = BENCH_PROGRESSION.filter((plan) => !plan.test).map((plan) => getBenchResult(logs, plan.week));
   const estimates = results.filter((r) => r?.started).map((r) => r.bestE1rm);
   const bestEstimate = estimates.length ? Math.max(...estimates) : null;
@@ -66,7 +67,9 @@ function ProgressView({ logs, exerciseNames, onOpenSession }) {
             {BENCH_PROGRESSION.map((plan) => {
               const result = getBenchResult(logs, plan.week);
               let doneCell = "–";
-              if (plan.test) doneCell = testBest ? `${formatKg(testBest)} ✓` : "–";
+              const outside = isWeekDoneOutside(settings, plan.week) && !result?.started;
+              if (outside) doneCell = "poza appką ✓";
+              else if (plan.test) doneCell = testBest ? `${formatKg(testBest)} ✓` : "–";
               else if (result.started) {
                 doneCell = `${result.doneSets.length}/${plan.sets} ${result.allHit ? "✓" : "✗"}`;
               }
@@ -76,7 +79,7 @@ function ProgressView({ logs, exerciseNames, onOpenSession }) {
                   <td>
                     {plan.test ? "Test maksa" : `${plan.sets} × ${plan.reps} · ${formatKg(plan.weight)}`}
                   </td>
-                  <td className={result?.started ? (result.allHit ? "ok" : "fail") : ""}>{doneCell}</td>
+                  <td className={outside ? "ok" : result?.started ? (result.allHit ? "ok" : "fail") : ""}>{doneCell}</td>
                   <td>{result?.started ? formatKg(Math.round(result.bestE1rm * 2) / 2) : "–"}</td>
                 </tr>
               );

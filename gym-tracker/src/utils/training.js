@@ -175,9 +175,26 @@ export function defaultMaxTest() {
   };
 }
 
+// Tydzień oznaczony jako zrobiony poza appką (np. w zeszycie albo w starej wersji).
+export function isWeekDoneOutside(settings, week) {
+  return Boolean(settings?.doneOutsideWeeks?.includes(week));
+}
+
+// Czy w tym tygodniu jest choć jedna odhaczona seria albo próba z testu?
+export function weekHasEntries(logs, week) {
+  return SESSIONS.some((session) => {
+    const log = logs[sessionKey(week, session.id)];
+    if (!log) return false;
+    if (log.maxTest?.attempts?.some((attempt) => attempt.result)) return true;
+    return Object.values(log.exercises ?? {}).some((exercise) => exercise.sets?.some((set) => set.done));
+  });
+}
+
 // Pierwszy nieskończony trening na siłowni (A lub B) - od niego startuje appka.
-export function findNextSession(logs) {
+// Tygodnie zrobione poza appką pomijamy.
+export function findNextSession(logs, settings) {
   for (let week = 1; week <= WEEK_COUNT; week++) {
+    if (isWeekDoneOutside(settings, week)) continue;
     for (const session of SESSIONS.filter((s) => !s.home)) {
       if (!isSessionComplete(logs, week, session)) return { week, sessionId: session.id };
     }
