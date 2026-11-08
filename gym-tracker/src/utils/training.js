@@ -16,8 +16,37 @@ export function applyExerciseName(exercise, exerciseNames) {
   return custom ? { ...exercise, name: custom, originalName: exercise.name } : exercise;
 }
 
-export function getSessionExercises(session, exerciseNames) {
-  return session.exerciseIds.map((id) => applyExerciseName(EXERCISES[id], exerciseNames));
+// Ćwiczenie z planu albo dopisane przez Ciebie (settings.customExercises).
+export function getExerciseDef(id, settings) {
+  return EXERCISES[id] ?? settings?.customExercises?.[id] ?? null;
+}
+
+// Czy dopisane ćwiczenie jest w tym dniu na stałe (w każdym tygodniu)?
+export function isPermanentExtra(settings, sessionId, exerciseId) {
+  return Boolean(settings?.sessionExtras?.[sessionId]?.includes(exerciseId));
+}
+
+// Lista ćwiczeń treningu: najpierw z planu, potem dopisane:
+// - na stałe w tym dniu (settings.sessionExtras),
+// - tylko w tym treningu (log.extraExerciseIds),
+// - oraz takie, które mają tu odhaczone serie (żeby historia nie znikała
+//   po usunięciu ćwiczenia z dnia).
+export function getSessionExerciseIds(session, settings, log) {
+  const ids = [...session.exerciseIds];
+  const doneHere = Object.keys(log?.exercises ?? {}).filter((id) =>
+    log.exercises[id].sets?.some((set) => set.done)
+  );
+  const extras = [...(settings?.sessionExtras?.[session.id] ?? []), ...(log?.extraExerciseIds ?? []), ...doneHere];
+  for (const id of extras) {
+    if (!ids.includes(id) && settings?.customExercises?.[id]) ids.push(id);
+  }
+  return ids;
+}
+
+export function getSessionExercises(session, settings, log) {
+  return getSessionExerciseIds(session, settings, log).map((id) =>
+    applyExerciseName(getExerciseDef(id, settings), settings?.exerciseNames)
+  );
 }
 
 export function getBenchPlan(week) {

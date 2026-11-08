@@ -1,6 +1,6 @@
-import { BENCH_PROGRESSION, EXERCISES, WEEK_COUNT } from "../data/plan";
+import { BENCH_PROGRESSION, EXERCISES, SESSIONS, WEEK_COUNT } from "../data/plan";
 import { formatKg, formatNumber, parseNumber } from "../utils/numbers";
-import { applyExerciseName, getBenchResult, getMaxTestBest, isWeekDoneOutside, sessionKey } from "../utils/training";
+import { applyExerciseName, getBenchResult, getExerciseDef, getMaxTestBest, isWeekDoneOutside, sessionKey } from "../utils/training";
 
 const START_MAX = 105;
 
@@ -10,10 +10,10 @@ const ACCESSORY_IDS = Object.values(EXERCISES)
   .map((exercise) => exercise.id);
 const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 
-// Najlepsza seria danego ćwiczenia w danym tygodniu (dni A i B).
+// Najlepsza seria danego ćwiczenia w danym tygodniu (ze wszystkich dni).
 function bestSetInWeek(logs, exerciseId, week) {
-  const sets = ["A", "B"].flatMap(
-    (day) => logs[sessionKey(week, day)]?.exercises?.[exerciseId]?.sets?.filter((set) => set.done) ?? []
+  const sets = SESSIONS.flatMap(
+    (session) => logs[sessionKey(week, session.id)]?.exercises?.[exerciseId]?.sets?.filter((set) => set.done) ?? []
   );
   if (sets.length === 0) return null;
   return sets.reduce((best, set) => {
@@ -25,6 +25,8 @@ function bestSetInWeek(logs, exerciseId, week) {
 
 function ProgressView({ logs, settings, onOpenSession }) {
   const exerciseNames = settings.exerciseNames;
+  // Ćwiczenia z planu + dopisane przez Ciebie.
+  const historyIds = [...ACCESSORY_IDS, ...Object.keys(settings.customExercises ?? {})];
   const results = BENCH_PROGRESSION.filter((plan) => !plan.test).map((plan) => getBenchResult(logs, plan.week));
   const estimates = results.filter((r) => r?.started).map((r) => r.bestE1rm);
   const bestEstimate = estimates.length ? Math.max(...estimates) : null;
@@ -102,9 +104,9 @@ function ProgressView({ logs, settings, onOpenSession }) {
             </tr>
           </thead>
           <tbody>
-            {ACCESSORY_IDS.map((id) => (
+            {historyIds.map((id) => (
               <tr key={id}>
-                <td className="exercise-name-cell">{applyExerciseName(EXERCISES[id], exerciseNames).name}</td>
+                <td className="exercise-name-cell">{applyExerciseName(getExerciseDef(id, settings), exerciseNames).name}</td>
                 {WEEKS.map((week) => {
                   const best = bestSetInWeek(logs, id, week);
                   return (

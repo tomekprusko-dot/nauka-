@@ -1,3 +1,5 @@
+import { useState } from "react";
+import AddExerciseForm from "./AddExerciseForm";
 import ExerciseCard from "./ExerciseCard";
 import MaxTestView from "./MaxTestView";
 import {
@@ -7,6 +9,7 @@ import {
   getExerciseSets,
   getProgressionHint,
   getSessionExercises,
+  isPermanentExtra,
   getSessionProgress,
   isMaxTestSession,
   isWeekDoneOutside,
@@ -22,9 +25,11 @@ function WorkoutView({
   onUpdateLog,
   onRenameExercise,
   onToggleWeekOutside,
+  onAddExercise,
+  onRemoveExercise,
   onStartTimer,
 }) {
-  const exerciseNames = settings.exerciseNames;
+  const [adding, setAdding] = useState(false);
   const doneOutside = isWeekDoneOutside(settings, week);
   const log = logs[sessionKey(week, session.id)];
   const benchPlan = getBenchPlan(week);
@@ -90,7 +95,7 @@ function WorkoutView({
       ) : (
         <>
           {session.warmup && <p className="callout subtle">{session.warmup}</p>}
-          {getSessionExercises(session, exerciseNames).map((exercise, index) => {
+          {getSessionExercises(session, settings, log).map((exercise, index) => {
             const previous = findPreviousSets(logs, exercise.id, week, session.id);
             return (
               <ExerciseCard
@@ -103,10 +108,33 @@ function WorkoutView({
                 hint={getProgressionHint(exercise, previous)}
                 onChange={(sets) => updateSets(exercise.id, sets)}
                 onRename={(name) => onRenameExercise(exercise.id, name)}
+                onRemove={exercise.custom ? () => onRemoveExercise(exercise.id) : null}
+                removeLabel={
+                  isPermanentExtra(settings, session.id, exercise.id)
+                    ? `Usuń z dnia ${session.tab} (wszystkie tygodnie)`
+                    : "Usuń z tego treningu"
+                }
                 onStartTimer={onStartTimer}
               />
             );
           })}
+
+          {adding ? (
+            <AddExerciseForm
+              session={session}
+              week={week}
+              settings={settings}
+              onAdd={(exercise, scope) => {
+                onAddExercise(exercise, scope);
+                setAdding(false);
+              }}
+              onCancel={() => setAdding(false)}
+            />
+          ) : (
+            <button type="button" className="add-exercise-button" onClick={() => setAdding(true)}>
+              + Dodaj ćwiczenie
+            </button>
+          )}
         </>
       )}
 

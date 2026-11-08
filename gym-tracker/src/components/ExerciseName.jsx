@@ -64,7 +64,7 @@ function ExerciseName({ exercise, onRename }) {
     <div className="exercise-name">
       <h3>
         {exercise.name}
-        {exercise.optional && <span className="tag">opcjonalne</span>}
+        {exercise.optional && !exercise.custom && <span className="tag">opcjonalne</span>}
       </h3>
       <button type="button" className="icon-button" aria-label={`Zmień nazwę: ${exercise.name}`} onClick={startEditing}>
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">

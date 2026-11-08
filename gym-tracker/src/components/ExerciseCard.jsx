@@ -16,7 +16,19 @@ function describePrevious(sets, exercise) {
   return `${weights.map(formatNumber).join(" / ")} kg × ${reps}`;
 }
 
-function ExerciseCard({ number, exercise, week, sets, previousSets, hint, onChange, onRename, onStartTimer }) {
+function ExerciseCard({
+  number,
+  exercise,
+  week,
+  sets,
+  previousSets,
+  hint,
+  onChange,
+  onRename,
+  onRemove,
+  removeLabel,
+  onStartTimer,
+}) {
   const doneCount = sets.filter((set) => set.done).length;
   const complete = doneCount === sets.length;
 
@@ -47,6 +59,7 @@ function ExerciseCard({ number, exercise, week, sets, previousSets, hint, onChan
         <span className="exercise-number">{complete ? "✓" : number}</span>
         <div className="exercise-title">
           <ExerciseName exercise={exercise} onRename={onRename} />
+          {exercise.custom && <span className="tag custom-tag">dodane przez Ciebie</span>}
           <p className="muted small">
             <strong>{getTargetLabel(exercise, week)}</strong> · przerwa {formatRest(exercise.rest)}
           </p>
@@ -55,7 +68,7 @@ function ExerciseCard({ number, exercise, week, sets, previousSets, hint, onChan
 
       {previousSets && <p className="small muted">Ostatnio: {describePrevious(previousSets, exercise)}</p>}
       {hint && <p className="hint">↑ {hint.text}</p>}
-      {hint && !exercise.increment && (
+      {hint && !exercise.increment && exercise.id.startsWith("pushup") && (
         <p className="small muted">Pomysły: {BODYWEIGHT_PROGRESSIONS.join("; ")}.</p>
       )}
 
@@ -85,6 +98,11 @@ function ExerciseCard({ number, exercise, week, sets, previousSets, hint, onChan
           />
         ))}
       </div>
+      {onRemove && (
+        <button type="button" className="link-button remove-exercise" onClick={onRemove}>
+          {removeLabel}
+        </button>
+      )}
     </article>
   );
 }

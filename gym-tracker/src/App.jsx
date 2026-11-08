@@ -190,14 +190,66 @@ function App() {
   }
 
   // Zmiana nazwy ćwiczenia. Pusta nazwa albo nazwa z planu = powrót do oryginału.
-  function renameExercise(exerciseId, name, originalName) {
+  function renameExercise(exerciseId, name) {
     const trimmed = name.trim();
+    const custom = dataRef.current.settings.customExercises?.[exerciseId];
+    if (custom) {
+      // Dopisane ćwiczenie nie ma "nazwy z planu" - zmieniamy po prostu jego nazwę.
+      if (!trimmed) return;
+      updateSettings((settings) => ({
+        ...settings,
+        customExercises: { ...settings.customExercises, [exerciseId]: { ...custom, name: trimmed } },
+      }));
+      return;
+    }
+    const originalName = EXERCISES[exerciseId].name;
     updateSettings((settings) => {
       const names = { ...(settings.exerciseNames ?? {}) };
       if (!trimmed || trimmed === originalName) delete names[exerciseId];
       else names[exerciseId] = trimmed;
       return { ...settings, exerciseNames: names };
     });
+  }
+
+  // Dopisanie ćwiczenia do dnia: na stałe (każdy tydzień) albo tylko do tego treningu.
+  function addExercise(week, sessionId, exercise, scope) {
+    updateSettings((settings) => {
+      const next = { ...settings, customExercises: { ...settings.customExercises, [exercise.id]: exercise } };
+      if (scope === "always") {
+        const current = settings.sessionExtras?.[sessionId] ?? [];
+        if (!current.includes(exercise.id)) {
+          next.sessionExtras = { ...settings.sessionExtras, [sessionId]: [...current, exercise.id] };
+        }
+      }
+      return next;
+    });
+    if (scope === "once") {
+      updateSessionLog(week, sessionId, (log) => ({
+        ...log,
+        extraExerciseIds: [...new Set([...(log.extraExerciseIds ?? []), exercise.id])],
+      }));
+    }
+  }
+
+  // Usunięcie dopisanego ćwiczenia z dnia. Definicja i historia zostają,
+  // więc ćwiczenie można później dodać z powrotem ("Dodane wcześniej").
+  function removeExercise(week, sessionId, exerciseId) {
+    if (dataRef.current.settings.sessionExtras?.[sessionId]?.includes(exerciseId)) {
+      updateSettings((settings) => ({
+        ...settings,
+        sessionExtras: {
+          ...settings.sessionExtras,
+          [sessionId]: settings.sessionExtras[sessionId].filter((id) => id !== exerciseId),
+        },
+      }));
+    }
+    const log = dataRef.current.logs[sessionKey(week, sessionId)];
+    if (log?.extraExerciseIds?.includes(exerciseId)) {
+      updateSessionLog(week, sessionId, (current) => ({
+        ...current,
+        extraExerciseIds: current.extraExerciseIds.filter((id) => id !== exerciseId),
+      }));
+    }
   }
 
   // Oznacz / odznacz tydzień jako zrobiony poza appką. Po oznaczeniu
@@ -331,7 +383,9 @@ function App() {
               session={activeSession}
               settings={data.settings}
               onUpdateLog={(updater) => updateSessionLog(selected.week, selected.sessionId, updater)}
-              onRenameExercise={(exerciseId, name) => renameExercise(exerciseId, name, EXERCISES[exerciseId].name)}
+              onRenameExercise={renameExercise}
+              onAddExercise={(exercise, scope) => addExercise(selected.week, selected.sessionId, exercise, scope)}
+              onRemoveExercise={(exerciseId) => removeExercise(selected.week, selected.sessionId, exerciseId)}
               onToggleWeekOutside={toggleWeekOutside}
               onStartTimer={startTimer}
             />
