@@ -9,10 +9,23 @@ import {
   getSessionExercises,
   getSessionProgress,
   isMaxTestSession,
+  isWeekDoneOutside,
   sessionKey,
+  weekHasEntries,
 } from "../utils/training";
 
-function WorkoutView({ logs, week, session, exerciseNames, onUpdateLog, onRenameExercise, onStartTimer }) {
+function WorkoutView({
+  logs,
+  settings,
+  week,
+  session,
+  onUpdateLog,
+  onRenameExercise,
+  onToggleWeekOutside,
+  onStartTimer,
+}) {
+  const exerciseNames = settings.exerciseNames;
+  const doneOutside = isWeekDoneOutside(settings, week);
   const log = logs[sessionKey(week, session.id)];
   const benchPlan = getBenchPlan(week);
   const { done, total } = getSessionProgress(logs, week, session);
@@ -46,6 +59,21 @@ function WorkoutView({ logs, week, session, exerciseNames, onUpdateLog, onRename
             : `Odhaczone serie: ${done} / ${total}`}
         </p>
       </div>
+
+      {doneOutside && (
+        <div className="callout success week-outside">
+          <p>Tydzień {week} oznaczony jako zrobiony poza appką. Appka startuje od kolejnego tygodnia.</p>
+          <button type="button" className="link-button" onClick={() => onToggleWeekOutside(week)}>
+            Cofnij
+          </button>
+        </div>
+      )}
+
+      {!doneOutside && !session.home && !weekHasEntries(logs, week) && (
+        <button type="button" className="link-button week-outside-link" onClick={() => onToggleWeekOutside(week)}>
+          Ten tydzień masz już za sobą? Oznacz jako zrobiony poza appką
+        </button>
+      )}
 
       {showRepeatWarning && (
         <div className="callout warning">

@@ -1,13 +1,14 @@
 import { SESSIONS } from "../data/plan";
-import { getSessionProgress } from "../utils/training";
+import { getSessionProgress, isWeekDoneOutside } from "../utils/training";
 
 // Wybór treningu w tygodniu: A, B i sesje pompek w domu.
-function SessionTabs({ logs, week, sessionId, onChange }) {
+function SessionTabs({ logs, settings, week, sessionId, onChange }) {
   return (
     <div className="session-tabs">
       {SESSIONS.map((session) => {
         const { done, total } = getSessionProgress(logs, week, session);
-        const complete = total > 0 && done >= total;
+        // Tydzień zrobiony poza appką: dni na siłowni (A i B) liczymy jako zrobione.
+        const complete = (total > 0 && done >= total) || (!session.home && isWeekDoneOutside(settings, week));
         return (
           <button
             key={session.id}
