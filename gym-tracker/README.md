@@ -11,6 +11,8 @@ a treningi synchronizują się przez Supabase.
 - **Tydzień 8**: test maksa z rozgrzewką i kolejnymi próbami.
 - **Postęp**: plan a wykonanie, szacowany maks, historia ćwiczeń.
 - **Więcej**: konto, wskazówki z planu i kopia zapasowa (eksport/import JSON).
+- **Własne nazwy ćwiczeń**: ołówek przy nazwie. Historia i podpowiedzi ciężarów
+  zostają, a nazwa synchronizuje się jak treningi (wiersz `settings` w bazie).
 
 Adres po wdrożeniu: https://tomekprusko-dot.github.io/nauka-/lawka/
 

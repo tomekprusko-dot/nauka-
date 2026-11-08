@@ -1,4 +1,5 @@
 import SetRow from "./SetRow";
+import ExerciseName from "./ExerciseName";
 import { formatNumber, parseNumber } from "../utils/numbers";
 import { getTargetLabel } from "../utils/training";
 import { BODYWEIGHT_PROGRESSIONS } from "../data/plan";
@@ -15,7 +16,7 @@ function describePrevious(sets, exercise) {
   return `${weights.map(formatNumber).join(" / ")} kg × ${reps}`;
 }
 
-function ExerciseCard({ number, exercise, week, sets, previousSets, hint, onChange, onStartTimer }) {
+function ExerciseCard({ number, exercise, week, sets, previousSets, hint, onChange, onRename, onStartTimer }) {
   const doneCount = sets.filter((set) => set.done).length;
   const complete = doneCount === sets.length;
 
@@ -45,10 +46,7 @@ function ExerciseCard({ number, exercise, week, sets, previousSets, hint, onChan
       <header className="exercise-header">
         <span className="exercise-number">{complete ? "✓" : number}</span>
         <div className="exercise-title">
-          <h3>
-            {exercise.name}
-            {exercise.optional && <span className="tag">opcjonalne</span>}
-          </h3>
+          <ExerciseName exercise={exercise} onRename={onRename} />
           <p className="muted small">
             <strong>{getTargetLabel(exercise, week)}</strong> · przerwa {formatRest(exercise.rest)}
           </p>

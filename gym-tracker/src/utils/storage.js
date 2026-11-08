@@ -9,9 +9,21 @@ const STORAGE_KEY = "gym-tracker-data";
 //       note: "dobrze szło",
 //     },
 //   },
+//   settings: {
+//     exerciseNames: { "incline-db": "Skos na maszynie Hammer" },  // Twoje nazwy ćwiczeń
+//   },
 // }
+
+// Pod tym kluczem ustawienia lądują w bazie - obok treningów "1-A", "1-B"...
+export const SETTINGS_KEY = "settings";
+
 export function emptyData() {
-  return { logs: {} };
+  return { logs: {}, settings: {} };
+}
+
+// Starsze kopie i zapisy nie mają "settings" - dopisujemy puste.
+export function normalizeData(data) {
+  return { logs: data.logs, settings: data.settings ?? {} };
 }
 
 export function isValidData(data) {
@@ -22,7 +34,7 @@ export function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const data = raw ? JSON.parse(raw) : null;
-    return isValidData(data) ? data : emptyData();
+    return isValidData(data) ? normalizeData(data) : emptyData();
   } catch {
     // Np. tryb prywatny albo uszkodzony JSON - zaczynamy od zera zamiast się wywalić.
     return emptyData();

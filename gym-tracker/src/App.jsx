@@ -9,11 +9,12 @@ import SyncBadge from "./components/SyncBadge";
 import LoginView from "./components/LoginView";
 import InstallHint from "./components/InstallHint";
 import Logo from "./components/Logo";
-import { emptyData, loadData, saveData } from "./utils/storage";
+import { emptyData, loadData, saveData, SETTINGS_KEY } from "./utils/storage";
 import { unlockAudio } from "./utils/sound";
 import { fetchAllLogs, isSupabaseConfigured, subscribeToChanges, supabase, writeLog } from "./sync/supabase";
 import { clearDirty, createSyncQueue } from "./sync/syncQueue";
 import { findNextSession, getSession, sessionKey } from "./utils/training";
+import { EXERCISES } from "./data/plan";
 import "./App.css";
 
 const TABS = [
@@ -90,18 +91,28 @@ function App() {
     queueRef.current = queue;
 
     // Najpierw wyślij to, czego nie udało się wysłać ostatnio (np. brak zasięgu).
-    for (const key of queue.dirtyKeys()) queue.schedule(key, dataRef.current.logs[key] ?? null);
+    for (const key of queue.dirtyKeys()) {
+      const local = dataRef.current;
+      queue.schedule(key, key === SETTINGS_KEY ? local.settings : (local.logs[key] ?? null));
+    }
 
     async function pull() {
       try {
         const remoteLogs = await fetchAllLogs();
         if (cancelled) return;
+        // Ustawienia siedzą w tej samej tabeli co treningi, pod kluczem "settings".
+        const remoteSettings = remoteLogs[SETTINGS_KEY] ?? null;
+        delete remoteLogs[SETTINGS_KEY];
 
         // Pierwsze logowanie na tym telefonie: treningi wpisane wcześniej
         // lokalnie (a których nie ma w chmurze) wysyłamy, zamiast je zgubić.
         if (isFirstPull && readStorage(SYNCED_USER_KEY) !== userId) {
           for (const [key, log] of Object.entries(dataRef.current.logs)) {
             if (!(key in remoteLogs)) queue.schedule(key, log);
+          }
+          const localSettings = dataRef.current.settings;
+          if (!remoteSettings && Object.keys(localSettings).length > 0) {
+            queue.schedule(SETTINGS_KEY, localSettings);
           }
           writeStorage(SYNCED_USER_KEY, userId);
         }
@@ -112,7 +123,8 @@ function App() {
           for (const key of Object.keys(prev.logs)) {
             if (queue.isBusy(key)) logs[key] = prev.logs[key];
           }
-          return { ...prev, logs };
+          const settings = queue.isBusy(SETTINGS_KEY) ? prev.settings : (remoteSettings ?? {});
+          return { ...prev, logs, settings };
         });
 
         if (isFirstPull) {
@@ -164,6 +176,19 @@ function App() {
     queueRef.current?.schedule(key, nextLog);
   }
 
+  // Zmiana nazwy ćwiczenia. Pusta nazwa albo nazwa z planu = powrót do oryginału.
+  function renameExercise(exerciseId, name, originalName) {
+    const trimmed = name.trim();
+    const names = { ...(dataRef.current.settings.exerciseNames ?? {}) };
+    if (!trimmed || trimmed === originalName) delete names[exerciseId];
+    else names[exerciseId] = trimmed;
+    const settings = { ...dataRef.current.settings, exerciseNames: names };
+    const nextData = { ...dataRef.current, settings };
+    dataRef.current = nextData;
+    setData(nextData);
+    queueRef.current?.schedule(SETTINGS_KEY, settings);
+  }
+
   // Wczytanie kopii albo wyczyszczenie - podmienia wszystkie treningi naraz.
   function replaceAllData(newData) {
     const oldLogs = dataRef.current.logs;
@@ -175,6 +200,7 @@ function App() {
       if (!(key in newData.logs)) queue.schedule(key, null);
     }
     for (const [key, log] of Object.entries(newData.logs)) queue.schedule(key, log);
+    queue.schedule(SETTINGS_KEY, newData.settings);
   }
 
   function enableLocalMode() {
@@ -188,12 +214,18 @@ function App() {
   }
 
   async function signOut() {
+    // Najpierw odłączamy kolejkę zapisów. Czyszczenie telefonu poniżej NIE może
+    // trafić do chmury - inaczej wylogowanie skasowałoby Twoje treningi z bazy.
+    queueRef.current?.stop();
+    queueRef.current = null;
     await supabase.auth.signOut();
     // Po wylogowaniu czyścimy telefon, żeby kolejna osoba nie zobaczyła Twoich treningów.
     clearDirty();
     writeStorage(SYNCED_USER_KEY, null);
     setSyncStatus("connecting");
-    replaceAllData(emptyData());
+    const empty = emptyData();
+    dataRef.current = empty;
+    setData(empty);
     setSelected(findNextSession({}));
   }
 
@@ -270,12 +302,16 @@ function App() {
               logs={data.logs}
               week={selected.week}
               session={activeSession}
+              exerciseNames={data.settings.exerciseNames}
               onUpdateLog={(updater) => updateSessionLog(selected.week, selected.sessionId, updater)}
+              onRenameExercise={(exerciseId, name) => renameExercise(exerciseId, name, EXERCISES[exerciseId].name)}
               onStartTimer={startTimer}
             />
           </>
         )}
-        {tab === "progress" && <ProgressView logs={data.logs} onOpenSession={openSession} />}
+        {tab === "progress" && (
+          <ProgressView logs={data.logs} exerciseNames={data.settings.exerciseNames} onOpenSession={openSession} />
+        )}
         {tab === "more" && (
           <MoreView
             data={data}

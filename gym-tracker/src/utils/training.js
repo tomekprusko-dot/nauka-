@@ -9,8 +9,15 @@ export function getSession(sessionId) {
   return SESSIONS.find((session) => session.id === sessionId);
 }
 
-export function getSessionExercises(session) {
-  return session.exerciseIds.map((id) => EXERCISES[id]);
+// Twoja nazwa ćwiczenia (jeśli ją zmieniłeś) - reszta ćwiczenia zostaje z planu.
+// id się nie zmienia, więc historia i podpowiedzi ciężarów działają dalej.
+export function applyExerciseName(exercise, exerciseNames) {
+  const custom = exerciseNames?.[exercise.id];
+  return custom ? { ...exercise, name: custom, originalName: exercise.name } : exercise;
+}
+
+export function getSessionExercises(session, exerciseNames) {
+  return session.exerciseIds.map((id) => applyExerciseName(EXERCISES[id], exerciseNames));
 }
 
 export function getBenchPlan(week) {

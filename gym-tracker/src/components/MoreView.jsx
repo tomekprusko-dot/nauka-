@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { TIPS } from "../data/plan";
-import { emptyData, isValidData } from "../utils/storage";
+import { emptyData, isValidData, normalizeData } from "../utils/storage";
 
 // Konto, wskazówki z planu i kopia zapasowa danych.
 // Potwierdzenia robimy jako przyciski na stronie, a nie window.confirm() -
@@ -39,7 +39,7 @@ function MoreView({ data, account, onReplaceData }) {
     try {
       const parsed = JSON.parse(await file.text());
       if (!isValidData(parsed)) throw new Error("zły format");
-      setPendingImport(parsed);
+      setPendingImport(normalizeData(parsed));
       setMessage("");
     } catch {
       setMessage("Nie udało się wczytać pliku. Czy to na pewno kopia z tej appki?");

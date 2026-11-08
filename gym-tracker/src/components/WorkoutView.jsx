@@ -12,7 +12,7 @@ import {
   sessionKey,
 } from "../utils/training";
 
-function WorkoutView({ logs, week, session, onUpdateLog, onStartTimer }) {
+function WorkoutView({ logs, week, session, exerciseNames, onUpdateLog, onRenameExercise, onStartTimer }) {
   const log = logs[sessionKey(week, session.id)];
   const benchPlan = getBenchPlan(week);
   const { done, total } = getSessionProgress(logs, week, session);
@@ -62,7 +62,7 @@ function WorkoutView({ logs, week, session, onUpdateLog, onStartTimer }) {
       ) : (
         <>
           {session.warmup && <p className="callout subtle">{session.warmup}</p>}
-          {getSessionExercises(session).map((exercise, index) => {
+          {getSessionExercises(session, exerciseNames).map((exercise, index) => {
             const previous = findPreviousSets(logs, exercise.id, week, session.id);
             return (
               <ExerciseCard
@@ -74,6 +74,7 @@ function WorkoutView({ logs, week, session, onUpdateLog, onStartTimer }) {
                 previousSets={previous}
                 hint={getProgressionHint(exercise, previous)}
                 onChange={(sets) => updateSets(exercise.id, sets)}
+                onRename={(name) => onRenameExercise(exercise.id, name)}
                 onStartTimer={onStartTimer}
               />
             );

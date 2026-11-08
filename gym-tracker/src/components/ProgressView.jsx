@@ -1,6 +1,6 @@
 import { BENCH_PROGRESSION, EXERCISES, WEEK_COUNT } from "../data/plan";
 import { formatKg, formatNumber, parseNumber } from "../utils/numbers";
-import { getBenchResult, getMaxTestBest, sessionKey } from "../utils/training";
+import { applyExerciseName, getBenchResult, getMaxTestBest, sessionKey } from "../utils/training";
 
 const START_MAX = 105;
 
@@ -23,7 +23,7 @@ function bestSetInWeek(logs, exerciseId, week) {
   });
 }
 
-function ProgressView({ logs, onOpenSession }) {
+function ProgressView({ logs, exerciseNames, onOpenSession }) {
   const results = BENCH_PROGRESSION.filter((plan) => !plan.test).map((plan) => getBenchResult(logs, plan.week));
   const estimates = results.filter((r) => r?.started).map((r) => r.bestE1rm);
   const bestEstimate = estimates.length ? Math.max(...estimates) : null;
@@ -101,7 +101,7 @@ function ProgressView({ logs, onOpenSession }) {
           <tbody>
             {ACCESSORY_IDS.map((id) => (
               <tr key={id}>
-                <td className="exercise-name-cell">{EXERCISES[id].name}</td>
+                <td className="exercise-name-cell">{applyExerciseName(EXERCISES[id], exerciseNames).name}</td>
                 {WEEKS.map((week) => {
                   const best = bestSetInWeek(logs, id, week);
                   return (
