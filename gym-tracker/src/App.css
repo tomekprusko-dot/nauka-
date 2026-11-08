@@ -3,7 +3,10 @@
   margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 0 32px;
+  /* Odstęp od góry = wysokość paska z godziną i baterią na iPhonie. Bez niego
+     przyklejony nagłówek (top: safe-area) zjeżdża o ten pasek w dół i zasłania
+     rząd tygodni, a reszta treści zostaje na swoim miejscu. */
+  padding-block: env(safe-area-inset-top, 0px) 32px;
 }
 
 /* Pasek nad przyklejonym nagłówkiem (pod wycięciem ekranu w telefonie). */
@@ -749,7 +752,7 @@ button:focus-visible {
   flex-direction: column;
   justify-content: center;
   gap: 20px;
-  padding-block: 32px;
+  padding-block: calc(32px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
