@@ -1093,3 +1093,61 @@ button:focus-visible {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ---------- Edytor ćwiczenia ---------- */
+.exercise-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exercise-editor > p {
+  margin: 0;
+}
+
+.field-row.with-weight {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.link-button.left {
+  align-self: flex-start;
+  font-size: 0.85rem;
+}
+
+.danger-link {
+  color: var(--danger);
+}
+
+.remove-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--danger-soft);
+}
+
+.remove-box p {
+  margin: 0;
+}
+
+.reuse summary {
+  cursor: pointer;
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.reuse .reuse-chips {
+  margin-top: 8px;
+}
+
+.reuse p {
+  margin: 6px 0 0;
+}

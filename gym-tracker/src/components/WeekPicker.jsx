@@ -11,10 +11,10 @@ function WeekPicker({ logs, settings, week, onChange }) {
       {BENCH_PROGRESSION.map((plan) => {
         const bench = getBenchResult(logs, plan.week);
         const bothDone =
-          isSessionComplete(logs, plan.week, sessionA) && isSessionComplete(logs, plan.week, sessionB);
+          isSessionComplete(logs, plan.week, sessionA, settings) && isSessionComplete(logs, plan.week, sessionB, settings);
         let status = "";
         if (bothDone || isWeekDoneOutside(settings, plan.week)) status = "done";
-        else if (bench?.started && !bench.allHit && isSessionComplete(logs, plan.week, sessionA)) status = "missed";
+        else if (bench?.started && !bench.allHit && isSessionComplete(logs, plan.week, sessionA, settings)) status = "missed";
         else if (bench?.started) status = "started";
 
         return (

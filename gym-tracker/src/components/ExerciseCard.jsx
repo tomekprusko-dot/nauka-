@@ -1,5 +1,5 @@
 import SetRow from "./SetRow";
-import ExerciseName from "./ExerciseName";
+import ExerciseEditor from "./ExerciseEditor";
 import { formatNumber, parseNumber } from "../utils/numbers";
 import { getTargetLabel } from "../utils/training";
 import { BODYWEIGHT_PROGRESSIONS } from "../data/plan";
@@ -24,9 +24,7 @@ function ExerciseCard({
   previousSets,
   hint,
   onChange,
-  onRename,
-  onRemove,
-  removeLabel,
+  editor,
   onStartTimer,
 }) {
   const doneCount = sets.filter((set) => set.done).length;
@@ -58,7 +56,7 @@ function ExerciseCard({
       <header className="exercise-header">
         <span className="exercise-number">{complete ? "✓" : number}</span>
         <div className="exercise-title">
-          <ExerciseName exercise={exercise} onRename={onRename} />
+          <ExerciseEditor exercise={exercise} {...editor} />
           {exercise.custom && <span className="tag custom-tag">dodane przez Ciebie</span>}
           <p className="muted small">
             <strong>{getTargetLabel(exercise, week)}</strong> · przerwa {formatRest(exercise.rest)}
@@ -98,11 +96,6 @@ function ExerciseCard({
           />
         ))}
       </div>
-      {onRemove && (
-        <button type="button" className="link-button remove-exercise" onClick={onRemove}>
-          {removeLabel}
-        </button>
-      )}
     </article>
   );
 }

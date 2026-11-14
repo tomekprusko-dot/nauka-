@@ -13,7 +13,7 @@ import { emptyData, loadData, saveData, SETTINGS_KEY } from "./utils/storage";
 import { unlockAudio } from "./utils/sound";
 import { fetchAllLogs, isSupabaseConfigured, subscribeToChanges, supabase, writeLog } from "./sync/supabase";
 import { clearDirty, createSyncQueue } from "./sync/syncQueue";
-import { findNextSession, getSession, sessionKey } from "./utils/training";
+import { EDITABLE_FIELDS, findNextSession, getSession, getSessionExerciseIds, sessionKey } from "./utils/training";
 import { EXERCISES } from "./data/plan";
 import "./App.css";
 
@@ -189,67 +189,110 @@ function App() {
     return settings;
   }
 
-  // Zmiana nazwy ćwiczenia. Pusta nazwa albo nazwa z planu = powrót do oryginału.
-  function renameExercise(exerciseId, name) {
-    const trimmed = name.trim();
+  // ---------- Edycja ćwiczeń ----------
+  // Ćwiczenia z planu nie są zmieniane w miejscu: Twoje zmiany zapisują się
+  // obok, w ustawieniach (nazwa w exerciseNames, reszta w exerciseOverrides),
+  // więc zawsze można wrócić do wersji z planu.
+
+  function saveExercise(exerciseId, values) {
     const custom = dataRef.current.settings.customExercises?.[exerciseId];
     if (custom) {
-      // Dopisane ćwiczenie nie ma "nazwy z planu" - zmieniamy po prostu jego nazwę.
-      if (!trimmed) return;
       updateSettings((settings) => ({
         ...settings,
-        customExercises: { ...settings.customExercises, [exerciseId]: { ...custom, name: trimmed } },
+        customExercises: { ...settings.customExercises, [exerciseId]: { ...custom, ...values } },
       }));
       return;
     }
-    const originalName = EXERCISES[exerciseId].name;
+    const plan = EXERCISES[exerciseId];
     updateSettings((settings) => {
       const names = { ...(settings.exerciseNames ?? {}) };
-      if (!trimmed || trimmed === originalName) delete names[exerciseId];
-      else names[exerciseId] = trimmed;
-      return { ...settings, exerciseNames: names };
+      if (values.name === plan.name) delete names[exerciseId];
+      else names[exerciseId] = values.name;
+      // Zapisujemy tylko to, co różni się od planu.
+      const changed = {};
+      for (const field of EDITABLE_FIELDS) {
+        if (values[field] !== undefined && values[field] !== plan[field]) changed[field] = values[field];
+      }
+      const overrides = { ...(settings.exerciseOverrides ?? {}) };
+      if (Object.keys(changed).length > 0) overrides[exerciseId] = changed;
+      else delete overrides[exerciseId];
+      return { ...settings, exerciseNames: names, exerciseOverrides: overrides };
     });
   }
 
-  // Dopisanie ćwiczenia do dnia: na stałe (każdy tydzień) albo tylko do tego treningu.
-  function addExercise(week, sessionId, exercise, scope) {
+  function resetExercise(exerciseId) {
     updateSettings((settings) => {
-      const next = { ...settings, customExercises: { ...settings.customExercises, [exercise.id]: exercise } };
+      const names = { ...(settings.exerciseNames ?? {}) };
+      const overrides = { ...(settings.exerciseOverrides ?? {}) };
+      delete names[exerciseId];
+      delete overrides[exerciseId];
+      return { ...settings, exerciseNames: names, exerciseOverrides: overrides };
+    });
+  }
+
+  // Przesunięcie ćwiczenia w górę (-1) lub w dół (+1). Zapisujemy całą
+  // kolejność dnia, więc obowiązuje we wszystkich tygodniach.
+  function moveExercise(week, sessionId, exerciseId, direction) {
+    const session = getSession(sessionId);
+    const log = dataRef.current.logs[sessionKey(week, sessionId)];
+    const ids = getSessionExerciseIds(session, dataRef.current.settings, log);
+    const from = ids.indexOf(exerciseId);
+    const to = from + direction;
+    if (from < 0 || to < 0 || to >= ids.length) return;
+    [ids[from], ids[to]] = [ids[to], ids[from]];
+    updateSettings((settings) => ({ ...settings, sessionOrder: { ...settings.sessionOrder, [sessionId]: ids } }));
+  }
+
+  // Usunięcie ćwiczenia: "once" = tylko z tego treningu, "always" = z dnia
+  // we wszystkich tygodniach. Odhaczone wcześniej serie zostają w historii.
+  function removeExercise(week, sessionId, exerciseId, scope) {
+    const session = getSession(sessionId);
+    if (scope === "always") {
+      updateSettings((settings) => {
+        const next = { ...settings };
+        const extras = settings.sessionExtras?.[sessionId] ?? [];
+        if (extras.includes(exerciseId)) {
+          next.sessionExtras = { ...settings.sessionExtras, [sessionId]: extras.filter((id) => id !== exerciseId) };
+        }
+        if (session.exerciseIds.includes(exerciseId)) {
+          const removed = settings.sessionRemoved?.[sessionId] ?? [];
+          next.sessionRemoved = { ...settings.sessionRemoved, [sessionId]: [...new Set([...removed, exerciseId])] };
+        }
+        return next;
+      });
+    }
+    // W obu przypadkach ćwiczenie znika też z bieżącego treningu.
+    updateSessionLog(week, sessionId, (log) => ({
+      ...log,
+      extraExerciseIds: (log.extraExerciseIds ?? []).filter((id) => id !== exerciseId),
+      removedExerciseIds: [...new Set([...(log.removedExerciseIds ?? []), exerciseId])],
+    }));
+  }
+
+  // Dodanie ćwiczenia: nowego, z planu (np. usuniętego albo z innego dnia)
+  // lub dodanego wcześniej. "always" = w każdym tygodniu, "once" = tylko tu.
+  function addExercise(week, sessionId, exercise, scope) {
+    const session = getSession(sessionId);
+    updateSettings((settings) => {
+      const next = { ...settings };
+      if (exercise.custom) next.customExercises = { ...settings.customExercises, [exercise.id]: exercise };
       if (scope === "always") {
-        const current = settings.sessionExtras?.[sessionId] ?? [];
-        if (!current.includes(exercise.id)) {
-          next.sessionExtras = { ...settings.sessionExtras, [sessionId]: [...current, exercise.id] };
+        const removed = settings.sessionRemoved?.[sessionId] ?? [];
+        if (removed.includes(exercise.id)) {
+          next.sessionRemoved = { ...settings.sessionRemoved, [sessionId]: removed.filter((id) => id !== exercise.id) };
+        } else if (!session.exerciseIds.includes(exercise.id)) {
+          const extras = settings.sessionExtras?.[sessionId] ?? [];
+          next.sessionExtras = { ...settings.sessionExtras, [sessionId]: [...new Set([...extras, exercise.id])] };
         }
       }
       return next;
     });
-    if (scope === "once") {
-      updateSessionLog(week, sessionId, (log) => ({
-        ...log,
-        extraExerciseIds: [...new Set([...(log.extraExerciseIds ?? []), exercise.id])],
-      }));
-    }
-  }
-
-  // Usunięcie dopisanego ćwiczenia z dnia. Definicja i historia zostają,
-  // więc ćwiczenie można później dodać z powrotem ("Dodane wcześniej").
-  function removeExercise(week, sessionId, exerciseId) {
-    if (dataRef.current.settings.sessionExtras?.[sessionId]?.includes(exerciseId)) {
-      updateSettings((settings) => ({
-        ...settings,
-        sessionExtras: {
-          ...settings.sessionExtras,
-          [sessionId]: settings.sessionExtras[sessionId].filter((id) => id !== exerciseId),
-        },
-      }));
-    }
-    const log = dataRef.current.logs[sessionKey(week, sessionId)];
-    if (log?.extraExerciseIds?.includes(exerciseId)) {
-      updateSessionLog(week, sessionId, (current) => ({
-        ...current,
-        extraExerciseIds: current.extraExerciseIds.filter((id) => id !== exerciseId),
-      }));
-    }
+    updateSessionLog(week, sessionId, (log) => ({
+      ...log,
+      removedExerciseIds: (log.removedExerciseIds ?? []).filter((id) => id !== exercise.id),
+      extraExerciseIds:
+        scope === "once" ? [...new Set([...(log.extraExerciseIds ?? []), exercise.id])] : (log.extraExerciseIds ?? []),
+    }));
   }
 
   // Oznacz / odznacz tydzień jako zrobiony poza appką. Po oznaczeniu
@@ -383,9 +426,13 @@ function App() {
               session={activeSession}
               settings={data.settings}
               onUpdateLog={(updater) => updateSessionLog(selected.week, selected.sessionId, updater)}
-              onRenameExercise={renameExercise}
               onAddExercise={(exercise, scope) => addExercise(selected.week, selected.sessionId, exercise, scope)}
-              onRemoveExercise={(exerciseId) => removeExercise(selected.week, selected.sessionId, exerciseId)}
+              onEditExercise={{
+                save: saveExercise,
+                reset: resetExercise,
+                move: (exerciseId, direction) => moveExercise(selected.week, selected.sessionId, exerciseId, direction),
+                remove: (exerciseId, scope) => removeExercise(selected.week, selected.sessionId, exerciseId, scope),
+              }}
               onToggleWeekOutside={toggleWeekOutside}
               onStartTimer={startTimer}
             />
