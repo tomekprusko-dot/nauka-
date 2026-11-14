@@ -1,6 +1,6 @@
 import { BENCH_PROGRESSION, EXERCISES, SESSIONS, WEEK_COUNT } from "../data/plan";
 import { formatKg, formatNumber, parseNumber } from "../utils/numbers";
-import { applyExerciseName, getBenchResult, getExerciseDef, getMaxTestBest, isWeekDoneOutside, sessionKey } from "../utils/training";
+import { getBenchResult, getExerciseDef, resolveExercise, getMaxTestBest, isWeekDoneOutside, sessionKey } from "../utils/training";
 
 const START_MAX = 105;
 
@@ -24,7 +24,6 @@ function bestSetInWeek(logs, exerciseId, week) {
 }
 
 function ProgressView({ logs, settings, onOpenSession }) {
-  const exerciseNames = settings.exerciseNames;
   // Ćwiczenia z planu + dopisane przez Ciebie.
   const historyIds = [...ACCESSORY_IDS, ...Object.keys(settings.customExercises ?? {})];
   const results = BENCH_PROGRESSION.filter((plan) => !plan.test).map((plan) => getBenchResult(logs, plan.week));
@@ -106,7 +105,7 @@ function ProgressView({ logs, settings, onOpenSession }) {
           <tbody>
             {historyIds.map((id) => (
               <tr key={id}>
-                <td className="exercise-name-cell">{applyExerciseName(getExerciseDef(id, settings), exerciseNames).name}</td>
+                <td className="exercise-name-cell">{resolveExercise(getExerciseDef(id, settings), settings).name}</td>
                 {WEEKS.map((week) => {
                   const best = bestSetInWeek(logs, id, week);
                   return (

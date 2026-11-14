@@ -21,18 +21,34 @@ export function getExerciseDef(id, settings) {
   return EXERCISES[id] ?? settings?.customExercises?.[id] ?? null;
 }
 
-// Czy dopisane ćwiczenie jest w tym dniu na stałe (w każdym tygodniu)?
+// Pola ćwiczenia z planu, które możesz zmienić (settings.exerciseOverrides).
+export const EDITABLE_FIELDS = ["sets", "repsMin", "repsMax", "rest", "fixedWeight"];
+
+// Ćwiczenie z Twoimi zmianami: nazwa (exerciseNames) i parametry (exerciseOverrides).
+// originalName / edited mówią, czy jest co przywracać "z planu".
+export function resolveExercise(exercise, settings) {
+  if (!exercise) return null;
+  const overrides = settings?.exerciseOverrides?.[exercise.id];
+  const named = applyExerciseName(exercise, settings?.exerciseNames);
+  if (!overrides || exercise.custom) return named;
+  return { ...named, ...overrides, edited: true, planDefaults: exercise };
+}
+
+// Czy ćwiczenie jest dopisane do tego dnia na stałe (w każdym tygodniu)?
 export function isPermanentExtra(settings, sessionId, exerciseId) {
   return Boolean(settings?.sessionExtras?.[sessionId]?.includes(exerciseId));
 }
 
-// Lista ćwiczeń treningu: najpierw z planu, potem dopisane:
-// - na stałe w tym dniu (settings.sessionExtras),
-// - tylko w tym treningu (log.extraExerciseIds),
-// - oraz takie, które mają tu odhaczone serie (żeby historia nie znikała
-//   po usunięciu ćwiczenia z dnia albo przeniesieniu go do innego dnia planu).
+// Lista ćwiczeń treningu, w Twojej kolejności:
+// 1. z planu dnia, bez tych usuniętych na stałe (settings.sessionRemoved),
+// 2. dopisane na stałe (settings.sessionExtras) i tylko w tym treningu (log.extraExerciseIds),
+// 3. takie, które mają tu odhaczone serie - żeby historia nie znikała po
+//    usunięciu ćwiczenia z dnia albo przeniesieniu go do innego dnia,
+// bez usuniętych tylko z tego treningu (log.removedExerciseIds).
 export function getSessionExerciseIds(session, settings, log) {
-  const ids = [...session.exerciseIds];
+  const removedAlways = settings?.sessionRemoved?.[session.id] ?? [];
+  const removedHere = log?.removedExerciseIds ?? [];
+  const ids = session.exerciseIds.filter((id) => !removedAlways.includes(id));
   const doneHere = Object.keys(log?.exercises ?? {}).filter((id) =>
     log.exercises[id].sets?.some((set) => set.done)
   );
@@ -40,13 +56,17 @@ export function getSessionExerciseIds(session, settings, log) {
   for (const id of extras) {
     if (!ids.includes(id) && getExerciseDef(id, settings)) ids.push(id);
   }
-  return ids;
+  const visible = ids.filter((id) => !removedHere.includes(id));
+
+  // Twoja kolejność (settings.sessionOrder); ćwiczeń spoza niej nie ruszamy - idą na koniec.
+  const order = settings?.sessionOrder?.[session.id];
+  if (!order) return visible;
+  const position = (id) => (order.includes(id) ? order.indexOf(id) : order.length + visible.indexOf(id));
+  return [...visible].sort((a, b) => position(a) - position(b));
 }
 
 export function getSessionExercises(session, settings, log) {
-  return getSessionExerciseIds(session, settings, log).map((id) =>
-    applyExerciseName(getExerciseDef(id, settings), settings?.exerciseNames)
-  );
+  return getSessionExerciseIds(session, settings, log).map((id) => resolveExercise(getExerciseDef(id, settings), settings));
 }
 
 export function getBenchPlan(week) {
@@ -71,7 +91,7 @@ export function getTargetLabel(exercise, week) {
     return `${plan.sets} × ${plan.reps} · ${String(plan.weight).replace(".", ",")} kg`;
   }
   const base = `${exercise.sets} × ${formatReps(exercise)}`;
-  return exercise.fixedWeight ? `${base} · ${exercise.fixedWeight} kg` : base;
+  return exercise.fixedWeight !== undefined ? `${base} · ${toInputValue(exercise.fixedWeight)} kg` : base;
 }
 
 // Lista wszystkich treningów PRZED wskazanym, od najnowszego do najstarszego.
@@ -148,7 +168,8 @@ export function getExerciseSets(logs, exercise, week, sessionId) {
 }
 
 // Ile serii odhaczono / ile jest w planie (bez ćwiczeń opcjonalnych).
-export function getSessionProgress(logs, week, session) {
+// Uwzględnia Twoje zmiany: usunięte ćwiczenia i zmienioną liczbę serii.
+export function getSessionProgress(logs, week, session, settings) {
   const log = logs[sessionKey(week, session.id)];
   if (isMaxTestSession(week, session.id)) {
     const finished = Boolean(log?.maxTest?.finished);
@@ -156,7 +177,7 @@ export function getSessionProgress(logs, week, session) {
   }
   let done = 0;
   let total = 0;
-  for (const exercise of getSessionExercises(session)) {
+  for (const exercise of getSessionExercises(session, settings, log)) {
     if (exercise.optional) continue;
     const sets = getExerciseSets(logs, exercise, week, session.id);
     total += sets.length;
@@ -165,8 +186,8 @@ export function getSessionProgress(logs, week, session) {
   return { done, total };
 }
 
-export function isSessionComplete(logs, week, session) {
-  const { done, total } = getSessionProgress(logs, week, session);
+export function isSessionComplete(logs, week, session, settings) {
+  const { done, total } = getSessionProgress(logs, week, session, settings);
   return total > 0 && done >= total;
 }
 
@@ -225,7 +246,7 @@ export function findNextSession(logs, settings) {
   for (let week = 1; week <= WEEK_COUNT; week++) {
     if (isWeekDoneOutside(settings, week)) continue;
     for (const session of SESSIONS.filter((s) => !s.home)) {
-      if (!isSessionComplete(logs, week, session)) return { week, sessionId: session.id };
+      if (!isSessionComplete(logs, week, session, settings)) return { week, sessionId: session.id };
     }
   }
   return { week: WEEK_COUNT, sessionId: "A" };

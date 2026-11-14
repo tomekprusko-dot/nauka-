@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { getSessionExerciseIds } from "../utils/training";
+import { EXERCISES } from "../data/plan";
+import { getSessionExerciseIds, resolveExercise } from "../utils/training";
 
 const REST_OPTIONS = [30, 45, 60, 90, 120, 180];
 
@@ -14,7 +15,7 @@ function createExerciseId() {
 }
 
 // Formularz "+ Dodaj ćwiczenie" na dole treningu.
-function AddExerciseForm({ session, week, settings, onAdd, onCancel }) {
+function AddExerciseForm({ session, week, settings, log, onAdd, onCancel }) {
   const [name, setName] = useState("");
   const [sets, setSets] = useState("3");
   const [repsMin, setRepsMin] = useState("12");
@@ -24,9 +25,12 @@ function AddExerciseForm({ session, week, settings, onAdd, onCancel }) {
   const [scope, setScope] = useState("always"); // "always" | "once"
   const [error, setError] = useState("");
 
-  // Ćwiczenia dodane wcześniej (np. w innym dniu), których tu jeszcze nie ma.
-  const inSession = getSessionExerciseIds(session, settings, null);
-  const reusable = Object.values(settings.customExercises ?? {}).filter((exercise) => !inSession.includes(exercise.id));
+  // Ćwiczenia z planu (np. usunięte z tego dnia albo z innego dnia) i dodane
+  // wcześniej przez Ciebie, których w tym treningu teraz nie ma.
+  const inSession = getSessionExerciseIds(session, settings, log);
+  const reusable = [...Object.values(EXERCISES).filter((exercise) => !exercise.main), ...Object.values(settings.customExercises ?? {})]
+    .filter((exercise) => !inSession.includes(exercise.id))
+    .map((exercise) => ({ exercise, label: resolveExercise(exercise, settings).name }));
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -62,16 +66,17 @@ function AddExerciseForm({ session, week, settings, onAdd, onCancel }) {
       <h3>Nowe ćwiczenie</h3>
 
       {reusable.length > 0 && (
-        <div className="reuse">
-          <span className="small muted">Dodane wcześniej:</span>
+        <details className="reuse">
+          <summary className="small">Wybierz z planu lub dodanych wcześniej ({reusable.length})</summary>
           <div className="reuse-chips">
-            {reusable.map((exercise) => (
+            {reusable.map(({ exercise, label }) => (
               <button key={exercise.id} type="button" className="chip" onClick={() => onAdd(exercise, scope)}>
-                + {exercise.name}
+                + {label}
               </button>
             ))}
           </div>
-        </div>
+          <p className="small muted">Ćwiczenie trafi tam, gdzie wskazuje „Gdzie dodać” poniżej.</p>
+        </details>
       )}
 
       <label className="field">

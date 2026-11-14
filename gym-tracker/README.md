@@ -11,8 +11,12 @@ a treningi synchronizują się przez Supabase.
 - **Tydzień 8**: test maksa z rozgrzewką i kolejnymi próbami.
 - **Postęp**: plan a wykonanie, szacowany maks, historia ćwiczeń.
 - **Więcej**: konto, wskazówki z planu i kopia zapasowa (eksport/import JSON).
-- **Własne nazwy ćwiczeń**: ołówek przy nazwie. Historia i podpowiedzi ciężarów
-  zostają, a nazwa synchronizuje się jak treningi (wiersz `settings` w bazie).
+- **Pełna edycja ćwiczeń** (ołówek przy nazwie): nazwa, serie, powtórzenia,
+  przerwa, ciężar, kolejność w dniu i usuwanie (z jednego treningu albo z dnia).
+  "+ Dodaj ćwiczenie" dodaje nowe ćwiczenie, ćwiczenie z planu z innego dnia
+  albo przywraca usunięte. Plan w `plan.js` się nie zmienia: Twoje zmiany
+  zapisują się w ustawieniach (wiersz `settings` w bazie) i można je cofnąć
+  przyciskiem "Przywróć ustawienia z planu".
 
 Adres po wdrożeniu: https://tomekprusko-dot.github.io/nauka-/lawka/
 

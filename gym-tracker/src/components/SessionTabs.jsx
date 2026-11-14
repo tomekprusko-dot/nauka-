@@ -6,7 +6,7 @@ function SessionTabs({ logs, settings, week, sessionId, onChange }) {
   return (
     <div className="session-tabs">
       {SESSIONS.map((session) => {
-        const { done, total } = getSessionProgress(logs, week, session);
+        const { done, total } = getSessionProgress(logs, week, session, settings);
         // Tydzień zrobiony poza appką: dni na siłowni (A i B) liczymy jako zrobione.
         const complete = (total > 0 && done >= total) || (!session.home && isWeekDoneOutside(settings, week));
         return (

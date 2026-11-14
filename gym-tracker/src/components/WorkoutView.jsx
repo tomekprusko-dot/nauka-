@@ -9,7 +9,6 @@ import {
   getExerciseSets,
   getProgressionHint,
   getSessionExercises,
-  isPermanentExtra,
   getSessionProgress,
   isMaxTestSession,
   isWeekDoneOutside,
@@ -23,17 +22,17 @@ function WorkoutView({
   week,
   session,
   onUpdateLog,
-  onRenameExercise,
   onToggleWeekOutside,
   onAddExercise,
-  onRemoveExercise,
+  onEditExercise,
   onStartTimer,
 }) {
   const [adding, setAdding] = useState(false);
   const doneOutside = isWeekDoneOutside(settings, week);
   const log = logs[sessionKey(week, session.id)];
   const benchPlan = getBenchPlan(week);
-  const { done, total } = getSessionProgress(logs, week, session);
+  const { done, total } = getSessionProgress(logs, week, session, settings);
+  const exercises = getSessionExercises(session, settings, log);
   const percent = total ? Math.round((done / total) * 100) : 0;
 
   // Zasada z planu: nieudany tydzień wyciskania powtarzamy, zamiast iść dalej.
@@ -95,7 +94,7 @@ function WorkoutView({
       ) : (
         <>
           {session.warmup && <p className="callout subtle">{session.warmup}</p>}
-          {getSessionExercises(session, settings, log).map((exercise, index) => {
+          {exercises.map((exercise, index) => {
             const previous = findPreviousSets(logs, exercise.id, week, session.id);
             return (
               <ExerciseCard
@@ -107,13 +106,15 @@ function WorkoutView({
                 previousSets={previous}
                 hint={getProgressionHint(exercise, previous)}
                 onChange={(sets) => updateSets(exercise.id, sets)}
-                onRename={(name) => onRenameExercise(exercise.id, name)}
-                onRemove={exercise.custom ? () => onRemoveExercise(exercise.id) : null}
-                removeLabel={
-                  isPermanentExtra(settings, session.id, exercise.id)
-                    ? `Usuń z dnia ${session.tab} (wszystkie tygodnie)`
-                    : "Usuń z tego treningu"
-                }
+                editor={{
+                  sessionTab: session.tab,
+                  canMoveUp: index > 0,
+                  canMoveDown: index < exercises.length - 1,
+                  onSave: (values) => onEditExercise.save(exercise.id, values),
+                  onReset: () => onEditExercise.reset(exercise.id),
+                  onMove: (direction) => onEditExercise.move(exercise.id, direction),
+                  onRemove: (scope) => onEditExercise.remove(exercise.id, scope),
+                }}
                 onStartTimer={onStartTimer}
               />
             );
@@ -124,6 +125,7 @@ function WorkoutView({
               session={session}
               week={week}
               settings={settings}
+              log={log}
               onAdd={(exercise, scope) => {
                 onAddExercise(exercise, scope);
                 setAdding(false);
