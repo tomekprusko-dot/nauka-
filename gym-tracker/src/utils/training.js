@@ -30,7 +30,7 @@ export function isPermanentExtra(settings, sessionId, exerciseId) {
 // - na stałe w tym dniu (settings.sessionExtras),
 // - tylko w tym treningu (log.extraExerciseIds),
 // - oraz takie, które mają tu odhaczone serie (żeby historia nie znikała
-//   po usunięciu ćwiczenia z dnia).
+//   po usunięciu ćwiczenia z dnia albo przeniesieniu go do innego dnia planu).
 export function getSessionExerciseIds(session, settings, log) {
   const ids = [...session.exerciseIds];
   const doneHere = Object.keys(log?.exercises ?? {}).filter((id) =>
@@ -38,7 +38,7 @@ export function getSessionExerciseIds(session, settings, log) {
   );
   const extras = [...(settings?.sessionExtras?.[session.id] ?? []), ...(log?.extraExerciseIds ?? []), ...doneHere];
   for (const id of extras) {
-    if (!ids.includes(id) && settings?.customExercises?.[id]) ids.push(id);
+    if (!ids.includes(id) && getExerciseDef(id, settings)) ids.push(id);
   }
   return ids;
 }
